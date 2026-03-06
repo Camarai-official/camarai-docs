@@ -1,8 +1,7 @@
 # Informe de Estado del Proyecto (Vista por Vista)
 
 **Fecha:** 02/02/2026
-**Autor:** Antigravity (IA Assistant)
-
+**Autor:** Sergio 
 Este informe detalla el estado actual del desarrollo, enfocándose en las vistas trabajadas recientemente, los componentes integrados, la corrección de errores y el porcentaje de completitud a nivel de Experiencia de Usuario (UX).
 
 ---
