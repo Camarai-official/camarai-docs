@@ -55,7 +55,7 @@ Un panel lateral (o modal flotante) con toggles para activar/desactivar cada cat
 - 📅 Reservas (nuevas reservas, confirmaciones)
 - 🏔️ Ambientes (ocupación, apertura/cierre de sala)
 - ⚠️ Solo Críticas (filtra sólo `status: "warning"` o `"critical"`)
-
+ 
 ---
 
 ## 🚀 Plan de Mejoras (Roadmap Técnico)
@@ -63,7 +63,7 @@ Un panel lateral (o modal flotante) con toggles para activar/desactivar cada cat
 ### 🎨 Frontend (UI/UX & Sincronización)
 - **Log Reactivo**: Sustituir el mock hardcodeado por una suscripción a la colección `event_log` de Convex para ver eventos según ocurren.
 - **Scroll Infinito**: Implementar paginación reactiva para poder navegar por cientos de eventos diarios sin sobrecargar la memoria del navegador.
-- **Filtro Temporal**: Añadir un DatePicker para consultar el historial de eventos de días o semanas anteriores.
+- **Filtro Temporal**: Añadir un DatePicker para consultar el historial de eventos de días o semanas anteriores. Y cada categoría accesible Personal, Stock, Cobros, Reservas, Ambientes, Críticas/status.
 
 ### ⚙️ Backend (BBDD & Lógica Convex)
 - **Centralización de Eventos**: Implementar triggers en las tablas de `staff`, `inventory` y `orders` que inserten automáticamente el registro correspondiente en `event_log`.
