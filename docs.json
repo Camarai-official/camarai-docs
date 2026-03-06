@@ -1,5 +1,18 @@
 {
   "docsDir": ".",
   "root": ".",
-  "theme": "mint"
+  "theme": "mint",
+  "name": "Camarai Docs",
+  "colors": {
+    "brand": "#0A6EFF",
+    "primary": "#0A6EFF",
+    "secondary": "#1E1E1E",
+    "bg": "#FFFFFF",
+    "surface": "#FFFFFF",
+    "text": "#1A1A1A"
+  },
+  "navigation": [
+    { "title": "Inicio", "path": "/" },
+    { "title": "Guía", "path": "/intro" }
+  ]
 }
