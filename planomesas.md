@@ -1,2 +1,0 @@
-# Plan de mesas
-Placeholder.
