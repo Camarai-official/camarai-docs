@@ -1,0 +1,71 @@
+---
+title: "Notificaciones — El Log de Todo lo que Pasa"
+description: "Registro en tiempo real de actividad operativa: personal, stock, cobros, reservas y ambientes."
+---
+
+![Vista Notificaciones](/images/notificaciones-view.png)
+
+## ¿Qué es esta vista?
+
+Las Notificaciones no son alertas push al admin — son el **libro de eventos del establecimiento**. Cada vez que algo relevante ocurre en el sistema (un empleado ficha, el stock baja, se cobra una mesa, llega una reserva...) queda registrado aquí con su hora, actor y descripción.
+
+Es como el `console.log` del restaurante: todo queda trazado y filtrable.
+
+---
+
+## ¿De qué tablas de la base de datos se alimenta?
+
+## Base de Datos: El Log Centralizado
+
+Todos los eventos se registran en la tabla `event_log`. Consulta la estructura técnica completa en el [Diccionario de BBDD](/docs/bbdd).
+
+### ¿Quién crea cada tipo de evento?
+
+| Tipo | Origen | Cuándo se crea |
+|---|---|---|
+| `staff` | Sistema de fichaje | Al fichar entrada, salida, descanso o solicitar ausencia |
+| `inventory` | Sistema de inventario | Cuando `stock ≤ alert_min` en `ingredients` |
+| `payment` | Sistema de cobros / TPV | Al marcar una comanda como pagada |
+| `booking` | Sistema de reservas | Al crear o confirmar una reserva |
+| `env` | Dashboard / Ambientes | Cuando la ocupación de un ambiente llega al 100% |
+| `system` | Convex scheduled functions | Cron jobs nocturnos, backups, renovaciones |
+
+### Query necesaria
+
+```ts
+// Obtener eventos del día actual, con filtros opcionales por tipo y criticidad
+getEventLog(options: {
+  date?: string,              // "2026-03-05", por defecto hoy
+  types?: string[],           // ["staff", "inventory"]
+  critical_only?: boolean,    // sólo warning + critical
+  limit?: number              // paginación
+}): Promise<EventLog[]>
+```
+
+---
+
+## 🪟 Modal: Filtrar por Categoría
+
+![Modal Filtros](/images/modal-notificaciones-filter.png)
+
+Un panel lateral (o modal flotante) con toggles para activar/desactivar cada categoría de evento:
+- 👤 Personal (fichajes, ausencias, incidencias)
+- 📦 Stock (alertas de inventario, pedidos a proveedores)
+- 💳 Cobros (pagos recibidos, tickets cerrados)
+- 📅 Reservas (nuevas reservas, confirmaciones)
+- 🏔️ Ambientes (ocupación, apertura/cierre de sala)
+- ⚠️ Solo Críticas (filtra sólo `status: "warning"` o `"critical"`)
+
+---
+
+## 🚀 Plan de Mejoras (Roadmap Técnico)
+
+### 🎨 Frontend (UI/UX & Sincronización)
+- **Log Reactivo**: Sustituir el mock hardcodeado por una suscripción a la colección `event_log` de Convex para ver eventos según ocurren.
+- **Scroll Infinito**: Implementar paginación reactiva para poder navegar por cientos de eventos diarios sin sobrecargar la memoria del navegador.
+- **Filtro Temporal**: Añadir un DatePicker para consultar el historial de eventos de días o semanas anteriores.
+
+### ⚙️ Backend (BBDD & Lógica Convex)
+- **Centralización de Eventos**: Implementar triggers en las tablas de `staff`, `inventory` y `orders` que inserten automáticamente el registro correspondiente en `event_log`.
+- **Mapeo de Actores**: Sustituir los nombres en texto del `actor` por IDs de referencia (`staff_id`, `table_id`) para permitir navegación (drill-down) desde el log.
+- **Integración WebPush**: Configurar un servicio de notificaciones en tiempo real para que el admin reciba avisos de eventos críticos (`status: "critical"`) fuera de la app.

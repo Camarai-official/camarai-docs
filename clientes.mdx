@@ -1,0 +1,49 @@
+---
+title: "Clientes (CRM)"
+description: "Gestión de la base de datos de clientes y fidelización."
+---
+
+# 👥 Clientes (CRM)
+
+La vista de Clientes es el núcleo del sistema de marketing y fidelización de Camarai. Permite gestionar el historial de cada comensal, sus preferencias y su vinculación con el canal de WhatsApp.
+
+## 📋 Panel de Gestión de Clientes
+
+Muestra una tabla con todos los clientes que han interactuado con el establecimiento (vía Reservas o TPV).
+
+### Información del Cliente
+- **Nombre y Apellidos**: Identificación personal.
+- **Teléfono (WhatsApp)**: Canal principal de comunicación (Formato E.164).
+- **Última Visita**: Fecha de la última comanda o reserva completada.
+- **Gasto Total (LTV)**: Valor acumulativo del cliente para el negocio.
+- **Etiquetas**: "VIP", "Recurrente", "Nuevo", "Problemático".
+
+## 🔍 Funcionalidades de CRM
+
+### Historial de Consumo
+- Acceso a todas las comandas pasadas del cliente.
+- Preferencias de platos e intolerancias alimentarias registradas.
+
+### Integración con Promociones
+- Segmentación de clientes para el envío de campañas de WhatsApp.
+- Filtros por frecuencia de visita o ticket medio.
+
+---
+
+## Base de Datos
+
+Los clientes se gestionan en la tabla `customers`. Consulta el detalle de columnas y tipos en [BBDD](/docs/bbdd).
+
+---
+
+## 🛠️ Plan de Mejoras (Roadmap Técnico)
+
+### Frontend (UI-UX)
+- [ ] Implementar vista de ficha individual del cliente con timeline de actividad.
+- [ ] Añadir barra de búsqueda predictiva por nombre o teléfono.
+- [ ] Integrar botón de "Enviar WhatsApp" directo desde la ficha.
+
+### Backend (Convex)
+- [ ] Crear la tabla `customers` y migrar datos de `reservations` y `orders`.
+- [ ] Implementar trigger para actualizar `total_spent` al cerrar una comanda.
+- [ ] Crear índice por `phone` para búsquedas ultrarrápidas durante la toma de pedidos.

@@ -1,0 +1,208 @@
+---
+title: "Personal — El Centro de Mando del Equipo"
+description: "Gestión completa del personal: fichas, horarios, ausencias, fichaje y dispositivos. 5 tabs, 5 modals."
+---
+
+## ¿Qué es esta vista?
+
+La vista de Personal es el módulo de RRHH del sistema. Está organizada en **5 tabs** que cubren todo el ciclo de vida del empleado dentro del restaurante: su ficha personal, el control de horarios, las ausencias, las incidencias de fichaje y la configuración de cómo van a fichar.
+
+Es la vista más compleja del dashboard en términos de modelos de datos porque toca 6 tablas distintas de Convex.
+
+---
+
+## Base de Datos
+
+Esta vista interactúa con 6 tablas principales. Para ver el detalle técnico de las columnas y tipos de `staff`, `time_logs`, `absence_requests`, `clock_incidents`, `clock_devices` y `establishment_settings`, consulta la sección de [Base de Datos Maestro](/docs/bbdd).
+
+---
+
+## Tab 1 — Equipo: La vista de tarjetas del equipo
+
+![Tab Equipo](/images/personal-tab-equipo.png)
+
+Aquí aparece cada empleado como una tarjeta con su nombre, rol, estado en tiempo real (trabajando / descanso / inactivo) y acceso rápido a WhatsApp.
+
+**Queries:**
+- `getAllStaff()` → lista de tarjetas
+- `getLatestTimeLog(staffId)` → para calcular el estado en tiempo real por empleado
+
+**Botones de acción de la barra:**
+- **Añadir nuevo empleado** → abre el `EmployeeDialog` en modo creación
+- **Fichaje manual** → abre el `TimeLogDialog` en modo creación
+
+---
+
+### 🪟 Modal: Nuevo / Editar Empleado — 5 tabs internas
+
+#### Tab "Datos" — Información personal
+
+![Modal Empleado — Datos](/images/personal-modal-empleado-datos.png)
+
+- Nombre completo, rol, teléfono, email
+- Foto de perfil (upload)
+- Estado: Activo / Inactivo / Baja
+- PIN de fichaje (4 dígitos)
+
+#### Tab "Laboral" — Contrato y horario
+
+![Modal Empleado — Laboral](/images/personal-modal-empleado-laboral.png)
+
+- Tipo de contrato (Indefinido / Temporal / Parcial)
+- Fecha de inicio del contrato
+- Salario bruto anual
+- Métodos de fichaje permitidos para este empleado
+
+#### Tab "Acceso" — Permisos al dashboard
+
+![Modal Empleado — Acceso](/images/personal-modal-empleado-acceso.png)
+
+- Qué secciones del panel puede ver este empleado (Dashboard, POS, Inventario, Reportes)
+- Permiso de administrador (acceso total)
+
+#### Tab "Nómina" — Datos económicos
+
+![Modal Empleado — Nómina](/images/personal-modal-empleado-nomina.png)
+
+- Nº de cuenta bancaria (IBAN)
+- IRPF aplicable
+- Tipo de contrato a efectos laborales
+- Historial de nóminas generadas
+
+#### Tab "Docs" — Documentación adjunta
+
+![Modal Empleado — Docs](/images/personal-modal-empleado-docs.png)
+
+- Upload de DNI, contrato firmado, certificados
+- Lista de documentos adjuntos con fecha de subida
+
+---
+
+### 🪟 Modal: Fichaje Manual
+
+![Modal Fichaje Manual](/images/personal-modal-empleado-nuevo.png)
+
+Permite al administrador registrar manualmente una entrada, salida o pausa para cualquier empleado:
+- Selector de empleado (de `staff`)
+- Tipo de acción: Entrada / Salida / Inicio pausa / Fin pausa
+- Fecha y hora (datepicker + timepicker)
+- El registro se crea con `method: "manual"` en `time_logs`
+
+---
+
+## Tab 2 — Personal: Registro de fichajes cronológico
+
+![Tab Horarios](/images/personal-tab-horarios.png)
+
+Tabla de todos los fichajes del día, filtrable por empleado y por tipo de acción. Cada fila muestra empleado, fecha, hora, acción y método de fichaje.
+
+**Columnas:** Empleado · Fecha · Hora · Acción (badge) · Método
+
+El botón `···` de cada fila abre el `TimeLogDialog` en **modo edición** para corregir un fichaje incorrecto.
+
+---
+
+## Tab 3 — Ausencias: Solicitudes de vacaciones y permisos
+
+![Tab Ausencias](/images/personal-tab-ausencias.png)
+
+Tabla completa de solicitudes con:
+- Filtro por empleado
+- Columnas: Empleado · Tipo · Fechas · Estado (badge)
+- Acciones inline: ✅ Aprobar / ❌ Rechazar (sólo visibles en estado "Pendiente")
+
+Escriben en `absence_requests` con `status: "approved"` o `"rejected"`.
+
+---
+
+### 🪟 Modal: Nueva Solicitud de Ausencia
+
+![Modal Nueva Ausencia](/images/personal-modal-ausencia-nueva.png)
+
+Formulario de solicitud:
+- Empleado (selector de `staff`)
+- Tipo: Vacaciones / Baja Médica / Permiso Personal / Cita Médica
+- Fecha inicio y fecha fin (datepicker de rango)
+- Motivo / notas (texto libre)
+
+Se crea con `status: "pending"` esperando aprobación del manager.
+
+---
+
+## Tab 4 — Incidencias: Anomalías del sistema de fichaje
+
+![Tab Incidencias](/images/personal-tab-incidencias.png)
+
+Lista de incidencias detectadas automáticamente o reportadas manualmente:
+
+| Tipo | Cuándo se crea |
+|---|---|
+| `no_clock_out` | El empleado fichó entrada pero no salida |
+| `duplicate` | Dos entradas seguidas sin salida entre medias |
+| `late_clock_in` | Entró más de X minutos tarde según su turno |
+| `suspicious` | Patron inusual detectado por el sistema |
+
+Acciones availables por incidencia: ✅ Aprobar (justificar) / ❌ Rechazar. Al aprobar/rechazar se actualiza `clock_incidents.estado`.
+
+> **Nota**: Las incidencias no tienen modal propio actualmente — las acciones son inline en la tabla con botones de aprobación/rechazo directos. En el futuro debería haber un modal de "Justificar incidencia" con campo de texto.
+
+---
+
+## Tab 5 — Métodos: Canales y Dispositivos de Fichaje
+
+![Tab Métodos](/images/personal-tab-metodos.png)
+
+Esta tab tiene **4 bloques diferenciados**:
+
+### Bloque 1: Canales de Fichaje
+Toggles para activar/desactivar los 4 métodos permitidos en el establecimiento:
+- 📱 App Móvil
+- 💬 WhatsApp (bot)
+- 📷 Código QR
+- 🖥️ Panel Web
+
+Se guarda en `establishment_settings.clock_methods`.
+
+### Bloque 2: Dispositivos de Fichaje
+Lista de tablets/terminales registrados con su estado (online/offline/mantenimiento).
+
+#### 🪟 Menú de dispositivo
+![Menú Dispositivo](/images/personal-modal-dispositivo-menu.png)
+
+Al pulsar `···` en un dispositivo, aparece un dropdown con:
+- **Configurar** → abre el `DeviceDialog` en modo edición
+- **Eliminar** → elimina el dispositivo de `clock_devices`
+
+#### 🪟 Modal: Configurar Dispositivo
+![Modal Configurar Dispositivo](/images/personal-modal-dispositivo-config.png)
+
+Formulario para registrar o editar un dispositivo:
+- Nombre del dispositivo
+- Tipo: Tablet / Terminal / Smartphone
+- Ubicación (texto libre, ej: "Entrada principal")
+- Estado: Online / Offline / Mantenimiento
+- Token del dispositivo (generado automáticamente)
+
+### Bloque 3: Integración WhatsApp
+Panel informativo del bot de WhatsApp para fichaje con:
+- Estado del servicio (Conectado / Desconectado)
+- QR de acceso rápido al bot
+- Pasos del flujo: enviar "Fichar" → elegir acción → confirmado
+
+### Bloque 4: Uso por Canal
+Barras de progreso mostrando el % de fichajes en los últimos 30 días por canal.
+Se calculagaría desde: `time_logs.method` agrupado y contado.
+
+---
+
+## 🚀 Plan de Mejoras (Roadmap Técnico)
+
+### 🎨 Frontend (UI/UX & Sincronización)
+- **Justificación de Incidencias**: Crear un modal que se abra al pulsar el check de "Aprobar" en incidencias, solicitando un comentario obligatorio para el log de RRHH.
+- **Refresco de Estado en Tiempo Real**: Implementar un pollers o suscripción WebSocket para que la tarjeta de "Equipo" cambie de color inmediatamente cuando un empleado ficha salida.
+- **Claridad Salarial**: Añadir selector de periodicidad (Mensual / Anual) y moneda en la ficha laboral para eliminar la ambigüedad en los datos económicos.
+
+### ⚙️ Backend (BBDD & Lógica Convex)
+- **Generación Automática de Incidencias**: Implementar un Cron Job en Convex que, al final de cada jornada, detecte fichajes `clock-in` sin su correspondiente `clock-out` y genere el registro en `clock_incidents`.
+- **Módulo de Turnos (Shifts)**: Es necesaria la creación de una tabla `staff_roster` para comparar el fichaje real contra el horario planificado y así detectar retrasos automáticos.
+- **Cifrado de PIN**: Migrar el campo `pin` de texto plano a un hash seguro para cumplir con la normativa de protección de datos y evitar auditorías internas negativas.

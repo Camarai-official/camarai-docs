@@ -1,0 +1,69 @@
+{
+    "$schema": "https://mintlify.com/schema.json",
+    "name": "Documentación Camarai",
+    "favicon": "/favicon.svg",
+    "colors": {
+        "primary": "#0F172A",
+        "light": "#334155",
+        "dark": "#020617"
+    },
+    "topbarLinks": [
+        {
+            "name": "App TPV",
+            "url": "http://localhost:3000"
+        }
+    ],
+    "navigation": [
+        {
+            "group": "General",
+            "pages": [
+                "index",
+                "introduction"
+            ]
+        },
+        {
+            "group": "Ingeniería",
+            "pages": [
+                "bbdd",
+                "database-dictionary",
+                "audit-report"
+            ]
+        },
+        {
+            "group": "Operativa",
+            "pages": [
+                "dashboard",
+                "comandas",
+                "pos",
+                "planomesas",
+                "ambientes"
+            ]
+        },
+        {
+            "group": "Gestión",
+            "pages": [
+                "inventario",
+                "cartas",
+                "reservas",
+                "personal",
+                "reportes"
+            ]
+        },
+        {
+            "group": "Marketing y Clientes",
+            "pages": [
+                "clientes",
+                "promociones",
+                "notificaciones"
+            ]
+        },
+        {
+            "group": "Configuración",
+            "pages": [
+                "configuracion",
+                "configuracion-perfil",
+                "configuracion-impuestos"
+            ]
+        }
+    ]
+}

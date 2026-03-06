@@ -1,0 +1,54 @@
+---
+title: "Promociones y Campañas"
+description: "Gestión de campañas de marketing y fidelización por WhatsApp."
+---
+
+# 📣 Promociones y Campañas
+
+Esta vista permite crear y monitorizar campañas de marketing directas a los clientes a través del canal de WhatsApp.
+
+## 📱 Pantalla Principal: Listado de Campañas
+
+Muestra un dashboard con el rendimiento global de las campañas y un listado detallado.
+
+### Métricas de Marketing
+- **Campañas Activas**: Conteo de campañas en ejecución.
+- **Audiencia Total**: Número total de destinatarios.
+- **Tasa de Apertura**: Porcentaje de mensajes leídos.
+- **Conversión**: Éxito de las campañas en pedidos reales.
+
+### Gestión de Campañas
+- **Buscador**: Filtro por nombre de campaña.
+- **Selector de Tipo**: Filtrado por Descuento, 2x1, Regalo, etc.
+- **Interruptor de Estado**: Activación/Desactivación rápida.
+
+## 🛠️ Modales y Diálogos
+
+### Crear/Editar Campaña (`CampanaWhatsAppDialog`)
+- **Nombre de la Campaña**: Título identificativo.
+- **Tipo de Oferta**: Selección del incentivo comercial.
+- **Fecha y Hora**: Programación del lanzamiento.
+- **Audiencia**: Selección del grupo de clientes destinatarios.
+
+### Vista Previa de WhatsApp (`WhatsAppPreview`)
+- Previsualización dinámica de cómo verá el cliente el mensaje en su móvil.
+
+## 📊 Pestaña de Estadísticas
+- Histórico detallado por campaña.
+- Métricas de entrega de la Evolution API.
+- Tasa de retención y clientes reactivados.
+
+---
+
+## 🛠️ Plan de Mejoras (Roadmap Técnico)
+
+### Frontend (UI-UX)
+- [ ] Implementar visualización de embudo de conversión (Funnel).
+- [ ] Añadir editor de imágenes embebido para adjuntar a los mensajes.
+- [ ] Mejorar la vista previa móvil con soporte para emojis y variables dinámicas (ej: `{nombre_cliente}`).
+
+### Backend (Convex)
+- [ ] Crear tabla `campaigns` en Convex para persistir el historial.
+- [ ] Implementar trigger para actualizar `audience_count` basado en filtros de clientes.
+- [ ] Integrar con Evolution API para el envío masivo programado (cron jobs).
+- [ ] Implementar tracking de clics mediante redirección (short-links) para métricas reales.

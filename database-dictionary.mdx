@@ -1,0 +1,155 @@
+---
+title: "Diccionario de Datos (Grid System)"
+description: "Definición milimétrica de tablas de Convex en formato rejilla para desarrollo de Backend."
+---
+
+# 📊 Diccionario de Datos Maestro
+
+Este documento es la **fuente de verdad absoluta** para el equipo de Backend y BBDD. Todas las tablas están normalizadas y diseñadas para soportar la arquitectura multi-tenant de Camarai.
+
+---
+
+## 🏗️ Módulo 1: Organización y Staff
+
+### Tabla: `establishments`
+Define la casa matriz de cada cliente.
+
+| Campo | Tipo | Index | FK | Descripción / Restricciones |
+|---|---|---|---|---|
+| `nombre` | `string` | No | - | Nombre comercial del negocio. |
+| `cif` | `string` |**Yes** | - | Identificador fiscal único (Unique constraint). |
+| `logo_url` | `string` | No | - | URL de imagen en Convex Storage. |
+| `owner_id` | `Id<"users">` |**Yes** | `users` | Propietario de la cuenta. |
+| `payment_methods` | `object` | No | - | `{ cash: bool, card: bool, bizum: bool }`. |
+| `currency` | `string` | No | - | ISO Currency code (default: "EUR"). |
+
+**💡 NOTA DE AUDITORÍA:** Se debe añadir un campo `status: "trial" | "active" | "suspended"` para control de suscripciones a nivel BBDD.
+
+### Tabla: `staff`
+Ficha técnica de empleados vinculados a un establecimiento.
+
+| Campo | Tipo | Index | FK | Descripción / Restricciones |
+|---|---|---|---|---|
+| `nombre` | `string` | No | - | Nombre completo del perfil. |
+| `rol` | `string` |**Yes** | - | "Camarero", "Cocinero", "Manager". |
+| `pin` | `string` | No | - | PIN de 4 dígitos. **Debe ser cifrado (Hash)**. |
+| `establishment_id` | `Id<"establishments">` |**Yes** | `establishments` | Relación multi-tenant obligatoria. |
+| `permissions` | `object` | No | - | Mapa de booleanos de acceso por módulo. |
+| `salary` | `number` | No | - | Almacenado en céntimos (integer). |
+
+### Tabla: `time_logs` (Fichajes)
+Registro histórico de entradas y salidas.
+
+| Campo | Tipo | Index | FK | Descripción / Restricciones |
+|---|---|---|---|---|
+| `staff_id` | `Id<"staff">` |**Yes** | `staff` | Empleado que genera el evento. |
+| `action` | `string` | No | - | "clock-in", "clock-out", "break". |
+| `timestamp` | `number` |**Yes** | - | Época en milisegundos. |
+| `method` | `string` | No | - | "app", "qr", "whatsapp", "manual". |
+| `edited_by` | `Id<"staff">`| No | `staff` | Si es edición manual, ID del Admin. |
+
+---
+
+## 🎟️ Módulo 2: Operativa y Reservas
+
+### Tabla: `reservations`
+El libro de reservas digital.
+
+| Campo | Tipo | Index | FK | Descripción / Restricciones |
+|---|---|---|---|---|
+| `customer_name` | `string` | No | - | Nombre del cliente. |
+| `phone` | `string` |**Yes** | - | Formato E.164 (+34...). |
+| `guests` | `number` | No | - | Cantidad de comensales. |
+| `date` | `string` |**Yes** | - | Formato ISO "YYYY-MM-DD". |
+| `status` | `string` |**Yes** | - | "Pendiente", "Confirmada", "Cancelada". |
+| `table_id` | `Id<"tables">` | No | `tables` | Asignación de mesa física. |
+| `establishment_id`| `Id<"establishments">` |**Yes** | `establishments` | Filtro por local. |
+
+### Tabla: `orders` (Comandas)
+Cabecera de cada pedido en el TPV.
+
+| Campo | Tipo | Index | FK | Descripción / Restricciones |
+|---|---|---|---|---|
+| `table_id` | `Id<"tables">` |**Yes** | `tables` | Mesa donde está la comanda. |
+| `staff_id` | `Id<"staff">` | No | `staff` | Camarero que la abrió. |
+| `status` | `string` |**Yes** | - | "Abierta", "Pagada", "Anulada". |
+| `total_amount` | `number` | No | - | Suma de items en céntimos (integer). |
+| `created_at` | `number` |**Yes** | - | Timestamp de apertura. |
+
+---
+
+## 🍲 Módulo 3: Menú y Productos
+
+### Tabla: `products`
+Definición de artículos a la venta.
+
+| Campo | Tipo | Index | FK | Descripción / Restricciones |
+|---|---|---|---|---|
+| `nombre` | `string` | No | - | Nombre del plato/bebida. |
+| `precio_base` | `number` | No | - | Valor sin impuestos (en céntimos). |
+| `category_id` | `Id<"categories">`|**Yes** | `categories` | Categoría a la que pertenece. |
+| `tax_id` | `Id<"taxes">` | No | `taxes` | Tipo de IVA aplicable. |
+| `disponible` | `boolean` | No | - | Toggle de stock manual. |
+
+**💡 NOTA DE AUDITORÍA:** Para escalabilidad, los precios de zona (barra/terraza) deberían estar en una tabla hija `product_zone_prices` para evitar un objeto anidado difícil de indexar.
+
+### Tabla: `ingredient_categories`
+Clasificación de insumos.
+
+| Campo | Tipo | Index | FK | Descripción / Restricciones |
+|---|---|---|---|---|
+| `name` | `string` | No | - | "Proteínas", "Vegetales"... |
+| `establishment_id`| `Id<"establishments">` |**Yes** | `establishments` | Filtro por local. |
+
+---
+
+## 📜 Módulo 4: Análisis y Notificaciones
+
+### Tabla: `event_log`
+Historial de eventos del sistema (Auditoría).
+
+| Campo | Tipo | Index | FK | Descripción / Restricciones |
+|---|---|---|---|---|
+| `type` | `string` |**Yes** | - | "staff", "inventory", "payment", "booking". |
+| `status` | `string` | No | - | "info", "warning", "critical", "success". |
+| `event` | `string` | No | - | Título corto de la notificación. |
+| `actor` | `string` | No | - | Nombre/ID del generador del evento. |
+| `timestamp` | `number` |**Yes** | - | Época en milisegundos. |
+| `establishment_id`| `Id<"establishments">` |**Yes** | `establishments` | Contexto multi-tenant. |
+
+### Tabla: `cash_sessions`
+Control de cierres de caja.
+
+| Campo | Tipo | Index | FK | Descripción / Restricciones |
+|---|---|---|---|---|
+| `opened_at` | `number` |**Yes** | - | Inicio de jornada. |
+| `opening_cash` | `number` | No | - | Efectivo inicial (céntimos). |
+| `closed_at` | `number` | No | - | Fin de jornada (opcional). |
+| `theoretical` | `number` | No | - | Ventas registradas (céntimos). |
+| `real_cash` | `number` | No | - | Conteo físico (céntimos). |
+| `staff_id` | `Id<"staff">` | No | `staff` | Responsable del cierre. |
+
+---
+
+## 🛠️ Módulo 5: Configuración y Hardware
+
+### Tabla: `pos_printers`
+Dispositivos de impresión técnica.
+
+| Campo | Tipo | Index | FK | Descripción / Restricciones |
+|---|---|---|---|---|
+| `nombre` | `string` | No | - | Alias: "Impresora Cocina". |
+| `connection` | `string` | No | - | "network", "usb", "bluetooth". |
+| `ip` | `string` | No | - | Requerido si conexión es red. |
+| `paper_width` | `number` | No | - | 58 o 80 (mm). |
+| `establishment_id`| `Id<"establishments">` |**Yes** | `establishments` | Local al que pertenece. |
+
+### Tabla: `taxes`
+Configuración impositiva fiscal.
+
+| Campo | Tipo | Index | FK | Descripción / Restricciones |
+|---|---|---|---|---|
+| `nombre` | `string` | No | - | "IVA General", "IVA Reducido". |
+| `porcentaje` | `number` | No | - | Valor integer (21, 10, etc). |
+| `es_defecto` | `boolean` | No | - | Indica si se aplica por defecto. |
+| `establishment_id`| `Id<"establishments">` |**Yes** | `establishments` | Alcance del impuesto. |

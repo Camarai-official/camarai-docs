@@ -1,0 +1,222 @@
+---
+title: "Base de Datos (BBDD)"
+description: "Diccionario técnico completo de todas las tablas de la base de datos de Camarai."
+---
+
+# 🗄️ Base de Datos Maestro (Convex)
+
+Este documento es la referencia técnica central para el esquema de base de datos. Todas las tablas están en formato de rejilla para facilitar la visualización de columnas, tipos de datos e índices.
+
+---
+
+## 🏢 1. Configuración y Empresa
+
+### Tabla: `establishments`
+*Datos del local y configuración global.*
+
+| Columna | Tipo | Index | FK | Descripción |
+|---|---|---|---|---|
+| `_id` | `Id<"establishments">` |**Yes** | - | Identificador único del local. |
+| `nombre` | `string` | No | - | Nombre comercial del negocio. |
+| `cif` | `string` |**Yes** | - | Identificador fiscal único. |
+| `telefono` | `string` | No | - | Teléfono de contacto. |
+| `email` | `string` | No | - | Email corporativo. |
+| `direccion` | `string` | No | - | Dirección física. |
+| `logo_url` | `string` | No | - | URL de imagen en Convex Storage. |
+| `timezone` | `string` | No | - | Zona horaria (ej: "Europe/Madrid"). |
+| `currency` | `string` | No | - | Símbolo de moneda (ej: "EUR"). |
+| `owner_id` | `Id<"users">` |**Yes** | `users` | Referencia al dueño de la cuenta. |
+| `plan` | `string` | No | - | "free", "starter", "pro", "enterprise". |
+| `payment_methods` | `object` | No | - | `{ cash: bool, card: bool, bizum: bool, mixed: bool }` |
+
+---
+
+## 👥 2. Gestión de Personal (RRHH)
+
+### Tabla: `staff`
+*Ficha técnica de empleados.*
+
+| Columna | Tipo | Index | FK | Descripción |
+|---|---|---|---|---|
+| `_id` | `Id<"staff">` |**Yes** | - | Identificador del empleado. |
+| `establishment_id` | `Id<"establishments">` |**Yes** | `establishments` | Local al que pertenece. |
+| `nombre` | `string` | No | - | Nombre completo. |
+| `rol` | `string` |**Yes** | - | "Camarero", "Cocinero", "Manager". |
+| `pin` | `string` | No | - | PIN de 4 dígitos (Hash). |
+| `estado` | `string` | No | - | "Activo", "Inactivo", "Baja". |
+| `permissions` | `object` | No | - | Mapa de booleanos de acceso por módulo. |
+| `salary` | `number` | No | - | Sueldo en céntimos. |
+
+### Tabla: `time_logs`
+*Registro de fichajes e historial laboral.*
+
+| Columna | Tipo | Index | FK | Descripción |
+|---|---|---|---|---|
+| `_id` | `Id<"time_logs">` |**Yes** | - | ID del registro. |
+| `staff_id` | `Id<"staff">` |**Yes** | `staff` | Empleado vinculado. |
+| `action` | `string` | No | - | "clock-in", "clock-out", "break". |
+| `timestamp` | `number` |**Yes** | - | Fecha/hora en milisegundos. |
+| `method` | `string` | No | - | "app", "whatsapp", "qr", "manual". |
+| `notes` | `string` | No | - | Observaciones o avisos. |
+
+### Tabla: `absence_requests`
+*Gestión de vacaciones y bajas.*
+
+| Columna | Tipo | Index | FK | Descripción |
+|---|---|---|---|---|
+| `staff_id` | `Id<"staff">` |**Yes** | `staff` | Solicitante. |
+| `type` | `string` | No | - | "vacation", "sick_leave", "personal". |
+| `start_date` | `string` | No | - | "YYYY-MM-DD". |
+| `end_date` | `string` | No | - | "YYYY-MM-DD". |
+| `status` | `string` |**Yes** | - | "pending", "approved", "rejected". |
+
+---
+
+## 🥘 3. Inventario y Cocina
+
+### Tabla: `ingredients`
+*Almacén de insumos básicos.*
+
+| Columna | Tipo | Index | FK | Descripción |
+|---|---|---|---|---|
+| `_id` | `Id<"ingredients">` |**Yes** | - | ID del producto bruto. |
+| `establishment_id` | `Id<"establishments">` |**Yes** | `establishments` | Propiedad del registro. |
+| `name` | `string` | No | - | Nombre (ej: "Tomate"). |
+| `stock` | `number` | No | - | Cantidad actual en almacén. |
+| `unit` | `string` | No | - | "Kg", "L", "Unidades". |
+| `alert_min` | `number` | No | - | Umbral para alerta de stock bajo. |
+| `cost_base` | `number` | No | - | Precio de coste en céntimos. |
+
+### Tabla: `stock_movements`
+*Log de entradas, salidas y mermas.*
+
+| Columna | Tipo | Index | FK | Descripción |
+|---|---|---|---|---|
+| `ingredient_id` | `Id<"ingredients">`|**Yes** | `ingredients` | Insumo afectado. |
+| `type` | `string` | No | - | "ajuste", "merma", "compra". |
+| `quantity` | `number` | No | - | Valor (+/-) ajustado. |
+| `created_at` | `number` |**Yes** | - | Milisegundos. |
+
+---
+
+## 📋 4. Menú y Productos
+
+### Tabla: `products`
+*Artículos a la venta en el TPV.*
+
+| Columna | Tipo | Index | FK | Descripción |
+|---|---|---|---|---|
+| `nombre` | `string` | No | - | Nombre del plato. |
+| `category_id` | `Id<"categories">`|**Yes** | `categories` | Categoría vinculada. |
+| `precio_base` | `number` | No | - | Precio sin IVA (céntimos). |
+| `tax_id` | `Id<"taxes">` | No | `taxes` | Referencia al IVA. |
+| `disponible` | `boolean` | No | - | Toggle de disponibilidad. |
+| `alergenos` | `array<string>` | No | - | Lista de etiquetas. |
+
+### Tabla: `menus`
+*Estructuras de cartas (Carta Verano, Menu Día).*
+
+| Columna | Tipo | Index | FK | Descripción |
+|---|---|---|---|---|
+| `nombre` | `string` | No | - | Título de la carta. |
+| `activa` | `boolean` |**Yes** | - | Estado de visibilidad en TPV. |
+| `establishment_id` | `Id<"establishments">`|**Yes** | `establishments` | Referencia. |
+
+---
+
+## 💰 5. Operativa y Ventas
+
+### Tabla: `orders` (Comandas)
+*Cabecera de tickets y ventas.*
+
+| Columna | Tipo | Index | FK | Descripción |
+|---|---|---|---|---|
+| `id` | `Id<"orders">` |**Yes** | - | ID único de órden. |
+| `table_id` | `Id<"tables">` |**Yes** | `tables` | Mesa donde se sirve. |
+| `status` | `string` |**Yes** | - | "Abierta", "Pagada", "Anulada". |
+| `total_amount` | `number` | No | - | Total final en céntimos. |
+| `client_name` | `string` | No | - | Nombre (opcional). |
+| `created_at` | `number` |**Yes** | - | Apertura. |
+
+### Tabla: `order_items`
+*Detalle de cada plato servido.*
+
+| Columna | Tipo | Index | FK | Descripción |
+|---|---|---|---|---|
+| `order_id` | `Id<"orders">` |**Yes** | `orders` | Comanda vinculada. |
+| `product_id` | `Id<"products">` | No | `products` | Producto vendido. |
+| `quantity` | `number` | No | - | Cantidad. |
+| `price_at_sale` | `number` | No | - | Precio en el momento de venta. |
+
+---
+
+## 📅 6. CRM y Reservas
+
+### Tabla: `customers`
+*Clientes fidelizados y CRM.*
+
+| Columna | Tipo | Index | FK | Descripción |
+|---|---|---|---|---|
+| `name` | `string` | No | - | Nombre completo. |
+| `phone` | `string` |**Yes** | - | Teléfono WhatsApp (ID único). |
+| `total_spent` | `number` | No | - | LTV (Gasto total). |
+| `tags` | `array<string>`| No | - | Segmentación. |
+
+### Tabla: `reservations`
+*El libro de reservas.*
+
+| Columna | Tipo | Index | FK | Descripción |
+|---|---|---|---|---|
+| `customer_name` | `string` | No | - | Nombre. |
+| `phone` | `string` |**Yes** | - | Contacto. |
+| `date` | `string` |**Yes** | - | "YYYY-MM-DD". |
+| `status` | `string` | No | - | "Confirmada", "Pendiente"... |
+| `table_id` | `Id<"tables">` | No | `tables` | Asignación física. |
+
+---
+
+## 📍 7. Planta y Periféricos
+
+### Tabla: `environments`
+*Zonas del local (Salón, Terraza).*
+
+| Columna | Tipo | Index | FK | Descripción |
+|---|---|---|---|---|
+| `name` | `string` | No | - | Nombre de la zona. |
+| `status` | `string` | No | - | "Abierto", "Cerrado". |
+
+### Tabla: `tables`
+*Mesas y QR Tokens.*
+
+| Columna | Tipo | Index | FK | Descripción |
+|---|---|---|---|---|
+| `environment_id` | `Id<"environments">`|**Yes** | `environments` | Zona vinculada. |
+| `number` | `number` | No | - | Número de mesa. |
+| `capacity` | `number` | No | - | PAX máximo. |
+| `qr_token` | `string` |**Yes** | - | Token para pedidos web. |
+
+### Tabla: `pos_printers`
+*Hardware de impresión.*
+
+| Columna | Tipo | Index | FK | Descripción |
+|---|---|---|---|---|
+| `nombre` | `string` | No | - | Nombre del dispositivo. |
+| `connection` | `string` | No | - | "network", "usb", "bluetooth". |
+| `ip` | `string` | No | - | IP de la red local. |
+| `paper_width` | `number` | No | - | 58 u 80. |
+
+---
+
+## 🔔 8. Auditoría y Logs
+
+### Tabla: `event_log`
+*Historial maestro de acciones.*
+
+| Columna | Tipo | Index | FK | Descripción |
+|---|---|---|---|---|
+| `type` | `string` |**Yes** | - | "staff", "inventory", "payment", etc. |
+| `status` | `string` | No | - | "info", "warning", "critical". |
+| `event` | `string` | No | - | Mensaje corto. |
+| `actor` | `string` | No | - | Quién generó el evento. |
+| `timestamp` | `number` |**Yes** | - | Epoch MS. |
+| `establishment_id` | `Id<"establishments">`|**Yes** | `establishments` | Propiedad. |

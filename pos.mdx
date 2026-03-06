@@ -1,0 +1,109 @@
+---
+title: "POS y KDS — Los Terminales de Venta y Cocina"
+description: "Panel de acceso y configuración del Punto de Venta (POS) y la pantalla de cocina (KDS)."
+---
+
+## ¿Qué es esta vista?
+
+Esta vista es el **puente entre el dashboard de administración y las dos aplicaciones operativas** del sistema: el TPV (Terminal Punto de Venta) que usa el camarero para cobrar, y el KDS (Kitchen Display System) que usa la cocina para ver los pedidos en preparación.
+
+Desde aquí no se gestiona el menú ni los pedidos — eso ocurre en sus respectivas apps. Esta vista sólo sirve para **configurar y lanzar** cada terminal.
+
+---
+
+## Tab POS — Punto de Venta
+
+![Vista POS y KDS](/images/pos-kds-view.png)
+
+### ¿De qué tablas se alimenta?
+
+| Tabla Convex | ¿Para qué sirve? |
+|---|---|
+| `pos_terminals` | Listado de terminales POS registrados (los selectores "Terminal" e "Impresora" del modal de config) |
+| `pos_printers` | Impresoras vinculadas al sistema |
+| `pos_sessions` | Registro de cada sesión de POS: quién la abrió, cuándo y en qué terminal |
+| `establishment_settings` | Métodos de pago habilitados, modo de operación (por mesa vs. directo) |
+
+```ts
+// pos_terminals
+{
+  _id: Id<"pos_terminals">,
+  nombre: string,              // "Terminal Barra 1"
+  type: "pos" | "cash_register",
+  establishment_id: Id<"establishments">,
+  device_token: string,
+  last_seen?: number
+}
+
+// pos_sessions
+{
+  _id: Id<"pos_sessions">,
+  terminal_id: Id<"pos_terminals">,
+  staff_id: Id<"staff">,
+  opened_at: number,
+  closed_at?: number
+}
+```
+
+### 🪟 Modal: Configurar POS
+
+![Modal Configurar POS](/images/modal-pos-config.png)
+
+Campos de configuración que se guardan en `establishment_settings`:
+- **Terminal ID**: qué dispositivo POS usar (selector de `pos_terminals`)
+- **Impresora**: qué impresora vincular (selector de `pos_printers`)
+- **Modo de operación**: "Por Mesa" (asigna la venta a una mesa) o "Directo" (sin mesa)
+- **Métodos de pago habilitados**: Efectivo / Tarjeta / Mixto (toggles)
+
+---
+
+## Tab KDS — Kitchen Display System
+
+![Vista KDS](/images/pos-kds-view-kds.png)
+
+### ¿De qué tablas se alimenta?
+
+| Tabla Convex | ¿Para qué sirve? |
+|---|---|
+| `orders` + `order_items` | Las comandas que el KDS debe mostrar |
+| `products` + `categories` | Para filtrar sólo los productos que prepara esta estación |
+| `environments` | Para filtrar comandas de una sala concreta |
+| `kds_stations` | Configuración de cada pantalla KDS registrada |
+
+```ts
+// kds_stations
+{
+  _id: Id<"kds_stations">,
+  nombre: string,                        // "KDS Cocina Principal"
+  establishment_id: Id<"establishments">,
+  selected_environment?: Id<"environments">,  // filtrar por sala
+  selected_categories: Id<"categories">[],    // filtrar por categorías de platos
+  alert_time: number,                    // minutos antes de la alerta roja
+  sound_enabled: boolean,
+  layout_mode: "grid" | "list"
+}
+```
+
+### 🪟 Modal: Configurar KDS
+
+![Modal Configurar KDS](/images/modal-kds-config.png)
+
+- **Sala/Ambiente**: filtrar sólo comandas de esa zona (o "Todos")
+- **Categorías de cocina**: sólo mostrar los ítems que prepara ese puesto (ej: el KDS de fríos sólo ve ensaladas)
+- **Tiempo de alerta**: minutos tras los que un ítem sin preparar se marca en rojo
+- **Sonido**: activar/desactivar pitido cuando llega una nueva comanda
+- **Diseño**: vista en cuadrícula (una tarjeta por comanda) o lista
+
+---
+
+## 🚀 Plan de Mejoras (Roadmap Técnico)
+
+### 🎨 Frontend (UI/UX & Sincronización)
+- **Deep Linking al TPV**: Configurar la navegación real para que el botón "Iniciar Sesión" abra la URL del Punto de Venta con el token de sesión inyectado.
+- **Monitor de Sesión**: Añadir un indicador visual (LED verde/rojo) que muestre si un terminal específico está actualmente en uso por un camarero.
+- **Previsualización de KDS**: Permitir abrir una ventana de incógnito con la vista de cocina directamente para pruebas rápidas del administrador.
+
+### ⚙️ Backend (BBDD & Lógica Convex)
+- **Persistencia de KDS**: Crear la tabla `kds_stations` en el esquema oficial de Convex para que la configuración de categorías/filtros sea permanente por dispositivo.
+- **Heartbeat de Hardware**: Implementar una función que actualice `last_seen` en `pos_terminals` cada 60 segundos para detectar desconexiones de impresoras o tablets.
+- **Validación de Sesiones**: Añadir lógica en el servidor que impida que dos empleados abran sesión en el mismo ID de terminal simultáneamente (Bloqueo de Concurrencia).

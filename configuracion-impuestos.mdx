@@ -1,0 +1,98 @@
+---
+title: "Configuración / Impuestos"
+description: "Gestión de los tipos de IVA aplicables a los productos del restaurante."
+---
+
+![Vista Impuestos](/images/settings-taxes-view.png)
+
+## ¿Qué es esta vista?
+
+La página de Impuestos es el lugar donde se definen los **tipos de IVA** que luego se pueden asignar a cada producto en la vista de Cartas. Es una lista CRUD simple: ver, añadir, editar y eliminar tipos impositivos.
+
+---
+
+## Base de Datos
+
+Los tipos de IVA se definen en la tabla `taxes`. Consulta el detalle técnico en la [Base de Datos Maestro](/docs/bbdd).
+
+### Tipos habituales en restauración española
+
+| Nombre | Porcentaje | Se aplica a |
+|---|---|---|
+| IVA General | 21% | Bebidas alcohólicas, tabaco |
+| IVA Reducido | 10% | Alimentos preparados para consumir en local |
+| IVA Superreducido | 4% | Alimentos básicos (pan, leche...) |
+| Exento | 0% | Productos sin IVA |
+
+---
+
+## Queries necesarias
+
+```ts
+// Obtener todos los tipos de IVA del establecimiento
+getAllTaxes(): Promise<Tax[]>
+
+// Crear nuevo tipo
+createTax(data: Omit<Tax, "_id">): Promise<Id<"taxes">>
+
+// Editar
+updateTax(id: Id<"taxes">, data: Partial<Tax>): Promise<void>
+
+// Eliminar (verificar que no hay productos que lo usen antes)
+deleteTax(id: Id<"taxes">): Promise<void>
+```
+
+---
+
+## 🪟 Modal: Añadir / Editar IVA
+
+![Modal Añadir Impuesto](/images/settings-taxes-modal.png)
+
+Formulario mínimo:
+- Nombre del tipo (texto libre)
+- Porcentaje (número, 0-100)
+- Toggle "Usar por defecto en nuevos productos"
+- Descripción opcional
+
+---
+
+## Conexión con otras vistas
+
+El campo `tax_id` de la tabla `products` referencia a este registro. Cuando el TPV calcula el total de una comanda:
+
+```
+precio_con_iva = precio_base * (1 + taxes.porcentaje / 100)
+```
+
+Se aconseja **no eliminar un tipo de IVA** si hay productos que lo referencian — conviene primero reasignarlos.
+
+---
+
+## 🚀 Plan de Mejoras (Roadmap Técnico)
+
+### 🎨 Frontend (UI/UX & Sincronización)
+- **Prevención de Duplicados**: Validar en tiempo real (onChange) que el nombre del impuesto no coincida con uno ya existente para el mismo establecimiento.
+- **Control de Borrado Logico**: Mostrar un aviso de advertencia si el usuario intenta borrar un impuesto que está siendo usado por algún producto activo.
+
+### ⚙️ Backend (BBDD & Lógica Convex)
+- **Unicidad de `es_defecto`**: Implementar un trigger que, al marcar un impuesto como "por defecto", desmarque automáticamente cualquier otro registro previo del mismo local.
+- **Integrity Check**: Impedir la mutación `deleteTax` si existen registros en la tabla `products` que dependen de ese `tax_id`.
+- **Histórico Fiscal**: Guardar un log de cambios de porcentajes para asegurar que auditorías pasadas mantengan el cálculo correcto del IVA aplicado.
+
+---
+
+## Configuración / Notificaciones
+
+![Vista Notificaciones Settings](/images/settings-notifications-view.png)
+
+### ¿Qué configura esta sub-página?
+
+Los canales y condiciones de las alertas que el sistema envía al administrador:
+
+**Configuración Técnica (Notificaciones):** Las alertas se gestionan en la tabla `notification_settings`. Detalles en [BBDD](/docs/bbdd).
+
+**Queries:**
+```ts
+getNotificationSettings(): Promise<NotificationSettings>
+updateNotificationSettings(data: Partial<NotificationSettings>): Promise<void>
+```
