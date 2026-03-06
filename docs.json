@@ -1,4 +1,5 @@
 {
   "docsDir": ".",
-  "root": "."
+  "root": ".",
+  "theme": "mint"
 }
