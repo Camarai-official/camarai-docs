@@ -1,0 +1,2 @@
+# Configuración de impuestos
+Placeholder.
