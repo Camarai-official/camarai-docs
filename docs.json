@@ -3,7 +3,14 @@
   "root": ".",
   "name": "Camarai Docs",
   "navigation": {
-    "items": [
+    "products": [],
+    "languages": [],
+    "versions": [],
+    "tabs": [],
+    "dropdowns": [],
+    "anchors": [],
+    "groups": [],
+    "pages": [
       { "title": "Inicio", "path": "/" },
       { "title": "Guía", "path": "/intro" }
     ]
