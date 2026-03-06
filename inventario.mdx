@@ -101,10 +101,10 @@ Filtra sólo los movimientos de tipo `compra`. Permite ver el historial de abast
 
 ### 🎨 Frontend (UI/UX & Sincronización)
 - **Paginación / Virtualización**: Implementar `IntersectionObserver` o paginación por bloques para manejar inventarios de más de 100 artículos sin degradar el rendimiento.
-- **Integración Cámara/Escáner**: Añadir soporte para lectura de códigos de barras (EAN-13) usando la cámara del dispositivo para entradas rápidas de stock.
+- **Integración Cámara/Escáner**: Añadir soporte para lectura de códigos de barras (EAN-13) usando la cámara del dispositivo para entradas rápidas de stock. ( V2 o V3 ) 
 - **Feedback de Alertas**: Mejorar el diseño del toggle "Solo Alertas" para que sea más evidente visualmente cuando está activo.
 
 ### ⚙️ Backend (BBDD & Lógica Convex)
 - **Escandallos Dinámicos**: Implementar la lógica que descuenta automáticamente ingredientes de `current_stock` al marcar un ítem como "servido" en el KDS.
-- **Manejo de Multialmacén**: Expandir la tabla para soportar múltiples ubicaciones (Cámara Frigorífica, Barra, Almacén Seco).
-- **Proyecciones de Compra**: Crear una query que calcule la cantidad necesaria a comprar basándose en `stock_max - current_stock` para generar sugerencias de pedido a proveedores.
+- **Manejo de Multialmacén**: Expandir la tabla para soportar múltiples ubicaciones (Cámara Frigorífica, Barra, Almacén Seco). ( V2?)
+- **Proyecciones de Compra**: Crear una query que calcule la cantidad necesaria a comprar basándose en `stock_max - current_stock` para generar sugerencias de pedido a proveedores. ( V2 )
