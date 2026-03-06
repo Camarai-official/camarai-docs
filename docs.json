@@ -1,4 +1,12 @@
 {
   "docsDir": ".",
-  "root": "."
+  "root": ".",
+  "theme": "mint",
+  "name": "Camarai Docs",
+  "navigation": {
+    "items": [
+      { "title": "Inicio", "path": "/" },
+      { "title": "Guía", "path": "/intro" }
+    ]
+  }
 }
