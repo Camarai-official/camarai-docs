@@ -2,9 +2,16 @@
   "$schema": "https://mintlify.com/docs.json",
   "docsDir": ".",
   "root": ".",
-  "theme": "mint",
+  "name": "Camarai Docs",
+  "colors": {
+    "primary": "#0F172A",
+    "light": "#334155",
+    "dark": "#020617"
+  },
   "navigation": {
-    "groups": [],
+    "groups": [
+      { "group": "General", "pages": ["index", "introduction"] }
+    ],
     "pages": [
       { "title": "Inicio", "path": "/" },
       { "title": "Guía", "path": "/intro" }
