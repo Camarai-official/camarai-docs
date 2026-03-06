@@ -1,14 +1,8 @@
 {
+  "$schema": "https://mintlify.com/docs.json",
   "docsDir": ".",
   "root": ".",
-  "name": "Camarai Docs",
   "navigation": {
-    "products": [],
-    "languages": [],
-    "versions": [],
-    "tabs": [],
-    "dropdowns": [],
-    "anchors": [],
     "groups": [],
     "pages": [
       { "title": "Inicio", "path": "/" },
