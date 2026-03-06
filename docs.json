@@ -12,7 +12,7 @@
     "text": "#1A1A1A"
   },
   "navigation": [
-    { "title": "Inicio", "path": "/" },
-    { "title": "Guía", "path": "/intro" }
+    { "title": "Inicio", "url": "/" },
+    { "title": "Guía", "url": "/intro" }
   ]
 }
