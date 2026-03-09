@@ -3,80 +3,77 @@ title: "Cartas — El Menú Digital del Restaurante"
 description: "Creación y gestión de cartas, categorías y productos. Tres tabs, un único punto de control."
 ---
 
-## ¿Qué es esta vista?
+<Tabs>
+  <Tab title="Gestión de Menú">
+    ## ¿Qué es esta vista?
+    Esta vista agrupa en un solo lugar las **3 capas del menú**: la Carta (el documento), las Categorías (apartados) y los Productos (platos individuales).
 
-Esta vista agrupa en un solo lugar las **3 capas del menú**: la Carta (el documento que se entrega al cliente), las Categorías (los apartados que la estructuran: Entrantes, Carnes, Postres...) y los Productos (cada plato o bebida individual).
+    La jerarquía es: `Carta → Categoría → Producto`.
 
-La jerarquía es: `Carta → Categoría → Producto`.
+    | Nivel | Descripción | Tabla Convex |
+    | :--- | :--- | :--- |
+    | **Carta** | El menú global (Verano, Vinos, etc.) | `menus` |
+    | **Categoría** | Entrantes, Carnes, Postres, etc. | `categories` |
+    | **Producto** | El plato o bebida individual con su precio. | `products` |
 
----
+    ### 🪟 Modal: Editar Categoría
+    ![Modal Categoría](/images/cartas-modal-categoria.png)
+    Permite cambiar el nombre, asignar a una carta distinta y subir un icono específico.
+  </Tab>
 
-## Tab 1 — Cartas
+  <Tab title="Productos y Variantes">
+    ## 🪟 Modal: Ficha de Producto (5 Tabs)
+    Es el centro de configuración del producto, incluyendo escandallos y precios por zona.
 
-![Tab Cartas](/images/cartas-tab-cartas.png)
+    ````carousel
+    ![Tab General](/images/cartas-modal-producto-1.png)
+    <!-- slide -->
+    ![Tab Precios](/images/cartas-modal-producto-2.png)
+    <!-- slide -->
+    ![Tab Receta](/images/cartas-modal-producto-3.png)
+    <!-- slide -->
+    ![Tab Variantes](/images/cartas-modal-producto-4.png)
+    <!-- slide -->
+    ![Tab Disponibilidad](/images/cartas-modal-producto-5.png)
+    ````
 
-Gestión de los menús globales. Se pueden tener varias cartas (Carta de Verano, Menú del Día, Carta de Vinos) y activar/desactivar cada una con un toggle.
+    | Sección | Detalle Clave |
+    | :--- | :--- |
+    | **General** | Alérgenos y descripción. |
+    | **Precios** | PVP por zona (Barra/Terraza). |
+    | **Receta** | Descuento automático de `ingredients`. |
+    | **Variantes** | Modificadores: Punto de carne, Tamaño, etc. |
+  </Tab>
 
-**Configuración Técnica:** Las cartas se definen en la tabla `menus`. Consulta el detalle en [BBDD](/ingenieria/bbdd).
+  <Tab title="Especificación Técnica">
+    <Note icon="triangle-exclamation" color="#FF0000">
+      **🚨 HAY QUE SOLUCIONAR (CRÍTICO)**: Actualmente existe una desalineación lingüística. El Dashboard usa `nombre_producto` y la Carta/POS usan `name`. 
+      **Acción**: Todo el esquema debe migrarse a Inglés Técnico en Convex.
+    </Note>
 
----
+    <Note icon="money-bill-transfer" color="#FF0000">
+      **🚨 HAY QUE SOLUCIONAR**: Los precios se están guardando como strings con símbolo (`'20.97€'`). 
+      **Acción**: Deben ser `number` puros para permitir cálculos automáticos de IVA y descuentos.
+    </Note>
 
-## Tab 2 — Categorías
+    ### 🛠️ Mapeo de Sincronización
+    | Campo | Dashboard (ES ⚠️) | Estándar Convex (EN ✅) |
+    | :--- | :--- | :--- |
+    | Nombre | `nombre_producto` | `name` |
+    | Precio | `precio_venta` | `price` |
+    | Imagen | `url_imagen_producto` | `image` |
+    | Estado | `'Activo' / 'Inactivo'` | `active: boolean` |
+  </Tab>
 
-![Tab Categorías](/images/cartas-tab-categorias.png)
+  <Tab title="Roadmap">
+    ## 🚀 Futuras Mejoras
 
-Organización interna de cada carta.
+    ### 🎨 Frontend
+    - **Edge Resizing**: Optimización de imágenes de productos para carga instantánea.
+    - **QR Preview**: Previsualización real de la Carta Digital desde el Dashboard.
 
-**Configuración Técnica:** Las categorías se definen en la tabla `categories`. Consulta el detalle en [BBDD](/ingenieria/bbdd).
-
-### 🪟 Modal: Editar Categoría
-![Modal Categoría](/images/cartas-modal-categoria.png)
-Permite cambiar el nombre, asignar a una carta distinta y subir un icono específico de categoría.
-
----
-
-## Tab 3 — Productos
-
-![Tab Productos](/images/cartas-tab-productos.png)
-
-El listado completo de platos y bebidas. Muestra precio, categoría y estado de stock de un vistazo.
-
-**Configuración Técnica:** Los productos se definen en la tabla `products`. Consulta el detalle en [BBDD](/ingenieria/bbdd).
-
----
-
-## 🪟 Modal: Ficha de Producto (5 Tabs)
-
-Este es el modal más denso de la aplicación, dividido en 5 apartados técnicos:
-
-````carousel
-![Tab General](/images/cartas-modal-producto-1.png)
-<!-- slide -->
-![Tab Precios](/images/cartas-modal-producto-2.png)
-<!-- slide -->
-![Tab Receta](/images/cartas-modal-producto-3.png)
-<!-- slide -->
-![Tab Variantes](/images/cartas-modal-producto-4.png)
-<!-- slide -->
-![Tab Disponibilidad](/images/cartas-modal-producto-5.png)
-````
-
-1. **General**: Nombre, descripción, categoría y selección de alérgenos.
-2. **Precios**: Configuración de PVP y selector de **IVA**. Permite definir precios distintos por zona (Barra, Terraza, VIP).
-3. **Receta**: Escandallo del producto. Vincula con la tabla `ingredients` y define cantidades consumidas por cada venta.
-4. **Variantes**: Modificadores del producto (ej: Punto de la carne, Formato 33cl/50cl). Cada variante puede tener un coste extra.
-5. **Disponibilidad**: Horarios específicos en los que el producto puede pedirse (ej: solo en cenas).
-
----
-
-## 🚀 Plan de Mejoras (Roadmap Técnico)
-
-### 🎨 Frontend (UI/UX & Sincronización)
-- **Optimización de Assets**: Implementar carga perezosa (lazy loading) y un sistema de "Edge Resizing" para las imágenes de productos subidas, evitando el lag al abrir la carta.
-- **Previsualización en Tiempo Real**: Permitir que el admin vea una "Vista Previa" de cómo quedará el QR de la carta en el móvil del cliente mientras edita categorías.
-- **Feedback de Stock**: Añadir un micro-indicador visual cuando un producto se marca como "Fuera de Carta" para que el usuario no tenga que entrar en el modal.
-
-### ⚙️ Backend (BBDD & Lógica Convex)
-- **Integración con Inventario (Trigger)**: Implementar una mutation que, al vender un producto, recorra su tabla `product_recipes` y descuente las cantidades del `ingredients.current_stock`.
-- **Precios Dinámicos por Zona**: Automatizar la aplicación de recargos (ej: +10% en terraza) calculados en el servidor en lugar de definir precios manuales por cada producto.
-- **Versionado de Cartas**: Guardar un historial de cambios para el menú, permitiendo programar cambios de carta automáticos (ej: Carta de Navidad activándose sola el 15 de diciembre).
+    ### ⚙️ Backend (Convex)
+    - **Trigger de Inventario**: Descuento automático de stock al generar una comanda.
+    - **Versionado**: Programación de cambios de carta (ej: Menú de Navidad automático).
+  </Tab>
+</Tabs>

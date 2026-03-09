@@ -5,10 +5,36 @@ description: "Sistema de comunicación en tiempo real entre el personal del esta
 
 # Chat Interno
 
-El Dashboard incluye un chat integrado para que los administradores, camareros (vía POS) y gerentes puedan comunicarse sin salir de la plataforma.
+<Tabs>
+  <Tab title="Chat en Vivo">
+    ## Comunicación en Tiempo Real
+    El Dashboard incluye un chat integrado para que los administradores, camareros (vía POS) y gerentes puedan comunicarse sin salir de la plataforma.
 
-## Características
+    ![Placeholder: Vista Chat Principal](/images/TODO-chat-view-main.png)
 
-- **Mensajería Instantánea**: Comunicación directa entre dispositivos Camelai.
-- **Canales por Ambiente**: Grupos automáticos por zona de trabajo.
-- **Integración con Agentes**: Los agentes pueden enviar alertas críticas directamente al chat.
+    ### Características
+    - **Mensajería Instantánea**: Comunicación directa entre dispositivos Camelai.
+    - **Canales por Ambiente**: Grupos automáticos por zona de trabajo (Terraza, Salón).
+  </Tab>
+
+  <Tab title="Integración Agentes">
+    ## Alertas de IA en el Chat
+    ![Placeholder: Alertas de Agente en Chat](/images/TODO-chat-agent-alerts.png)
+
+    Los agentes de IA no solo hablan por WhatsApp; también inyectan mensajes críticos en los canales internos del Dashboard:
+    - **Agente Gerente**: Notificaciones de apertura/cierre de caja.
+    - **Agente Cliente**: Notificaciones de nuevas reservas.
+  </Tab>
+
+  <Tab title="Especificación Técnica">
+    ### Infraestructura de Mensajería
+    - **Protocolo**: WebSockets vía Convex para latencia mínima.
+    - **Persistencia**: Todos los mensajes se guardan en la tabla `messages`.
+    
+    | Campo | Tipo |
+    | :--- | :--- |
+    | `sender_id` | `Id<"staff">` |
+    | `content` | `string` |
+    | `channel` | `string` |
+  </Tab>
+</Tabs>

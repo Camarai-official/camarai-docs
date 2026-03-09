@@ -3,12 +3,43 @@ title: "Categorías"
 description: "Organización y jerarquía del menú para el POS y la Carta Digital."
 ---
 
-# Categorías
+<Tabs>
+  <Tab title="Gestión de Categorías">
+    ## Organización del Menú
+    Las categorías permiten agrupar los productos para facilitar su localización en el punto de venta y darlos de alta de forma estructurada en la Carta Digital.
 
-Las categorías permiten agrupar los productos para facilitar su localización en el punto de venta y darlos de alta de forma estructurada en la Carta Digital.
+    ![Placeholder: Vista Listado de Categorías](/images/TODO-categorias-view-main.png)
 
-## Organización
+    ### 🪟 Modal: Editar Categoría
+    ![Modal Categoría](/images/cartas-modal-categoria.png)
 
-- **Jerarquía**: Secciones principales (Entrantes, Platos principales, Postres).
-- **Ordenación**: Control de la secuencia de visualización.
-- **Visibilidad**: Activar/Desactivar categorías por horario o disponibilidad.
+    | Campo | Descripción |
+    | :--- | :--- |
+    | **Nombre** | Título de la sección (ej: "Entrantes"). |
+    | **Carta Asignada** | Menú al que pertenece la categoría. |
+    | **Icono** | Imagen representativa para el POS/Carta. |
+  </Tab>
+
+  <Tab title="Parámetros Avanzados">
+    ## Control de Visibilidad
+    - **Jerarquía**: Controla el orden manual de aparición.
+    - **Visibilidad**: Activar/Desactivar secciones enteras por temporada.
+    - **Horarios**: (Roadmap) Categorías que solo aparecen en desayunos o cenas.
+  </Tab>
+
+  <Tab title="Especificación Técnica">
+    <Note icon="language" color="#FF0000">
+      **🚨 HAY QUE SOLUCIONAR**: Cambiar `nombre_categoria` por `name` en Convex para unificación con la Carta Digital.
+    </Note>
+
+    ### Relación de Datos
+    - **Tabla**: `categories`
+    - **Link**: Cada categoría debe apuntar a un `menu_id`.
+  </Tab>
+
+  <Tab title="Roadmap">
+    ## 🚀 Futuras Mejoras
+    - **Subcategorías**: Implementar niveles infinitos de jerarquía.
+    - **Estilos Personalizados**: Colores de fondo específicos por categoría en la Carta Digital.
+  </Tab>
+</Tabs>

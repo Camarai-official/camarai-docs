@@ -1,38 +1,93 @@
-# 📚 Camarai Documentation Repository (Mintlify)
+# Camarai Documentation Repository (Mintlify)
 
 Este repositorio centraliza la **inteligencia estratégica** de Camarai. Documentamos el paso de un sistema basado en mocks a una arquitectura de producción reactiva.
 
-## 🧠 Estado de la Verdad Técnica
+---
 
-Tras la última auditoría, hemos establecido los pilares para la integración con el Backend:
+## Estado de la Verdad Técnica
 
-1.  **Prioridad de Vistas Huérfanas**: Hemos detectado que completar las vistas sin lógica es el paso previo e indispensable para diseñar una BBDD (Convex) robusta. No se construye el esquema sin entender el flujo de datos total del Dashboard.
-2.  **Rol de n8n**: Definido exclusivamente para el **Agente IA** y **Comunicaciones Externas**. La lógica operativa interna reside en Convex. 
-3.  **Estandarización de Datos**: Sustitución de "veneno" (strings en cálculos matemáticos) por tipos numéricos puros y enums en inglés.
-4.  **Hardware en Radar**: La integración con periféricos (impresoras/TPV) queda en fase de definición, evaluando la mejor vía de comunicación.
+| Pilar | Estado | Documento de Referencia |
+| :--- | :---: | :--- |
+| **Vistas y UI** | ✅ Estructurado | Todos los `.mdx` tienen Tabs + Tablas |
+| **Roles y Permisos** | ✅ Sincronizado | [`ingenieria/roles.mdx`](ingenieria/roles.mdx) |
+| **Autenticación** | ✅ Documentado | [`ingenieria/autenticacion.mdx`](ingenieria/autenticacion.mdx) |
+| **Base de Datos** | ✅ Especificación completa | [`ingenieria/bbdd.mdx`](ingenieria/bbdd.mdx) — 25 tablas, ~200 campos |
+| **Alineación de Datos** | 🟡 Sincronizado con BBDD | [`ingenieria/alineacion.mdx`](ingenieria/alineacion.mdx) |
+| **Backend Convex** | 🔴 Pendiente | Vista por crear en Ingeniería |
+| **Capturas de Pantalla** | 🔴 16 faltantes | Ver sección "Auditoría Visual" |
+
+> [!IMPORTANT]
+> **Omni-Sincronización**: En Camarai, cualquier cambio en cualquier dispositivo (POS, PDA, KDS o Dashboard) se refleja instantáneamente en el resto del ecosistema. La documentación debe respetar este principio de "Verdad Única".
 
 ---
 
-## 🗺️ Roadmap de la Documentación (Objetivos de la Doc)
+## Roadmap de la Documentación
 
-Este es el plan para que la "Doc" alcance su madurez, permitiendo el acceso rápido a cada rincón del sistema.
+### Fase 1: Auditoría Visual Completa *(En progreso)*
+- [x] Estructura de Tabs y Tablas en todas las vistas.
+- [x] Placeholders de imágenes con nombres estandarizados (`TODO-*.png`).
+- [ ] Captura de pantallas de las 16 vistas/modals pendientes.
 
-### 🏁 Fase 1: Auditoría Visual Completa (Galería)
-- [ ] **Captura de Pantallas**: Documentación visual de TODAS las vistas actuales (POS, Dash y Carta).
-- [ ] **Galería Histórica**: Estructurar Mintlify para que todas las capturas sean accesibles sin necesidad de eliminar versiones anteriores.
-- [ ] **Detección de Vacíos**: Listado visual de partes del Dashboard que carecen de backend.
+### Fase 2: Especificación de BBDD *(Completada)*
+- [x] Especificación maestra con trazabilidad Tabla → Vista → Rol.
+- [x] Plan de implementación en 5 fases con revisión en bucle.
+- [x] Diagrama ER completo con campos dentro de cada tabla.
+- [x] Modelo de monetización dual (suscripción + comisión por pedido).
+- [x] Sincronización de nomenclatura entre `bbdd.mdx` y `alineacion.mdx`.
+- [ ] Validación cruzada de cada tabla contra las vistas operativas.
+- [ ] Glosario de Enums unificado en Inglés.
 
-### 🏁 Fase 2: Diseño de BBDD y Contratos
-- [ ] **Esquema Convex**: Documentar el `schema.ts` unificado una vez saneadas las vistas huérfanas.
-- [ ] **Glosario de Enums**: Definir todos los estados (Libre, Ocupado, Sucio) en inglés técnico para la base de datos.
+### Fase 3: Backend Convex *(Pendiente)*
+- [ ] Crear vista dedicada en Ingeniería y Datos para el backend de Convex.
+- [ ] Documentar el `convex/schema.ts` basado en la especificación de `bbdd.mdx`.
+- [ ] Documentar mutations, queries y acciones de Convex.
+- [ ] Mapear qué funciones Convex consume cada app (Dashboard, POS, Carta, PDA).
+- [ ] Documentar la estrategia de autenticación server-side (validación de `role` en cada mutación).
 
-### 🏁 Fase 3: Flujos de Agentes e IA
-- [ ] **Arquitectura n8n**: Mapeo de flujos para el Agente Cliente y notificaciones de Gerencia.
-- [ ] **Manual del Bot del Cliente**: Lógica de recomendaciones y links de sesión.
+### Fase 4: Flujos de Agentes e IA
+- [x] Documentación de los 4 agentes (Cliente, Gerente, Camarero, TPV).
+- [ ] Arquitectura n8n: Mapeo de flujos.
+- [ ] Manual del Bot del Cliente: Lógica de recomendaciones.
 
 ---
 
-## 🛠️ Desarrollo Local
+## Auditoría Visual — Capturas Pendientes (16)
+
+### Gestión de Catálogo y Stock (3)
+- [ ] `TODO-productos-view-main.png` — Listado de productos con filtros.
+- [ ] `TODO-categorias-view-main.png` — Listado de categorías.
+- [ ] `TODO-ingredientes-view-main.png` — Listado de materia prima.
+
+### Marketing y Clientes (5)
+- [ ] `TODO-clientes-view-main.png` — Tabla CRM.
+- [ ] `TODO-clientes-modal-ficha.png` — Ficha detalle de cliente.
+- [ ] `TODO-marketing-promociones-main.png` — Lista de campañas WhatsApp.
+- [ ] `TODO-marketing-promociones-modal.png` — Editor de campaña.
+- [ ] `TODO-marketing-promociones-preview.png` — Vista previa del mensaje.
+
+### Comunicación (2)
+- [ ] `TODO-chat-view-main.png` — Vista principal del chat.
+- [ ] `TODO-chat-agent-alerts.png` — Alerta de agente IA en el chat.
+
+### Inteligencia Artificial (6)
+- [ ] `TODO-agente-cliente-wa-welcome.png` — WhatsApp: Saludo y carta.
+- [ ] `TODO-agente-cliente-wa-booking.png` — WhatsApp: Flujo de reserva.
+- [ ] `TODO-agente-gerente-wa-alert.png` — WhatsApp: Alerta stock bajo.
+- [ ] `TODO-agente-gerente-wa-kpi.png` — WhatsApp: Resumen de ventas.
+- [ ] `TODO-agente-camarero-voice-ui.png` — Interfaz de toma de pedidos por voz.
+- [ ] `TODO-agente-tpv-chat-ui.png` — Chat del Agente TPV en Dashboard.
+
+### Imágenes Potencialmente Sobrantes
+- `cocina-view.png` — Versión antigua del KDS.
+- `modal-carta-general.png` / `modal-carta-whatsapp.png` — Reemplazadas.
+- `modal-categoria-general.png` / `apariencia.png` — Reemplazadas.
+- `modal-empleado.png` — Redundante con `personal-modal-*`.
+- `modal-ingrediente.png` — Redundante con `modal-inventario-ingrediente.png`.
+- `personal-view.png` — La docu usa capturas por tab.
+
+---
+
+## Desarrollo Local
 
 ```bash
 # Instalar Mintlify CLI
@@ -42,5 +97,19 @@ npm i -g mintlify
 mintlify dev
 ```
 
-> [!IMPORTANT]
-> **Omni-Sincronización**: En Camarai, cualquier cambio en cualquier dispositivo (POS, PDA, KDS o Dashboard) se refleja instantáneamente en el resto del ecosistema. La documentación debe respetar este principio de "Verdad Única".
+---
+
+## Estructura del Repositorio
+
+```
+camarai-docs/
+├── general/          # Índice, Roadmap, Nomenclatura
+├── ingenieria/       # BBDD, Roles, Autenticación, Alineación, Componentes
+├── operativa/        # Dashboard, Comandas, Plano Mesas, Chat, POS, KDS
+├── gestion/          # Productos, Categorías, Ingredientes, Inventario, Reservas, Personal, Reportes, Cartas
+├── marketing/        # Clientes, Promociones, Notificaciones
+├── configuracion/    # Configuración General, Perfil, Impuestos
+├── agentes/          # Agente Cliente, Gerente, Camarero, TPV
+├── images/           # Capturas de pantalla (~93 archivos)
+└── mint.json         # Navegación y branding
+```

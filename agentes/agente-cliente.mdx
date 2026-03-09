@@ -1,0 +1,32 @@
+<Tabs>
+  <Tab title="Interacción WhatsApp">
+    ## El Asistente del Cliente
+    Recomienda platos, hace upselling, envía el link de la Carta Digital y gestiona reservas de forma autónoma.
+
+    ![Placeholder: Chat WhatsApp Cliente (Saludo y Carta)](/images/TODO-agente-cliente-wa-welcome.png)
+
+    ### Flujo de Venta
+    - **Upselling**: "He visto que has pedido una hamburguesa, ¿te gustaría añadir unas patatas trufadas?".
+    - **Link Dinámico**: Envía la URL con sesión única para pedidos sin fricción.
+  </Tab>
+
+  <Tab title="Gestión de Reservas">
+    ## Reservas Inteligentes
+    ![Placeholder: Chat WhatsApp Cliente (Flujo Reserva)](/images/TODO-agente-cliente-wa-booking.png)
+
+    El agente consulta en tiempo real la tabla `reservations` y `tables` para confirmar disponibilidad sin intervención humana.
+  </Tab>
+
+  <Tab title="Especificaciones Técnicas">
+    | Aspecto | Detalle |
+    |:--------|:--------|
+    | **Canal** | WhatsApp (Evolution API) |
+    | **Orquestación** | n8n |
+    | **Tablas Convex (Lee)** | `products`, `categories`, `menu`, `establishments` |
+    | **Tablas Convex (Escribe)** | `reservations`, `customers` |
+
+    <Note icon="triangle-exclamation" color="#FF0000">
+      **🚨 HAY QUE SOLUCIONAR**: Implementar una validación de sesión más robusta entre el Agente y la Carta.
+    </Note>
+  </Tab>
+</Tabs>

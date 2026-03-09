@@ -1,0 +1,34 @@
+<Tabs>
+  <Tab title="Alertas de Gestión">
+    ## El Manager en el Bolsillo
+    Envía alertas críticas y resúmenes de KPIs al manager/dueño en tiempo real a través de WhatsApp.
+
+    ![Placeholder: Alerta WhatsApp (Stock Bajo)](/images/TODO-agente-gerente-wa-alert.png)
+
+    ### Tipos de Notificación
+    - **Stock Crítico**: Aviso inmediato cuando un ingrediente baja del umbral.
+    - **Fichajes**: Notificación si un empleado no llega a su hora.
+  </Tab>
+
+  <Tab title="KPIs y Reportes">
+    ## Resúmenes Diarios
+    ![Placeholder: Resumen Ventas WhatsApp](/images/TODO-agente-gerente-wa-kpi.png)
+
+    Al final de cada turno o día, el agente envía un resumen ejecutivo con:
+    - Facturación total.
+    - Ticket medio.
+    - Producto estrella del día.
+  </Tab>
+
+  <Tab title="Especificaciones Técnicas">
+    | Aspecto | Detalle |
+    |:--------|:--------|
+    | **Canal** | WhatsApp (Evolution API) |
+    | **Lee de Convex** | Todo el ecosistema (espejo del Dashboard). |
+    | **Escribe en Convex** | ❌ Solo lectura (V1). |
+
+    <Note icon="circle-info">
+      Este agente actúa como un filtro de inteligencia para que el dueño no tenga que entrar al Dashboard para lo urgente.
+    </Note>
+  </Tab>
+</Tabs>

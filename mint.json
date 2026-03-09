@@ -22,58 +22,64 @@
             "group": "General",
             "pages": [
                 "general/index",
-                "general/roadmap",
+                "general/roadmap"
+            ]
+        },
+        {
+            "group": "Ingeniería y Datos",
+            "pages": [
+                "ingenieria/mapa-arquitectura",
+                "ingenieria/componentes",
+                "ingenieria/bbdd",
+                "ingenieria/roles",
+                "ingenieria/autenticacion",
+                "ingenieria/alineacion",
                 "general/nomenclatura"
             ]
         },
         {
-            "group": "Ingeniería",
-            "pages": [
-                "ingenieria/mapa-arquitectura",
-                "ingenieria/componentes",
-                "ingenieria/alineacion"
-            ]
-        },
-        {
-            "group": "Operativa",
+            "group": "Dashboard (Cerebro)",
             "pages": [
                 "operativa/dashboard",
                 "operativa/comandas",
-                "operativa/pos",
-                "operativa/kds",
                 "operativa/planomesas",
                 "operativa/ambientes",
-                "operativa/chat"
-            ]
-        },
-        {
-            "group": "Gestión",
-            "pages": [
+                "operativa/chat",
                 "gestion/productos",
                 "gestion/categorias",
                 "gestion/ingredientes",
                 "gestion/inventario",
-                "gestion/cartas",
                 "gestion/reservas",
                 "gestion/personal",
-                "gestion/reportes"
-            ]
-        },
-        {
-            "group": "Marketing y Clientes",
-            "pages": [
+                "gestion/reportes",
                 "marketing/clientes",
                 "marketing/promociones",
-                "marketing/notificaciones"
+                "marketing/notificaciones",
+                "configuracion/configuracion",
+                "configuracion/configuracion-perfil",
+                "configuracion/configuracion-impuestos"
             ]
         },
         {
-            "group": "Configuración",
+            "group": "POS & KDS (Terminales Operativas)",
             "pages": [
-                "configuracion/configuracion",
-                "configuracion/configuracion-perfil",
-                "configuracion/configuracion-impuestos",
-                "configuracion/SETTING_ROW_GUIDE"
+                "operativa/pos",
+                "operativa/kds"
+            ]
+        },
+        {
+            "group": "Carta Digital (Venta Cliente)",
+            "pages": [
+                "gestion/cartas"
+            ]
+        },
+        {
+            "group": "Agentes IA (Inteligencia)",
+            "pages": [
+                "agentes/agente-cliente",
+                "agentes/agente-gerente",
+                "agentes/agente-camarero",
+                "agentes/agente-tpv"
             ]
         }
     ]

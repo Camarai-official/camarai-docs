@@ -1,130 +1,957 @@
 ---
 title: "Arquitectura de Datos"
 sidebarTitle: "Base de Datos (BBDD)"
-description: "Referencia técnica definitiva del esquema de base de datos y modelo de dominio de Camarai."
+description: "Propuesta técnica completa del esquema Convex: 25 tablas, 5 dominios, trazabilidad vista-rol-agente."
 ---
 
-# 🏗️ Arquitectura de Datos Maestro
+# Propuesta de Arquitectura de Datos — Convex
 
-Esta sección define la **fuente de verdad absoluta** para la persistencia de datos en Camarai. El sistema utiliza **Convex** como motor de base de datos reactiva, operando bajo un modelo **multi-tenant** donde la segregación de datos se garantiza mediante el identificador de cada establecimiento.
-
----
-
-## 🗺️ Modelo de Entidad-Relación (ER)
-
-El siguiente diagrama ilustra las core-entities y sus vínculos relacionales.
-
-```mermaid
-erDiagram
-    ESTABLISHMENT ||--o{ STAFF : employs
-    ESTABLISHMENT ||--o{ INGREDIENT : owns
-    ESTABLISHMENT ||--o{ MENU : defines
-    ESTABLISHMENT ||--o{ ORDER : processes
-    
-    STAFF ||--o{ TIME_LOG : registers
-    STAFF ||--o{ ABSENCE_REQUEST : requests
-    
-    INGREDIENT ||--o{ STOCK_MOVEMENT : tracks
-    
-    MENU ||--o{ CATEGORY : contains
-    CATEGORY ||--o{ PRODUCT : categorizes
-    
-    TABLE ||--o{ ORDER : hosts
-    ORDER ||--o{ ORDER_ITEM : details
-    PRODUCT ||--o{ ORDER_ITEM : included_in
-    
-    CUSTOMER ||--o{ RESERVATION : books
-    TABLE ||--o{ RESERVATION : assigned_to
-    ENVIRONMENT ||--o{ TABLE : contains
-```
+> [!WARNING]
+> **ESTADO: PROPUESTA EN REVISIÓN PERIÓDICA**
+> Este documento es una **propuesta técnica viva**. Cada tabla, campo y relación debe pasar validación cruzada contra las vistas operativas, los roles de acceso y la nomenclatura estándar antes de implementarse en Convex.
+> Para el detalle de incongruencias detectadas, consulta la [Auditoría 360°](/ingenieria/auditoria-bbdd).
 
 ---
 
-## 💎 Estándares Técnicos de Campo
+## Visión General del Ecosistema de Datos
 
-Para garantizar la integridad y precisión financiera, seguimos estas reglas estrictas:
-- **Moneda**: Todos los valores monetarios se almacenan como `number` en **céntimos** de Euro (Integer).
-- **Tiempo**: Los registros cronológicos utilizan `number` en **Unix Epoch (milisegundos)**.
-- **IDs**: Referencias cruzadas utilizando `Id<"table_name">` nativo de Convex.
-- **Strings**: Formatos de fecha estandarizados en `ISO 8601` (YYYY-MM-DD) cuando no se requiere precisión de milisegundos.
+El esquema se divide en **5 dominios funcionales** que cubren las 4 apps + 4 agentes del ecosistema Camarai.
+
+<Tabs>
+  <Tab title="Diagrama ER Completo">
+    ```mermaid
+    erDiagram
+        ESTABLISHMENTS {
+            string name
+            string cif
+            string currency
+            string timezone
+            string status
+            string plan
+            string logo_url
+            string whatsapp_number
+        }
+        STAFF {
+            string name
+            string role
+            string pin
+            string auth_id
+            string phone
+            string email
+            string status
+            number salary
+            string contract_type
+        }
+        SUBSCRIPTIONS {
+            string plan
+            number monthly_fee
+            number commission_per_order
+            string status
+            string billing_cycle
+        }
+        NOTIFICATION_SETTINGS {
+            boolean stock_alerts
+            boolean reservation_alerts
+            boolean clock_incident_alerts
+            string admin_whatsapp
+        }
+        CATEGORIES {
+            string name
+            number order
+            string icon
+            boolean active
+        }
+        PRODUCTS {
+            string name
+            number price
+            string image
+            string sku
+            boolean active
+            string description
+        }
+        INGREDIENTS {
+            string name
+            number stock
+            number alert_min
+            number stock_max
+            string unit
+            number cost_base
+        }
+        INGREDIENT_CATEGORIES {
+            string name
+            number order
+        }
+        TAXES {
+            string name
+            number percentage
+            boolean is_default
+        }
+        MENU {
+            string name
+            string type
+            boolean active
+            number published_at
+        }
+        ORDERS {
+            string status
+            number total_amount
+            string notes
+            string source
+            number created_at
+            number closed_at
+        }
+        ORDER_ITEMS {
+            number quantity
+            number unit_price
+            string notes
+            string course
+            string item_status
+        }
+        PAYMENTS {
+            string method
+            number amount
+            number timestamp
+        }
+        TABLES {
+            number number
+            number capacity
+            string status
+            string shape
+            number x
+            number y
+        }
+        ENVIRONMENTS {
+            string name
+            number capacity
+            string status
+        }
+        RESERVATIONS {
+            string date
+            string time
+            number guests
+            string status
+            boolean notified
+            string source
+        }
+        CUSTOMERS {
+            string name
+            string phone
+            string email
+            number points
+            number total_visits
+            number last_visit
+        }
+        TIME_LOGS {
+            string action
+            number timestamp
+            string method
+        }
+        ABSENCE_REQUESTS {
+            string type
+            string start_date
+            string end_date
+            string reason
+            string status
+        }
+        CLOCK_INCIDENTS {
+            string type
+            string status
+            number detected_at
+            string notes
+        }
+        CLOCK_DEVICES {
+            string name
+            string type
+            string location
+            string status
+        }
+        ESTABLISHMENT_SETTINGS {
+            string clock_methods
+            boolean auto_incident_detection
+            number max_late_minutes
+        }
+        EVENT_LOG {
+            string type
+            string level
+            string actor
+            string action
+            number timestamp
+        }
+        DEVICES {
+            string name
+            string type
+            string connection
+            string role
+            string status
+        }
+        STOCK_MOVEMENTS {
+            string type
+            number quantity
+            string notes
+            number timestamp
+        }
+
+        ESTABLISHMENTS ||--o{ STAFF : employs
+        ESTABLISHMENTS ||--o{ CATEGORIES : organizes
+        ESTABLISHMENTS ||--o{ INGREDIENTS : stocks
+        ESTABLISHMENTS ||--o{ TAXES : configures
+        ESTABLISHMENTS ||--o{ ENVIRONMENTS : contains
+        ESTABLISHMENTS ||--o{ CUSTOMERS : registers
+        ESTABLISHMENTS ||--o{ MENU : defines
+        ESTABLISHMENTS ||--o{ DEVICES : manages
+        ESTABLISHMENTS ||--o{ SUBSCRIPTIONS : monetizes
+        ESTABLISHMENTS ||--o{ NOTIFICATION_SETTINGS : configures
+        ESTABLISHMENTS ||--o{ EVENT_LOG : audits
+        STAFF ||--o{ TIME_LOGS : registers
+        STAFF ||--o{ ABSENCE_REQUESTS : requests
+        STAFF ||--o{ CLOCK_INCIDENTS : generates
+        STAFF ||--o{ ORDERS : serves
+        INGREDIENT_CATEGORIES ||--o{ INGREDIENTS : classifies
+        INGREDIENTS ||--o{ STOCK_MOVEMENTS : tracks
+        CATEGORIES ||--o{ PRODUCTS : groups
+        PRODUCTS ||--o{ ORDER_ITEMS : ordered_as
+        ENVIRONMENTS ||--o{ TABLES : contains
+        TABLES ||--o{ ORDERS : hosts
+        TABLES ||--o{ RESERVATIONS : assigned_to
+        ORDERS ||--o{ ORDER_ITEMS : details
+        ORDERS ||--o{ PAYMENTS : settled_by
+        CUSTOMERS ||--o{ RESERVATIONS : books
+    ```
+  </Tab>
+  <Tab title="Inventario de 25 Tablas">
+    | # | Tabla | Dominio | Apps | Agentes |
+    | :--- | :--- | :--- | :--- | :--- |
+    | 1 | `establishments` | Núcleo | Dashboard, POS, Carta | Todos |
+    | 2 | `staff` | Núcleo | Dashboard, POS, PDA | Gerente |
+    | 3 | `subscriptions` | Núcleo | Dashboard | — |
+    | 4 | `notification_settings` | Núcleo | Dashboard | Gerente |
+    | 5 | `categories` | Catálogo | Dashboard, POS, Carta | Cliente |
+    | 6 | `products` | Catálogo | Dashboard, POS, Carta | Cliente, TPV |
+    | 7 | `ingredients` | Catálogo | Dashboard | Gerente |
+    | 8 | `ingredient_categories` | Catálogo | Dashboard | — |
+    | 9 | `taxes` | Catálogo | Dashboard, POS | — |
+    | 10 | `menu` | Catálogo | Dashboard, Carta | Cliente |
+    | 11 | `orders` | Operativa | Dashboard, POS, PDA, Carta | Camarero, TPV |
+    | 12 | `order_items` | Operativa | Dashboard, POS, PDA, Carta | Camarero |
+    | 13 | `payments` | Operativa | POS, Dashboard | Gerente |
+    | 14 | `tables` | Operativa | Dashboard, POS, PDA | Camarero |
+    | 15 | `environments` | Operativa | Dashboard | — |
+    | 16 | `reservations` | Operativa | Dashboard | Cliente |
+    | 17 | `customers` | Operativa | Dashboard, POS | Cliente |
+    | 18 | `time_logs` | RRHH | Dashboard | Gerente |
+    | 19 | `absence_requests` | RRHH | Dashboard | — |
+    | 20 | `clock_incidents` | RRHH | Dashboard | Gerente |
+    | 21 | `clock_devices` | RRHH | Dashboard | — |
+    | 22 | `establishment_settings` | RRHH | Dashboard | — |
+    | 23 | `event_log` | Auditoría | Dashboard | Gerente, TPV |
+    | 24 | `devices` | Auditoría | Dashboard | — |
+    | 25 | `stock_movements` | Auditoría | Dashboard | — |
+  </Tab>
+</Tabs>
+
+| Dominio | Tablas | Estado |
+| :--- | :---: | :---: |
+| **D1: Núcleo Organizacional** | 4 | 🟡 En diseño |
+| **D2: Catálogo y Suministros** | 6 | 🟡 En diseño |
+| **D3: Operativa de Ventas** | 7 | 🔴 Pendiente |
+| **D4: Capital Humano (RRHH)** | 5 | 🔴 Pendiente |
+| **D5: Auditoría y Comunicación** | 3 | 🔴 Pendiente |
+| **TOTAL** | **25** | — |
 
 ---
 
-## 🏢 1. Núcleo Organizacional
+## Reglas Inquebrantables de Datos
 
-### Tabla: `establishments`
-*Configuración maestra del local y estado de cuenta.*
+Antes de definir cualquier tabla, todo campo debe cumplir estos estándares:
 
-| Campo | Tipo | Index | Descripción |
+| Regla | Estándar | Correcto | Incorrecto |
 | :--- | :--- | :--- | :--- |
-| `nombre` | `string` | No | Nombre comercial del negocio. |
-| `cif` | `string` | **Yes** | Identificador fiscal (Clave única). |
-| `owner_id` | `Id<"users">` | **Yes** | Referencia al dueño legal del SaaS. |
-| `plan` | `string` | No | `free` \| `starter` \| `pro` \| `enterprise`. |
-| `currency` | `string` | No | ISO Currency code (System Default: "EUR"). |
-| `status` | `string` | **Yes** | `active` \| `trial` \| `suspended`. |
+| **Idioma** | Inglés Técnico | `name` | `nombre_producto` |
+| **Moneda** | `number` en céntimos | `2150` (= 21,50€) | `"€21.50"` |
+| **Tiempo** | Unix Epoch (ms) | `1709913600000` | `"2024-03-08"` |
+| **IDs** | `Id<"tabla">` de Convex | `Id<"staff">` | `"staff-1"` o `1` |
+| **Estados** | Enum string EN | `"active"` | `"Activo"` |
+| **Booleanos** | `boolean` nativo | `true` | `"si"` |
 
 ---
 
-## 👥 2. Capital Humano (RRHH)
+## Dominio 1 — Núcleo Organizacional
 
-### Tabla: `staff`
-*Ficha de empleados y control de acceso.*
+El fundamento sobre el que se construye todo. Sin estas tablas, nada funciona.
 
-| Campo | Tipo | Index | Descripción |
+<Tabs>
+  <Tab title="establishments">
+    ### `establishments` — Identidad del Local
+
+    **¿Qué es?** La ficha maestra del restaurante. Contiene datos fiscales, de branding y de configuración global. Es la tabla raíz: casi todas las demás tablas tienen un `establishment_id` que apunta aquí.
+
+    **¿Quién la toca?**
+    - **Dashboard** ✏️: CRUD completo en Configuración > Perfil.
+    - **POS** 📖: Lee nombre, moneda y config para el ticket.
+    - **Carta** 📖: Lee branding (logo, nombre) para la interfaz del cliente.
+    - **Agente TPV** ✏️: Puede modificar config por prompt.
+
+    | Campo | Tipo | Qué hace | Vista que lo consume |
+    | :--- | :--- | :--- | :--- |
+    | `name` | `string` | Nombre comercial | Dashboard Home, Configuración, Ticket POS |
+    | `cif` | `string` | NIF/CIF fiscal (clave única) | Configuración > Perfil |
+    | `owner_id` | `Id<"users">` | Dueño legal de la cuenta SaaS | Sistema (Auth) |
+    | `plan` | `string` | `free` \| `starter` \| `pro` \| `enterprise` | Configuración > Facturación |
+    | `currency` | `string` | Código ISO moneda (`"EUR"`) | Todas las vistas con precios |
+    | `timezone` | `string` | `"Europe/Madrid"` | Fichajes, Reservas |
+    | `status` | `string` | `active` \| `trial` \| `suspended` | Sistema (Licencia) |
+    | `phone` | `string` | Teléfono de contacto | Configuración |
+    | `email` | `string` | Email del local | Configuración |
+    | `address` | `string` | Dirección física | Configuración |
+    | `city` | `string` | Ciudad | Configuración |
+    | `postal_code` | `string` | Código postal | Configuración |
+    | `country` | `string` | País | Configuración |
+    | `logo_url` | `string` | URL del logo subido | Carta, Ticket POS |
+    | `website` | `string` | Web del restaurante | Configuración |
+    | `whatsapp_number` | `string` | Nº de WhatsApp Business | Agentes, Reservas |
+    | `receipt_footer` | `string` | Mensaje de despedida en ticket | POS (impresión) |
+    | `created_at` | `number` | Timestamp de alta | Sistema |
+
+    > [!NOTE]
+    > **Migración pendiente**: El campo `nombre` en el código actual debe renombrarse a `name` para cumplir la regla de Inglés Técnico.
+  </Tab>
+
+  <Tab title="staff">
+    ### `staff` — Ficha de Empleados y Acceso
+
+    **¿Qué es?** Cada registro es un empleado. Contiene sus datos personales, laborales, de acceso (PIN, rol) y económicos. Es el puente entre la identidad humana y los permisos del software.
+
+    **¿Quién la toca?**
+    - **Dashboard** ✏️: CRUD en Personal > 5 Tabs de la ficha.
+    - **POS** 📖: Lee para autenticación por PIN y asignación de camarero.
+    - **Agente Gerente** 📖: Lee para alertas de fichajes y ausencias.
+
+    | Campo | Tipo | Qué hace | Vista / Tab que lo consume |
+    | :--- | :--- | :--- | :--- |
+    | `establishment_id` | `Id<"establishments">` | Multi-tenancy | Todas (filtro obligatorio) |
+    | `name` | `string` | Nombre completo | Personal > Equipo (tarjeta) |
+    | `role` | `string` | `owner` \| `admin` \| `manager` \| `waiter` \| `cook` | Sidebar, Permisos, [Roles](/ingenieria/roles) |
+    | `pin` | `string` (Hash) | PIN de 4 dígitos para POS | POS Login, Personal > Datos |
+    | `auth_id` | `string` | ID vinculado a Camarauth o Email | Sistema ([Auth](/ingenieria/autenticacion)) |
+    | `phone` | `string` | Teléfono personal | Personal > Datos, Agente Gerente |
+    | `email` | `string` | Email de trabajo | Personal > Datos, Dashboard Login |
+    | `photo_url` | `string` | Avatar del empleado | Personal > Equipo (tarjeta) |
+    | `status` | `string` | `active` \| `suspended` \| `deleted` | Personal > Equipo (badge) |
+    | `contract_type` | `string` | `indefinite` \| `temporary` \| `part_time` | Personal > Laboral |
+    | `contract_start` | `number` | Fecha inicio contrato (ms) | Personal > Laboral |
+    | `contract_end` | `number` | Fecha fin contrato (ms) | Personal > Laboral |
+    | `salary` | `number` | Sueldo bruto en céntimos | Personal > Nómina |
+    | `iban` | `string` | Número de cuenta bancaria | Personal > Nómina |
+    | `irpf` | `number` | Porcentaje de IRPF aplicable | Personal > Nómina |
+    | `ss_number` | `string` | Número de Seguridad Social | Personal > Nómina |
+    | `dashboard_sections` | `array` | Secciones del panel accesibles | Personal > Acceso |
+    | `clock_methods` | `array` | Métodos de fichaje permitidos | Personal > Laboral |
+    | `documents` | `array` | URLs de documentos adjuntos | Personal > Documentos |
+    | `notes` | `string` | Notas internas sobre el empleado | Personal > Datos |
+    | `created_at` | `number` | Fecha de alta (ms) | Sistema |
+
+    <Tip title="Seguridad">
+      El PIN **nunca** debe exponerse en logs ni respuestas de API. Se almacena como hash. La relación con la identidad de login se garantiza mediante `auth_id`. Ver [Autenticación](/ingenieria/autenticacion).
+    </Tip>
+  </Tab>
+
+  <Tab title="subscriptions">
+    ### `subscriptions` — Monetización Dual
+
+    **¿Qué es?** Gestiona la monetización de Camarai, que opera con un **modelo dual de ingresos**:
+
+    1.  **Suscripción Mensual**: Cuota fija muy baja (~20€/mes) para uso de la plataforma completa.
+    2.  **Comisión por Pedido (Carta Digital)**: Cada pedido que entra a través del **Bot de WhatsApp del Cliente** → **Carta Digital** genera una comisión de **0,30€** para Camarai.
+
+    > [!IMPORTANT]
+    > **Motor de ingresos principal**: La comisión de 0,30€ por pedido vía WhatsApp/Carta es el verdadero motor de monetización. A mayor volumen de pedidos digitales, mayor ingreso para Camarai sin que el restaurante perciba un coste alto.
+
+    **¿Quién la toca?**
+    - **Dashboard** 📖: Configuración > Facturación (actualmente deshabilitado).
+    - **Sistema**: Registra automáticamente las comisiones por pedido.
+
+    | Campo | Tipo | Qué hace |
+    | :--- | :--- | :--- |
+    | `establishment_id` | `Id<"establishments">` | Vínculo al local |
+    | `plan` | `string` | `free` \| `starter` \| `pro` \| `enterprise` |
+    | `monthly_fee` | `number` | Cuota mensual en céntimos (ej: `2000` = 20€) |
+    | `commission_per_order` | `number` | Comisión por pedido digital en céntimos (`30` = 0,30€) |
+    | `status` | `string` | `active` \| `past_due` \| `cancelled` |
+    | `billing_cycle` | `string` | `monthly` \| `annual` |
+    | `next_billing_date` | `number` | Próxima fecha de cobro (ms) |
+    | `stripe_subscription_id` | `string` | Referencia a Stripe |
+    | `stripe_customer_id` | `string` | Referencia al cliente en Stripe |
+    | `total_commissions_pending` | `number` | Comisiones acumuladas pendientes de cobro (céntimos) |
+    | `last_invoice_date` | `number` | Fecha de la última factura (ms) |
+    | `created_at` | `number` | Fecha de alta (ms) |
+
+    **Flujo de comisión**:
+    1. Cliente recibe link de **Agente Cliente** (WhatsApp) → Abre **Carta Digital**.
+    2. Cliente hace pedido → Se ejecuta `generarComanda`.
+    3. El sistema registra `+30 céntimos` en `total_commissions_pending`.
+    4. Al final del ciclo de facturación, se cobra `monthly_fee + total_commissions_pending`.
+
+    > [!NOTE]
+    > **Estado**: Esta tabla está **pendiente de implementación**. La sección "Facturación y Suscripción" en Configuración está deshabilitada.
+  </Tab>
+
+  <Tab title="notification_settings">
+    ### `notification_settings` — Control de Alertas
+
+    **¿Qué es?** Define qué alertas recibe el administrador y por qué canal. Alimenta al **Agente Gerente** para saber qué notificaciones enviar por WhatsApp.
+
+    **¿Quién la toca?**
+    - **Dashboard** ✏️: Configuración > Notificaciones.
+    - **Agente Gerente** 📖: Lee para decidir qué alertas enviar.
+
+    | Campo | Tipo | Qué hace |
+    | :--- | :--- | :--- |
+    | `establishment_id` | `Id<"establishments">` | Vínculo al local |
+    | `stock_alerts` | `boolean` | Alertar cuando un ingrediente baje del mínimo |
+    | `stock_alert_channel` | `string` | `email` \| `whatsapp` \| `push` \| `all` |
+    | `reservation_alerts` | `boolean` | Alertar ante nuevas reservas |
+    | `reservation_reminder_hours` | `number` | Horas antes de la reserva para enviar recordatorio |
+    | `clock_incident_alerts` | `boolean` | Alertar ante incidencias de fichaje |
+    | `order_cancellation_alerts` | `boolean` | Alertar ante anulaciones de pedido |
+    | `daily_summary` | `boolean` | Enviar resumen diario de KPIs |
+    | `admin_email` | `string` | Email del admin para notificaciones |
+    | `admin_whatsapp` | `string` | WhatsApp del admin (Agente Gerente) |
+  </Tab>
+</Tabs>
+
+---
+
+## Dominio 2 — Catálogo y Suministros
+
+Todo lo que el restaurante vende o necesita para producir lo que vende.
+
+<Tabs>
+  <Tab title="categories">
+    ### `categories` — Jerarquía del Menú
+
+    **¿Qué es?** Agrupa los productos del menú (ej: "Entrantes", "Carnes", "Postres"). Define el orden de aparición en el POS y la Carta Digital.
+
+    **¿Quién la toca?**
+    - **Dashboard** ✏️: CRUD en Categorías.
+    - **POS** 📖: Lee para el grid de navegación.
+    - **Carta** 📖: Lee para los tabs de navegación del menú.
+    - **Agente Cliente** 📖: Lee para filtrar recomendaciones.
+
+    | Campo | Tipo | Qué hace | Vista |
+    | :--- | :--- | :--- | :--- |
+    | `establishment_id` | `Id<"establishments">` | Multi-tenancy | Filtro global |
+    | `name` | `string` | Nombre de la categoría | POS grid, Carta tabs, Dashboard |
+    | `description` | `string` | Descripción de la categoría | Carta, Dashboard |
+    | `order` | `number` | Posición en la navegación | POS, Carta |
+    | `icon` | `string` | Icono visual (emoji o URL) | POS, Carta |
+    | `color` | `string` | Color de fondo del badge | POS, Dashboard |
+    | `active` | `boolean` | Visibilidad en POS/Carta | POS, Carta |
+    | `created_at` | `number` | Fecha de creación (ms) | Sistema |
+
+    > [!WARNING]
+    > **Veneno detectado**: El Dashboard usa `nombre_categoria` (ES). Debe migrarse a `name` (EN). Ver [Alineación](/ingenieria/alineacion).
+  </Tab>
+
+  <Tab title="products">
+    ### `products` — Catálogo de Productos
+
+    **¿Qué es?** Cada plato, bebida o artículo vendible. Es la tabla más consultada de todo el ecosistema porque la leen las 4 apps y 2 agentes.
+
+    **¿Quién la toca?**
+    - **Dashboard** ✏️: CRUD en Productos (5 tabs: General, Precios, Receta, Variantes, Disponibilidad).
+    - **POS** 📖: Lee para el grid de venta.
+    - **Carta** 📖: Lee para mostrar el menú al cliente.
+    - **Agente Cliente** 📖: Lee para recomendar platos.
+    - **Agente TPV** ✏️: Puede editarlos por prompt.
+
+    | Campo | Tipo | Qué hace | Vista |
+    | :--- | :--- | :--- | :--- |
+    | `establishment_id` | `Id<"establishments">` | Multi-tenancy | Filtro global |
+    | `category_id` | `Id<"categories">` | Categoría padre | Productos (filtro), POS (grid) |
+    | `name` | `string` | Nombre del producto | Todas las vistas de venta |
+    | `description` | `string` | Descripción para la carta | Carta, Dashboard |
+    | `price` | `number` | Precio base en **céntimos** | POS, Carta, Reportes |
+    | `cost` | `number` | Coste de producción (céntimos) | Reportes (margen) |
+    | `image` | `string` | URL de la foto del plato | Carta, POS |
+    | `sku` | `string` | Código interno / código de barras | Inventario, Escáner |
+    | `active` | `boolean` | Se muestra en POS/Carta | POS, Carta |
+    | `tax_id` | `Id<"taxes">` | IVA aplicable | POS (cálculo ticket) |
+    | `allergens` | `array` | Lista de alérgenos | Carta, Agente Cliente |
+    | `variants` | `array` | Opciones de variante (talla, extras) | Carta, POS |
+    | `preparation_time` | `number` | Tiempo estimado de preparación (min) | KDS |
+    | `available` | `boolean` | Disponible hoy (control temporal) | POS, Carta |
+    | `order` | `number` | Posición dentro de la categoría | POS, Carta |
+    | `created_at` | `number` | Fecha de creación (ms) | Sistema |
+
+    > [!CAUTION]
+    > **CRÍTICO**: El Dashboard usa `nombre_producto`, `precio_venta`, `url_imagen_producto`. La Carta usa `nombre_producto`, `variaciones.price`, `img_url`. El POS usa `name`, `price`, `image`. **TODOS deben unificarse a los nombres EN** listados en esta tabla.
+  </Tab>
+
+  <Tab title="ingredients">
+    ### `ingredients` — Almacén de Insumos
+
+    **¿Qué es?** Cada materia prima que usa la cocina. Controla el stock, los costes y las alertas de reposición.
+
+    **¿Quién la toca?**
+    - **Dashboard** ✏️: CRUD en Inventario.
+    - **Dashboard** 📖: Widget de "Alertas de Stock" en Home.
+    - **Agente Gerente** 📖: Lee para enviar alertas de stock bajo por WhatsApp.
+
+    | Campo | Tipo | Qué hace | Vista |
+    | :--- | :--- | :--- | :--- |
+    | `establishment_id` | `Id<"establishments">` | Multi-tenancy | Filtro global |
+    | `category_id` | `Id<"ingredient_categories">` | Tipo de ingrediente | Inventario (filtro badge) |
+    | `name` | `string` | Nombre del insumo | Inventario |
+    | `stock` | `number` | Cantidad actual | Inventario, Dashboard (widget) |
+    | `alert_min` | `number` | Umbral de alerta roja | Dashboard (widget), Agente Gerente |
+    | `stock_max` | `number` | Stock objetivo para pedidos | Inventario |
+    | `unit` | `string` | `kg` \| `units` \| `liters` \| `grams` | Inventario |
+    | `cost_base` | `number` | Precio de compra unitario (céntimos) | Inventario, Reportes |
+    | `supplier` | `string` | Proveedor habitual | Inventario |
+    | `barcode` | `string` | Código EAN-13 para escáner | Inventario (entrada rápida) |
+    | `conversions` | `array` | Equivalencias (ej: "1 caja = 12 uds") | Inventario |
+    | `created_at` | `number` | Fecha de creación (ms) | Sistema |
+  </Tab>
+
+  <Tab title="ingredient_categories">
+    ### `ingredient_categories` — Tipos de Ingrediente
+
+    **¿Qué es?** Clasifica los ingredientes por tipo (ej: "Carnes", "Lácteos", "Secos"). Permite filtrar en el listado de inventario.
+
+    | Campo | Tipo | Qué hace |
+    | :--- | :--- | :--- |
+    | `establishment_id` | `Id<"establishments">` | Multi-tenancy |
+    | `name` | `string` | Nombre de la categoría de ingrediente |
+    | `order` | `number` | Posición en el filtro |
+    | `created_at` | `number` | Fecha de creación (ms) |
+  </Tab>
+
+  <Tab title="taxes">
+    ### `taxes` — Impuestos Aplicables
+
+    **¿Qué es?** Define los tipos de IVA del local. Se vinculan a cada producto para el cálculo correcto del ticket.
+
+    **¿Quién la toca?**
+    - **Dashboard** ✏️: Configuración > Impuestos.
+    - **POS** 📖: Lee para calcular el ticket.
+
+    | Campo | Tipo | Qué hace | Vista |
+    | :--- | :--- | :--- | :--- |
+    | `establishment_id` | `Id<"establishments">` | Multi-tenancy | Filtro global |
+    | `name` | `string` | "IVA General", "IVA Reducido" | Configuración |
+    | `percentage` | `number` | 21, 10, 4, 0 | POS (cálculo) |
+    | `is_default` | `boolean` | Se asigna auto a nuevos productos | Productos |
+    | `created_at` | `number` | Fecha de creación (ms) | Sistema |
+
+    > [!WARNING]
+    > **Migración pendiente**: Los campos actuales `nombre` y `porcentaje` deben renombrarse a `name` y `percentage`.
+  </Tab>
+
+  <Tab title="menu">
+    ### `menu` — Cartas y Combos
+
+    **¿Qué es?** Define las "cartas" o menús que publica el restaurante (ej: "Menú del Día", "Carta Principal", "Menú Degustación"). Es el contenedor que agrupa productos para la Carta Digital.
+
+    **¿Quién la toca?**
+    - **Dashboard** ✏️: CRUD en Cartas.
+    - **Carta** 📖: Lee para renderizar el menú digital.
+    - **Agente Cliente** 📖: Lee para saber qué recomendar.
+
+    | Campo | Tipo | Qué hace | Vista |
+    | :--- | :--- | :--- | :--- |
+    | `establishment_id` | `Id<"establishments">` | Multi-tenancy | Filtro global |
+    | `name` | `string` | Nombre de la carta | Dashboard, Carta |
+    | `description` | `string` | Descripción del menú | Carta |
+    | `type` | `string` | `standard` \| `combo` \| `daily` \| `tasting` | Dashboard (filtro) |
+    | `active` | `boolean` | Visible en la Carta Digital | Carta |
+    | `price` | `number` | Precio del menú completo (céntimos, solo combos) | Carta |
+    | `product_ids` | `array` | Productos incluidos en el menú | Carta, Dashboard |
+    | `available_days` | `array` | Días de la semana disponible | Carta |
+    | `published_at` | `number` | Fecha de publicación (ms) | Dashboard |
+    | `created_at` | `number` | Fecha de creación (ms) | Sistema |
+  </Tab>
+</Tabs>
+
+---
+
+## Dominio 3 — Operativa de Ventas
+
+El motor que mueve el dinero. Las tablas más críticas del sistema.
+
+<Tabs>
+  <Tab title="orders">
+    ### `orders` — El Corazón de la Venta
+
+    **¿Qué es?** Cada registro es una comanda/pedido. Es la tabla **más crítica** porque la tocan las 4 apps y 3 de los 4 agentes. Es donde más incongruencias hemos detectado.
+
+    **¿Quién la toca?**
+    - **POS** 🔥: Principal creador y gestor de pedidos.
+    - **PDA** 🔥: Crea pedidos desde la sala.
+    - **Dashboard** 📖 + ✏️: Visualiza en Comandas, edita estados.
+    - **Carta** ✏️: Crea pedidos vía `generarComanda`.
+    - **Agente Camarero** 🔥: Crea pedidos por voz.
+    - **Agente TPV** ✏️: Gestiona pedidos por prompt.
+
+    | Campo | Tipo | Qué hace | Vista |
+    | :--- | :--- | :--- | :--- |
+    | `establishment_id` | `Id<"establishments">` | Multi-tenancy | Filtro global |
+    | `table_id` | `Id<"tables">` | Mesa vinculada | Comandas, POS, KDS |
+    | `staff_id` | `Id<"staff">` | Camarero que sirve | Comandas (columna), Reportes |
+    | `customer_id` | `Id<"customers">` | Cliente asociado (opcional) | Comandas, CRM |
+    | `order_number` | `number` | Número secuencial del día | POS (ticket), Comandas |
+    | `status` | `string` | `open` \| `paid` \| `cancelled` \| `refunded` | Comandas (badge), POS, KDS |
+    | `total_amount` | `number` | Valor total en **céntimos** | Comandas, Reportes, Dashboard |
+    | `subtotal` | `number` | Total antes de impuestos (céntimos) | POS (desglose), Reportes |
+    | `tax_amount` | `number` | Total de impuestos (céntimos) | POS (desglose), Reportes |
+    | `discount_amount` | `number` | Total de descuentos (céntimos) | POS, Reportes |
+    | `discount_reason` | `string` | Motivo del descuento | Reportes (auditoría) |
+    | `notes` | `string` | Notas especiales del pedido | POS, KDS |
+    | `source` | `string` | `pos` \| `pda` \| `carta` \| `voice` \| `agent` | Reportes |
+    | `guests` | `number` | Número de comensales | Reportes (ticket medio) |
+    | `is_commission_order` | `boolean` | Pedido vía Carta = genera comisión | Subscriptions (cobro) |
+    | `created_at` | `number` | Apertura del pedido (ms) | Comandas (orden) |
+    | `updated_at` | `number` | Última modificación (ms) | Sistema |
+    | `closed_at` | `number` | Cierre/pago del pedido (ms) | Reportes (cierre de caja) |
+
+    > [!CAUTION]
+    > **CORRECCIONES OBLIGATORIAS ANTES DE IMPLEMENTAR:**
+    > 1. `total_amount` → SIEMPRE `number` en céntimos. NUNCA `string` como `"€70.50"`.
+    > 2. `status` → SIEMPRE en inglés: `open`, `paid`, `cancelled`. NUNCA `"En Progreso"`.
+    > 3. `table_id` → SIEMPRE `Id<"tables">`. NUNCA `"Mesa 1"` (string descriptivo).
+    > 4. Los `items` se extraen a la tabla separada `order_items` (normalización).
+  </Tab>
+
+  <Tab title="order_items">
+    ### `order_items` — Líneas del Pedido
+
+    **¿Qué es?** Cada fila es un producto dentro de un pedido. Tabla hija de `orders` que permite normalizar los datos y evitar arrays anidados profundamente en Convex.
+
+    | Campo | Tipo | Qué hace | Vista |
+    | :--- | :--- | :--- | :--- |
+    | `order_id` | `Id<"orders">` | Pedido padre | Comandas (detalle), POS, KDS |
+    | `product_id` | `Id<"products">` | Producto pedido | KDS (nombre del plato) |
+    | `product_name` | `string` | Nombre desnormalizado (rendimiento) | KDS, Ticket impreso |
+    | `quantity` | `number` | Cantidad | POS, KDS, Carta |
+    | `unit_price` | `number` | Precio unitario (céntimos) | POS (cálculo), Reportes |
+    | `total_price` | `number` | Precio total = qty × price (céntimos) | POS, Reportes |
+    | `variant` | `string` | Variante seleccionada ("Grande", "Sin gluten") | POS, KDS |
+    | `notes` | `string` | "Sin cebolla", "Muy hecho" | KDS (instrucciones cocina) |
+    | `course` | `string` | `first` \| `second` \| `dessert` \| `drink` | KDS (tiempos de salida) |
+    | `item_status` | `string` | `pending` \| `preparing` \| `ready` \| `served` | KDS (flujo de cocina) |
+    | `sent_to_kitchen_at` | `number` | Momento de envío a cocina (ms) | KDS (tiempos) |
+    | `ready_at` | `number` | Momento marcado como listo (ms) | KDS (tiempos) |
+  </Tab>
+
+  <Tab title="payments">
+    ### `payments` — Cobros y Métodos de Pago
+
+    **¿Qué es?** Registra cada cobro realizado sobre un pedido. Un pedido puede tener múltiples pagos (ej: pago dividido entre tarjeta y efectivo).
+
+    **¿Quién la toca?**
+    - **POS** 🔥: Principal — registra cada cobro.
+    - **Dashboard** 📖: Reportes financieros.
+    - **Agente Gerente** 📖: Lee para KPIs de ventas.
+
+    | Campo | Tipo | Qué hace | Vista |
+    | :--- | :--- | :--- | :--- |
+    | `establishment_id` | `Id<"establishments">` | Multi-tenancy | Filtro global |
+    | `order_id` | `Id<"orders">` | Pedido cobrado | Comandas, POS, Reportes |
+    | `method` | `string` | `cash` \| `card` \| `bizum` \| `transfer` | POS (selector), Reportes |
+    | `amount` | `number` | Cantidad cobrada (céntimos) | POS, Reportes |
+    | `tip` | `number` | Propina incluida (céntimos) | POS, Reportes |
+    | `reference` | `string` | Referencia del TPV o nº transacción | Reportes (conciliación) |
+    | `staff_id` | `Id<"staff">` | Empleado que cobró | Reportes |
+    | `timestamp` | `number` | Momento del cobro (ms) | Reportes (cierre caja) |
+
+    > [!IMPORTANT]
+    > **Sin esta tabla, no se puede hacer un cierre de caja.** El POS simula pagos actualmente con un `return true`.
+  </Tab>
+
+  <Tab title="tables">
+    ### `tables` — Mesas del Local
+
+    **¿Qué es?** Cada mesa física del restaurante. Combina datos de geometría visual (para el plano de mesas del Dashboard) con datos operativos (para el POS).
+
+    **¿Quién la toca?**
+    - **Dashboard** ✏️: CRUD en Plano de Mesas (drag & drop).
+    - **POS** 🔥: Ciclo completo de estados (libre → ocupada → sucia → libre).
+    - **PDA** ✏️: Cambia estado al tomar pedidos.
+
+    | Campo | Tipo | Qué hace | Vista |
+    | :--- | :--- | :--- | :--- |
+    | `environment_id` | `Id<"environments">` | Zona padre (Terraza, Salón) | Plano Mesas, POS |
+    | `number` | `number` | Nº de mesa | POS, Comandas |
+    | `label` | `string` | Etiqueta personalizada ("VIP 1") | Plano Mesas |
+    | `capacity` | `number` | Nº de comensales | Reservas (filtro) |
+    | `status` | `string` | `free` \| `occupied` \| `reserved` \| `dirty` | POS (colores), Plano Mesas |
+    | `current_order_id` | `Id<"orders">` | Pedido activo en esta mesa | POS (vínculo directo) |
+    | `x` | `number` | Coordenada horizontal | Plano Mesas (drag) |
+    | `y` | `number` | Coordenada vertical | Plano Mesas (drag) |
+    | `width` | `number` | Ancho visual | Plano Mesas |
+    | `height` | `number` | Alto visual | Plano Mesas |
+    | `rotation` | `number` | Grados de rotación | Plano Mesas |
+    | `shape` | `string` | `rectangle` \| `circle` \| `square` | Plano Mesas |
+
+    > [!WARNING]
+    > **Correcciones**: `capacity` debe ser `number` puro (no `"4P"`). Estados deben ser EN (no `"Libre"`). Añadir `current_order_id` del POS.
+  </Tab>
+
+  <Tab title="environments">
+    ### `environments` — Zonas del Local
+
+    **¿Qué es?** Define las zonas del restaurante: "Terraza", "Salón Principal", "Barra", "VIP". Cada zona contiene múltiples mesas.
+
+    **Solo lo toca el Dashboard** ✏️: CRUD en Ambientes.
+
+    | Campo | Tipo | Qué hace | Vista |
+    | :--- | :--- | :--- | :--- |
+    | `establishment_id` | `Id<"establishments">` | Multi-tenancy | Filtro global |
+    | `name` | `string` | "Terraza", "Salón" | Ambientes, Plano Mesas |
+    | `description` | `string` | Descripción de la zona | Ambientes |
+    | `capacity` | `number` | Aforo máximo de la zona | Ambientes (indicador) |
+    | `status` | `string` | `active` \| `inactive` \| `maintenance` | Ambientes (badge) |
+    | `order` | `number` | Posición en la lista | Ambientes |
+    | `created_at` | `number` | Fecha de creación (ms) | Sistema |
+  </Tab>
+
+  <Tab title="reservations">
+    ### `reservations` — Libro de Reservas
+
+    **¿Quién la toca?**
+    - **Dashboard** ✏️: CRUD en Reservas (calendario).
+    - **Agente Cliente** 🔥: Crea reservas desde WhatsApp.
+
+    | Campo | Tipo | Qué hace | Vista |
+    | :--- | :--- | :--- | :--- |
+    | `establishment_id` | `Id<"establishments">` | Multi-tenancy | Filtro global |
+    | `customer_id` | `Id<"customers">` | Cliente que reserva | Reservas, CRM |
+    | `table_id` | `Id<"tables">` | Mesa asignada | Reservas, Plano Mesas |
+    | `date` | `string` | Fecha ISO `"2024-03-15"` | Reservas (calendario) |
+    | `time` | `string` | Hora `"21:00"` | Reservas |
+    | `guests` | `number` | Nº de comensales | Reservas (capacidad) |
+    | `status` | `string` | `pending` \| `confirmed` \| `cancelled` \| `completed` \| `no_show` | Reservas (badge) |
+    | `notified` | `boolean` | Se envió WhatsApp de confirmación | Reservas |
+    | `source` | `string` | `dashboard` \| `whatsapp` \| `web` | Reportes |
+    | `notes` | `string` | Notas especiales ("cumpleaños", "celiaco") | Reservas |
+    | `reminder_sent` | `boolean` | Se envió recordatorio automático | Sistema |
+    | `created_at` | `number` | Fecha de creación (ms) | Sistema |
+  </Tab>
+
+  <Tab title="customers">
+    ### `customers` — CRM de Clientes
+
+    **¿Qué es?** Base de datos de clientes del restaurante. Permite fidelización, historial de visitas y personalización de recomendaciones por el Agente Cliente.
+
+    **¿Quién la toca?**
+    - **Dashboard** ✏️: CRUD en Clientes (CRM).
+    - **POS** 📖: Lee para asociar cliente a pedido.
+    - **Agente Cliente** ✏️: Registra nuevas interacciones.
+
+    | Campo | Tipo | Qué hace | Vista |
+    | :--- | :--- | :--- | :--- |
+    | `establishment_id` | `Id<"establishments">` | Multi-tenancy | Filtro global |
+    | `name` | `string` | Nombre del cliente | CRM, Reservas |
+    | `phone` | `string` | Teléfono (clave para WhatsApp) | Reservas, Agente Cliente |
+    | `email` | `string` | Email de contacto | CRM |
+    | `points` | `number` | Puntos de fidelización | CRM (badge) |
+    | `tags` | `array` | `["VIP", "Recurrente", "Celiaco"]` | CRM (etiquetas) |
+    | `last_visit` | `number` | Última visita (ms) | CRM (ordenación) |
+    | `total_visits` | `number` | Contador de visitas | CRM |
+    | `total_spent` | `number` | Total gastado históricamente (céntimos) | CRM |
+    | `average_ticket` | `number` | Ticket medio (céntimos) | CRM |
+    | `preferred_table` | `Id<"tables">` | Mesa preferida | Reservas |
+    | `allergens` | `array` | Alergias del cliente | Agente Cliente, Reservas |
+    | `notes` | `string` | Preferencias, observaciones | CRM, Agente Cliente |
+    | `source` | `string` | `manual` \| `whatsapp` \| `reservation` | CRM |
+    | `created_at` | `number` | Fecha de registro (ms) | Sistema |
+
+    > [!IMPORTANT]
+    > El Dashboard aún **no tiene** un archivo `customers.ts` en `src/types/`. La vista `/clientes` está planificada pero sin tipos. Es un agujero de datos documentado en [Alineación](/ingenieria/alineacion).
+  </Tab>
+</Tabs>
+
+---
+
+## Dominio 4 — Capital Humano (RRHH)
+
+Todo lo relacionado con el equipo: fichajes, ausencias, incidencias y dispositivos de control.
+
+<Tabs>
+  <Tab title="time_logs">
+    ### `time_logs` — Registro de Fichajes
+
+    **¿Qué es?** Cada entrada/salida/pausa de un empleado. Alimenta la Tab "Personal" del Dashboard y los informes de horas.
+
+    | Campo | Tipo | Qué hace | Vista |
+    | :--- | :--- | :--- | :--- |
+    | `staff_id` | `Id<"staff">` | Empleado que ficha | Personal > Horarios |
+    | `establishment_id` | `Id<"establishments">` | Multi-tenancy | Filtro global |
+    | `action` | `string` | `clock_in` \| `clock_out` \| `break_start` \| `break_end` | Personal > Horarios (badge) |
+    | `timestamp` | `number` | Momento exacto (ms) | Personal > Horarios (orden) |
+    | `method` | `string` | `app` \| `whatsapp` \| `qr` \| `web` \| `manual` | Personal > Métodos |
+    | `device_id` | `Id<"clock_devices">` | Dispositivo usado (si aplica) | Personal > Métodos |
+    | `location` | `string` | Coordenadas GPS (si aplica) | Sistema (verificación) |
+    | `modified_by` | `Id<"staff">` | Si fue un ajuste manual, quién lo hizo | Personal > Horarios |
+    | `notes` | `string` | Notas del ajuste manual | Personal > Horarios |
+  </Tab>
+
+  <Tab title="absence_requests">
+    ### `absence_requests` — Solicitudes de Ausencia
+
+    **¿Qué es?** Vacaciones, bajas médicas, permisos personales. El empleado solicita; el manager aprueba o rechaza.
+
+    | Campo | Tipo | Qué hace | Vista |
+    | :--- | :--- | :--- | :--- |
+    | `staff_id` | `Id<"staff">` | Empleado solicitante | Personal > Ausencias |
+    | `establishment_id` | `Id<"establishments">` | Multi-tenancy | Filtro global |
+    | `type` | `string` | `vacation` \| `sick_leave` \| `personal` \| `medical_appt` | Personal > Ausencias |
+    | `start_date` | `string` | Fecha inicio (ISO) | Personal > Ausencias |
+    | `end_date` | `string` | Fecha fin (ISO) | Personal > Ausencias |
+    | `total_days` | `number` | Días totales de ausencia | Personal > Ausencias |
+    | `reason` | `string` | Motivo / notas | Personal > Ausencias |
+    | `status` | `string` | `pending` \| `approved` \| `rejected` | Personal > Ausencias (badge) |
+    | `reviewed_by` | `Id<"staff">` | Manager que aprobó/rechazó | Personal > Ausencias |
+    | `reviewed_at` | `number` | Fecha de revisión (ms) | Personal > Ausencias |
+    | `created_at` | `number` | Fecha de solicitud (ms) | Sistema |
+  </Tab>
+
+  <Tab title="clock_incidents">
+    ### `clock_incidents` — Anomalías de Fichaje
+
+    **¿Qué es?** Incidencias detectadas automáticamente o reportadas: fichajes perdidos, duplicados, retrasos.
+
+    | Campo | Tipo | Qué hace | Vista |
+    | :--- | :--- | :--- | :--- |
+    | `staff_id` | `Id<"staff">` | Empleado afectado | Personal > Incidencias |
+    | `establishment_id` | `Id<"establishments">` | Multi-tenancy | Filtro global |
+    | `type` | `string` | `no_clock_out` \| `duplicate` \| `late_clock_in` \| `suspicious` | Personal > Incidencias |
+    | `description` | `string` | Descripción auto del problema | Personal > Incidencias |
+    | `status` | `string` | `open` \| `justified` \| `rejected` | Personal > Incidencias (badge) |
+    | `detected_at` | `number` | Momento de detección (ms) | Personal > Incidencias (orden) |
+    | `resolved_by` | `Id<"staff">` | Manager que resolvió | Personal > Incidencias |
+    | `resolved_at` | `number` | Fecha de resolución (ms) | Personal > Incidencias |
+    | `notes` | `string` | Justificación del manager | Personal > Incidencias |
+  </Tab>
+
+  <Tab title="clock_devices">
+    ### `clock_devices` — Dispositivos de Fichaje
+
+    **¿Qué es?** Tablets o terminales registrados para fichar. Se gestionan desde Personal > Métodos (Tab 5).
+
+    | Campo | Tipo | Qué hace | Vista |
+    | :--- | :--- | :--- | :--- |
+    | `establishment_id` | `Id<"establishments">` | Multi-tenancy | Filtro global |
+    | `name` | `string` | "Tablet Entrada" | Personal > Métodos |
+    | `type` | `string` | `tablet` \| `terminal` \| `smartphone` | Personal > Métodos |
+    | `location` | `string` | "Entrada principal" | Personal > Métodos |
+    | `status` | `string` | `online` \| `offline` \| `maintenance` | Personal > Métodos (badge) |
+    | `token` | `string` | Token único del dispositivo | Sistema |
+    | `last_seen` | `number` | Última conexión (ms) | Personal > Métodos |
+    | `created_at` | `number` | Fecha de registro (ms) | Sistema |
+  </Tab>
+
+  <Tab title="establishment_settings">
+    ### `establishment_settings` — Configuración de Fichaje
+
+    **¿Qué es?** Controla qué métodos de fichaje están habilitados para el local.
+
+    | Campo | Tipo | Qué hace | Vista |
+    | :--- | :--- | :--- | :--- |
+    | `establishment_id` | `Id<"establishments">` | Multi-tenancy | Filtro global |
+    | `clock_methods` | `array` | `["app", "whatsapp", "qr", "web"]` | Personal > Métodos (toggles) |
+    | `auto_incident_detection` | `boolean` | Generar incidencias automáticamente | Sistema |
+    | `max_late_minutes` | `number` | Minutos máximos antes de marcar retraso | Sistema |
+    | `break_duration_minutes` | `number` | Duración estándar de pausa | Sistema |
+    | `overtime_alert` | `boolean` | Alertar si se superan las horas contratadas | Agente Gerente |
+  </Tab>
+</Tabs>
+
+---
+
+## Dominio 5 — Auditoría, Dispositivos y Stock
+
+Tablas de soporte que garantizan trazabilidad, control de hardware y movimientos de inventario.
+
+<Tabs>
+  <Tab title="event_log">
+    ### `event_log` — Trazabilidad Total
+
+    **¿Qué es?** Log inmutable de eventos críticos: cambios de precio, anulaciones, borrados, accesos. Es el "Black Box" del sistema que garantiza la tranquilidad del dueño.
+
+    **¿Quién la toca?**
+    - **Dashboard** 📖: Notificaciones (filtro y visualización).
+    - **Agente Gerente** 📖: Lee TODO para enviar alertas.
+    - **Agente TPV** 📖: Consulta por prompt.
+
+    | Campo | Tipo | Qué hace | Vista |
+    | :--- | :--- | :--- | :--- |
+    | `establishment_id` | `Id<"establishments">` | Multi-tenancy | Filtro global |
+    | `type` | `string` | `security` \| `inventory` \| `operational` \| `financial` | Notificaciones (filtro) |
+    | `level` | `string` | `info` \| `warning` \| `critical` | Notificaciones (color) |
+    | `actor` | `string` | `staff_id` o `system` | Notificaciones (quién) |
+    | `action` | `string` | Descripción del evento | Notificaciones (detalle) |
+    | `entity_type` | `string` | Tabla afectada (`orders`, `products`, etc.) | Notificaciones |
+    | `entity_id` | `string` | ID del registro afectado | Notificaciones |
+    | `before` | `object` | Estado anterior del registro | Notificaciones (diff) |
+    | `after` | `object` | Estado posterior del registro | Notificaciones (diff) |
+    | `timestamp` | `number` | Momento del evento (ms) | Notificaciones (orden) |
+    | `ip_address` | `string` | IP del dispositivo | Seguridad |
+  </Tab>
+
+  <Tab title="devices">
+    ### `devices` — Hardware del Local
+
+    **¿Qué es?** Registro de terminales POS, impresoras térmicas y estaciones KDS conectadas al sistema.
+
+    **Solo lo toca el Dashboard** ✏️: Configuración > Dispositivos.
+
+    | Campo | Tipo | Qué hace | Vista |
+    | :--- | :--- | :--- | :--- |
+    | `establishment_id` | `Id<"establishments">` | Multi-tenancy | Filtro global |
+    | `name` | `string` | "POS Principal", "Impresora Cocina" | Configuración |
+    | `type` | `string` | `pos_terminal` \| `printer` \| `kds_station` | Configuración |
+    | `connection` | `string` | `usb` \| `wifi` \| `bluetooth` | Configuración |
+    | `ip_address` | `string` | Dirección IP en la red local | Configuración |
+    | `role` | `string` | `main` \| `kitchen` \| `bar` | Configuración |
+    | `status` | `string` | `online` \| `offline` | Configuración (badge) |
+    | `last_seen` | `number` | Última conexión (ms) | Configuración |
+    | `created_at` | `number` | Fecha de registro (ms) | Sistema |
+  </Tab>
+
+  <Tab title="stock_movements">
+    ### `stock_movements` — Historial de Inventario
+
+    **¿Qué es?** Cada compra, merma o ajuste manual de un ingrediente queda registrado aquí. Alimenta las 3 tabs del historial de inventario.
+
+    **Solo lo toca el Dashboard** ✏️: Inventario > Historial (3 tabs: Todo, Mermas, Compras).
+
+    | Campo | Tipo | Qué hace | Vista |
+    | :--- | :--- | :--- | :--- |
+    | `ingredient_id` | `Id<"ingredients">` | Ingrediente afectado | Inventario > Historial |
+    | `establishment_id` | `Id<"establishments">` | Multi-tenancy | Filtro global |
+    | `type` | `string` | `purchase` \| `waste` \| `adjustment` \| `auto_deduction` | Historial (tabs) |
+    | `quantity` | `number` | Cantidad del movimiento | Historial |
+    | `unit_cost` | `number` | Coste unitario de compra (céntimos) | Historial, Reportes |
+    | `total_cost` | `number` | Coste total = qty × unit_cost (céntimos) | Reportes |
+    | `supplier` | `string` | Proveedor (en compras) | Historial |
+    | `notes` | `string` | Motivo o referencia | Historial |
+    | `staff_id` | `Id<"staff">` | Quién registró | Historial |
+    | `timestamp` | `number` | Momento del movimiento (ms) | Historial (orden) |
+  </Tab>
+</Tabs>
+
+---
+
+## Protocolo de Revisión Periódica
+
+| Revisión | Frecuencia | Qué se valida | Documentos |
 | :--- | :--- | :--- | :--- |
-| `establishment_id` | `Id<"establishments">` | **Yes** | Segregación de tenant. |
-| `rol` | `string` | **Yes** | `admin` \| `manager` \| `waiter` \| `cook`. |
-| `pin` | `string` | No | PIN de 4 dígitos (SIEMPRE cifrado en reposo). |
-| `salary` | `number` | No | Sueldo base en céntimos. |
-
-<Tip title="Seguridad">
-  El PIN nunca debe exponerse en logs ni respuestas de API en texto plano.
-</Tip>
-
----
-
-## 🥘 3. Gestión de Suministros
-
-### Tabla: `ingredients`
-*Almacén técnico de insumos.*
-
-| Campo | Tipo | Index | Descripción |
-| :--- | :--- | :--- | :--- |
-| `name` | `string` | No | Nombre del insumo (ej: "Lomo de Ternera"). |
-| `stock` | `number` | No | Cantidad actual (soporta flotantes para Kg/L). |
-| `alert_min` | `number` | No | Umbral crítico para pedido automático. |
-
----
-
-## 💰 4. Operativa de Ventas
-
-### Tabla: `orders`
-*Gestión de comandas y facturación activa.*
-
-| Campo | Tipo | Index | Descripción |
-| :--- | :--- | :--- | :--- |
-| `table_id` | `Id<"tables">` | **Yes** | Mesa vinculada. |
-| `status` | `string` | **Yes** | `open` \| `paid` \| `cancelled` \| `refunded`. |
-| `total_amount` | `number` | No | Valor acumulado en céntimos. |
-| `created_at` | `number` | **Yes** | Apertura de la comanda (ms). |
-
----
-
-## 📜 5. Auditoría y Logs de Sistema
-
-### Tabla: `event_log`
-*Trazabilidad total de eventos de seguridad y negocio.*
-
-| Campo | Tipo | Index | Descripción |
-| :--- | :--- | :--- | :--- |
-| `type` | `string` | **Yes** | `security` \| `inventory` \| `operational`. |
-| `level` | `string` | No | `info` \| `warning` \| `critical`. |
-| `actor` | `string` | No | Usuario o sistema que disparó el evento. |
-| `payload` | `object` | No | Datos adicionales en formato JSON. |
-
----
+| **R1: Vista ↔ Campo** | Cada nueva vista o modal | Cada campo tiene un sitio en la UI | `/operativa`, `/gestion` |
+| **R2: Rol ↔ Mutación** | Cada nueva función | El `role` está validado server-side | [Roles](/ingenieria/roles) |
+| **R3: Nomenclatura EN** | Cada merge a `main` | Cero campos en español | [Nomenclatura](/general/nomenclatura) |
+| **R4: Integridad FK** | Quincenal | `Id<>` apuntan a tablas reales | Este documento |
+| **R5: Solapamiento 360°** | Mensual | Tabla de [Auditoría](/ingenieria/auditoria-bbdd) actualizada | Auditoría BBDD |
 
 <Note>
-  **Nota de Arquitectura**: Para optimizar el rendimiento de las consultas en Convex, evite el uso masivo de objetos anidados profundamente. Favorezca la normalización mediante tablas hijas para estructuras de datos dinámicas.
+  **Nota Final de Arquitectura**: Para optimizar el rendimiento en Convex, evite objetos anidados profundamente. Favorezca la normalización mediante tablas hijas (`order_items` en vez de `orders.items[]`) para estructuras de datos dinámicas.
 </Note>

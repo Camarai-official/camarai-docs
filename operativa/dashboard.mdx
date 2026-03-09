@@ -3,73 +3,80 @@ title: "Dashboard — El Punto de Partida"
 description: "Todo lo que necesitas saber sobre el panel de control principal de Camarai."
 ---
 
-![Vista Dashboard](/images/dashboard-view.png)
+<Tabs>
+  <Tab title="Vista General">
+    ![Vista Dashboard](/images/dashboard-view.png)
 
-## ¿Qué es esto?
+    ## ¿Qué es esto?
 
-El Dashboard es la primera pantalla que ve cualquier admin al entrar. Está diseñado para que, **de un solo vistazo**, puedas saber si el día va bien o mal sin tener que entrar en ninguna sección. Piénsalo como el cuadro de mandos de un avión: no necesitas saber cómo funciona cada motor, solo necesitas ver las métricas clave en verde.
+    El Dashboard es la primera pantalla que ve cualquier admin al entrar. Está diseñado para que, **de un solo vistazo**, puedas saber si el día va bien o mal sin tener que entrar en ninguna sección. Piénsalo como el cuadro de mandos de un avión: no necesitas saber cómo funciona cada motor, solo necesitas ver las métricas clave en verde.
 
-La pantalla se divide en **widgets configurables** — cada uno muestra un aspecto diferente del negocio. Si un widget no te interesa, puedes ocultarlo.
+    La pantalla se divide en **widgets configurables** — cada uno muestra un aspecto diferente del negocio. Si un widget no te interesa, puedes ocultarlo.
 
----
+    | Funcionalidad | Descripción | Beneficio Operativo |
+    | :--- | :--- | :--- |
+    | **Resumen Diario** | Visualización de ventas y ticket medio en tiempo real. | Sabes si estás cumpliendo objetivos de facturación. |
+    | **Ranking de Platos** | Lista de lo más vendido. | Ayuda a decidir qué platos promocionar o retirar. |
+    | **Alertas de Stock** | Aviso de ingredientes críticos. | Evita roturas de stock en mitad del servicio. |
+    | **Ocupación** | Estado de la sala y aforo. | Permite gestionar mejor la rotación de mesas. |
+    | **Seguridad y Roles** | Control de acceso por PIN y logs. | [Tranquilidad del dueño](/ingenieria/roles) mediante trazabilidad total. |
+  </Tab>
 
-## ¿De qué tablas de la base de datos se alimenta?
+  <Tab title="Datos y Tablas">
+    ## ¿De qué tablas se alimenta?
 
-Para renderizar correctamente todos los widgets, el Dashboard consulta varias tablas de Convex:
+    Para renderizar correctamente todos los widgets, el Dashboard consulta varias tablas de Convex:
 
-| Tabla de Convex | ¿Para qué se usa? |
-|---|---|
-| `orders` | Calcular ingresos totales, ticket medio, y alimentar el widget de Comandas Recientes |
-| `order_items` | Calcular el ranking de productos más vendidos (Top Productos) |
-| `ingredients` | Detectar los ingredientes por debajo del stock mínimo (Alertas de Stock) |
-| `tables` + `environments` | Calcular la ocupación de mesas y distribución de aforo |
-| `staff` | Generar el Ranking de Equipo con ventas por empleado |
-| `establishments` | Nombre del restaurante, horario y datos de configuración del encabezado |
+    | Tabla de Convex | ¿Para qué se usa? | Impacto |
+    |---|---|---|
+    | `orders` | Calcular ingresos totales, ticket medio, y alimentar el widget de Comandas Recientes | **Financiero** |
+    | `order_items` | Calcular el ranking de productos más vendidos (Top Productos) | **Operativo** |
+    | `ingredients` | Detectar los ingredientes por debajo del stock mínimo (Alertas de Stock) | **Logístico** |
+    | `tables` + `environments` | Calcular la ocupación de mesas y distribución de aforo | **Operativo** |
+    | `staff` | Generar el Ranking de Equipo con ventas por empleado | **RRHH** |
+    | `establishments` | Nombre del restaurante, horario y datos de configuración | **Identidad** |
 
-> **Nota para el backend:** Todas estas consultas deberían estar en un endpoint de tipo `getDashboardSummary` que reciba `{ from: Date, to: Date }` como parámetro, ya que el DatePicker del dashboard filtra todo por rango de fechas.
+    <Note icon="code">
+      **Nota para el backend:** Todas estas consultas deben centralizarse en el endpoint `getDashboardSummary` que filtra por rango de fechas (`from/to`).
+    </Note>
+  </Tab>
 
----
+  <Tab title="Configuración">
+    ## 🪟 Modal: Configurar Dashboard
 
-## 🪟 Modal: Configurar Dashboard
+    Para personalizar tu panel, pulsa el botón ⚙️ en la esquina superior derecha. Se abre el modal de configuración donde activas o desactivas cada widget con un simple toggle.
 
-Para personalizar tu panel, pulsa el botón ⚙️ en la esquina superior derecha. Se abre el modal de configuración donde activas o desactivas cada widget con un simple toggle.
+    ### Sección 1 — Análisis de Ventas
+    ![Modal Configurar Dashboard (parte superior)](/images/modal-dashboard-config-top.png)
 
-### Sección 1 — Análisis de Ventas
-![Modal Configurar Dashboard (parte superior)](/images/modal-dashboard-config-top.png)
+    | Widget | ¿Qué muestra? | Tabla Relacionada |
+    |---|---|---|
+    | **Métricas Principales** | Ingresos totales, ticket medio, variación vs. semana anterior | `orders` |
+    | **Ventas por Hora** | Curva de demanda hora a hora | `orders` |
+    | **Gráfico de Ingresos** | Comparativa de facturación día a día | `orders` |
 
-| Widget | ¿Qué muestra? | Tabla |
-|---|---|---|
-| **Métricas Principales** | Ingresos totales, ticket medio, variación vs. semana anterior | `orders` |
-| **Ventas por Hora** | Curva de demanda hora a hora (¿cuándo viene más gente?) | `orders` |
-| **Gráfico de Ingresos** | Comparativa de facturación día a día del período | `orders` |
+    ### Sección 2 y 3 — Operaciones y Rendimiento
+    ![Modal Configurar Dashboard (parte inferior)](/images/modal-dashboard-config-bottom.png)
 
-### Sección 2 y 3 — Operaciones y Rendimiento
-![Modal Configurar Dashboard (parte inferior)](/images/modal-dashboard-config-bottom.png)
+    | Widget | ¿Qué muestra? | Tabla Relacionada |
+    |---|---|---|
+    | **Comandas Recientes** | Los últimos 5-10 pedidos activos | `orders` |
+    | **Alertas de Stock** | Lista de ingredientes críticos | `ingredients` |
+    | **Leaderboard Staff** | Eficiencia de venta por empleado | `staff` |
+    | **Ocupación de Sala** | % de mesas activas vs. totales | `tables` |
+  </Tab>
 
-| Widget | ¿Qué muestra? | Tabla |
-|---|---|---|
-| **Comandas Recientes** | Los últimos 5-10 pedidos activos en tiempo real | `orders` |
-| **Alertas de Stock** | Lista de ingredientes con stock ≤ al mínimo configurado | `ingredients` |
-| Widget | Métrica / Función | Origen de Datos (BBDD) |
-| :--- | :--- | :--- |
-| **Ventas Totales** | Ingresos brutos filtrados por rango. | orders |
-| **Ticket Medio** | Promedio de gasto por comanda cerrada. | orders |
-| **Ranking Top Platos** | Volumen de ventas por producto. | order_items, products |
-| **Alertas de Stock** | Alerta temprana de insumos bajo mínimos. | ingredients |
-| **Ocupación de Sala** | % de mesas activas vs. totales. | tables |
-| **Leaderboard Staff** | Eficiencia de venta por empleado. | staff, orders |
+  <Tab title="Roadmap">
+    ## 🚀 Plan de Mejoras Técnicas
 
----
+    ### 🎨 Frontend
+    - **Persistencia Local**: Implementar `localStorage` para recordar los toggles de widgets.
+    - **Nuevos Widgets**: Vincular el widget **"Conversión Upsell"** al modal de configuración.
+    - **Atajos de Fecha**: Botones rápidos "Hoy", "Semana", "Mes" en el DatePicker.
 
-## 🚀 Plan de Mejoras (Roadmap Técnico)
-
-### 🎨 Frontend (UI/UX & Sincronización)
-- **Persistencia Local**: Los toggles de widgets se reinician al recargar. Implementar `localStorage` como fallback antes de la persistencia en BBDD.
-- **Widgets Faltantes**: El widget **"Tasa Conversión Upsell"** está hardcodeado; falta vincularlo al modal de configuración.
-- **Atajos de Fecha**: Añadir botones rápidos "Hoy", "Semana", "Mes" para evitar el uso manual del DatePicker en consultas frecuentes.
-- **UX de Configuración**: El campo `badgeTable` no tiene representación visual ni toggle en el modal actual.
-
-### ⚙️ Backend (BBDD & Lógica Convex)
-- **Tabla Preferences**: Crear una colección `user_dashboard_preferences` para guardar el estado de los widgets por cada usuario/admin.
-- **Agregaciones en Tiempo Real**: Optimizar `getDashboardSummary` para que use índices compuestos por `establishment_id` y `created_at` para evitar latencia en rangos largos.
-- **Widget de Costes**: Implementar la tabla `expenses` y su lógica de agregación para alimentar el gráfico de rentabilidad.
+    ### ⚙️ Backend (Convex)
+    - **Colección Preferences**: Guardar `user_dashboard_preferences` por cada admin.
+    - **Optimización de Índices**: Índices compuestos por `establishment_id` y `created_at`.
+    - **Analítica Profunda**: Implementar el widget de rentabilidad basado en la tabla `expenses`.
+  </Tab>
+</Tabs>

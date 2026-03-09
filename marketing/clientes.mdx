@@ -3,47 +3,45 @@ title: "Clientes (CRM)"
 description: "Gestión de la base de datos de clientes y fidelización."
 ---
 
-# 👥 Clientes (CRM)
+<Tabs>
+  <Tab title="Fidelización (CRM)">
+    ## Gestión de la Base de Clientes
+    La vista de Clientes es el núcleo del sistema de marketing de Camarai. Permite gestionar el historial de cada comensal y su vinculación con WhatsApp.
 
-La vista de Clientes es el núcleo del sistema de marketing y fidelización de Camarai. Permite gestionar el historial de cada comensal, sus preferencias y su vinculación con el canal de WhatsApp.
+    ![Placeholder: Vista Tabla de Clientes](/images/TODO-clientes-view-main.png)
 
-## 📋 Panel de Gestión de Clientes
+    ### Atributos del Cliente
+    - **LTV (Gasto Total)**: Valor acumulado de todas las comandas pagadas.
+    - **Última Visita**: Sincronizado automáticamente con el TPV.
+    - **Etiquetas**: Segmentación manual o automática (VIP, Recurrente).
+  </Tab>
 
-Muestra una tabla con todos los clientes que han interactuado con el establecimiento (vía Reservas o TPV).
+  <Tab title="Ficha de Cliente">
+    ## Detalle Individual
+    ![Placeholder: Vista Ficha Detallada Cliente](/images/TODO-clientes-modal-ficha.png)
 
-### Información del Cliente
-- **Nombre y Apellidos**: Identificación personal.
-- **Teléfono (WhatsApp)**: Canal principal de comunicación (Formato E.164).
-- **Última Visita**: Fecha de la última comanda o reserva completada.
-- **Gasto Total (LTV)**: Valor acumulativo del cliente para el negocio.
-- **Etiquetas**: "VIP", "Recurrente", "Nuevo", "Problemático".
+    - **Historial de Pedidos**: Acceso directo a todos los tickets pasados.
+    - **Notas de Preferencia**: Alérgenos, mesa favorita o gustos específicos.
+    - **Acción Rápida**: Botón directo para iniciar chat de WhatsApp.
+  </Tab>
 
-## 🔍 Funcionalidades de CRM
+  <Tab title="Especificación Técnica">
+    <Note icon="database" color="#FF0000">
+      **🚨 HAY QUE SOLUCIONAR**: Actualmente los clientes se crean en `reservas`, pero no siempre se sincronizan con las `orders` del POS si el nombre varía ligeramente.
+      **Acción**: Implementar unificación por `phone` (formato E.164).
+    </Note>
 
-### Historial de Consumo
-- Acceso a todas las comandas pasadas del cliente.
-- Preferencias de platos e intolerancias alimentarias registradas.
+    ### Esquema Convex: `customers`
+    - `name: string`
+    - `phone: string` (Identificador único)
+    - `total_spent: number`
+    - `tags: string[]`
+  </Tab>
 
-### Integración con Promociones
-- Segmentación de clientes para el envío de campañas de WhatsApp.
-- Filtros por frecuencia de visita o ticket medio.
-
----
-
-## Base de Datos
-
-Los clientes se gestionan en la tabla `customers`. Consulta el detalle de columnas y tipos en [BBDD](/ingenieria/bbdd).
-
----
-
-## 🛠️ Plan de Mejoras (Roadmap Técnico)
-
-### Frontend (UI-UX)
-- [ ] Implementar vista de ficha individual del cliente con timeline de actividad.
-- [ ] Añadir barra de búsqueda predictiva por nombre o teléfono.
-- [ ] Integrar botón de "Enviar WhatsApp" directo desde la ficha.
-
-### Backend (Convex)
-- [ ] Crear la tabla `customers` y migrar datos de `reservations` y `orders`.
-- [ ] Implementar trigger para actualizar `total_spent` al cerrar una comanda.
-- [ ] Crear índice por `phone` para búsquedas ultrarrápidas durante la toma de pedidos.
+  <Tab title="Roadmap">
+    ## 🚀 Futuras Mejoras
+    - **Sincronización por QR**: Identificación automática del cliente al escanear la mesa.
+    - **NPS Automático**: Envío de encuesta de satisfacción tras el pago vía WhatsApp.
+    - **Sugerencias IA**: El sistema sugiere qué clientes "dormidos" contactar para reactivarlos.
+  </Tab>
+</Tabs>

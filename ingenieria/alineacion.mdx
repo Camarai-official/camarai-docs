@@ -7,6 +7,18 @@ description: "Estado actual de los contratos de datos en los 4 productos. Types,
   Este documento audita los **contratos de datos** (types, mocks, schemas) de los **4 repos** del ecosistema y expone las incompatibilidades que hay que resolver antes de implementar Convex.
 </Note>
 
+---
+
+## Guía de Lectura
+
+Este documento audita la sincronización del ecosistema. Para navegarlo correctamente, ten en cuenta estos tres pilares:
+
+1.  **El Concepto "Cerebro vs Terminal"**: El **Dashboard** centraliza la lógica (Cerebro) y el **POS/Carta** ejecutan la operación (Terminales). Cualquier desajuste en los nombres o tipos de datos entre ellos genera fallos en el sistema.
+2.  **Alertas de Urgencia**: Los bloques rojos de **URGENCIA** señalan deudas técnicas críticas que deben resolverse antes de activar la base de datos real (Convex).
+3.  **Contexto Operativo**: Cada sección técnica incluye un breve resumen ejecutivo para clarificar el impacto de los datos en la operativa del local.
+
+---
+
 > [!IMPORTANT]
 > **Regla de Oro Nº1**: El **Dashboard** centraliza TODO el peso de gestión (CMS, empleados, roles, permisos, configuraciones, impresoras). El **POS** es una terminal operativa ligera con lo mínimo para trabajar. El Dashboard es el **Creador/Dueño** y el POS es el **Consumidor/Ejecutor**.
 
@@ -18,6 +30,11 @@ Para una navegación rápida:
 ---
 
 ## 1. Inventario Técnico por Producto
+
+> [!TIP]
+> **Contexto de la Sección**: Aquí listamos todas las "listas de datos" que ya existen en cada una de nuestras aplicaciones (Dashboard, TPV, Carta). Es nuestro inventario de qué información estamos manejando actualmente.
+>
+> **Nota de Fragmentación**: Actualmente, tanto el Dashboard como el POS y la Carta manejan sus propios índices y sistemas de referencia de forma independiente. Esta autonomía es la que genera gran parte de las desincronizaciones que Convex debe unificar.
 
 Organización de tipos, modelos y mocks actuales en cada repositorio.
 
@@ -62,6 +79,10 @@ Organización de tipos, modelos y mocks actuales en cada repositorio.
     | 5 | `/inventario` | ✅ Implementado | `inventory.ts` | `StockMovement`, `Merma`, `Purchase` |
     | 6 | `/reservas` | ✅ Implementado | `reservations.ts` | `Reservation` con fecha, hora, personas, estado |
     | 7 | `/` (dashboard) | ✅ Implementado | `dashboard.ts` | `DashboardWidget`, `KPI`, `MetricConfig` |
+
+    <Note icon="octagon-exclamation" color="#FF0000">
+      **🚨 HAY QUE SOLUCIONAR**: Es obligatorio crear los 7 archivos de tipos faltantes (`customers.ts`, `chat.ts`, etc.) para que el Dashboard deje de tener "puntos ciegos" en su contrato de datos. Sin estos archivos, no podemos mapear la base de datos Convex con seguridad.
+    </Note>
   </Tab>
 
   <Tab title="POS (Venta)">
@@ -123,10 +144,15 @@ Organización de tipos, modelos y mocks actuales en cada repositorio.
 
 ## 2. Análisis de Desalineación Crítica
 
+> [!TIP]
+> **Contexto de la Sección**: Esta es la sección más importante. Comparamos cómo se llama la misma cosa en diferentes apps. Por ejemplo: si en el Dashboard el estado es "Pagado" y en el TPV es "Paid", el sistema no se entiende.
+
+<Note icon="triangle-exclamation" color="#FF0000">
+  **🚨 URGENCIA CRÍTICA**: Hemos detectado que el Dashboard habla en Español (`nombre_producto`) y el TPV en Inglés (`name`). Esto es como intentar conectar dos piezas de Lego de diferentes tamaños: **NO VAN A ENCAJAR** en la base de datos única (Convex) hasta que hablemos el mismo idioma.
+</Note>
+
 Comparativa directa de campos entre Dashboard, POS y Carta. Las discrepancias marcadas con ⚠️ deben resolverse en el schema unificado.
 
-### 2.1 Order (Pedido)
-Esta tabla es el corazón de la desalineación. Compara cómo se define un "Pedido" en los tres sistemas, revelando que campos tan básicos como el `id` o el `total` usan formatos totalmente distintos que deben unificarse.
 | Campo | Dashboard (`orders.ts`) | POS (mock / doc Convex) | Carta (`types/index.ts`) |
 |:------|:------------------------|:------------------------|:-------------------------|
 | id | `id?: string` | `ref: '#ORD-001'` (mock) / auto `_id` (Convex) | No tiene (genera vía API) |
@@ -136,6 +162,15 @@ Esta tabla es el corazón de la desalineación. Compara cómo se define un "Pedi
 | items | `OrderDetailItem[]` (inline) | `items[]{productId, qty, price, course, itemStatus}` (Convex ✅) | `Pedido{ [key]: PedidoItem }` ⚠️ formato diferente |
 | pago | No existe ❌ | `payments[]{method, amount, timestamp}` (Convex ✅) | No aplica (no cobra) |
 | timestamps | `time: string`, `date: string` | `createdAt: number`, `updatedAt: number` (Convex ✅) | No tiene |
+
+<Note icon="triangle-exclamation" color="#FF0000">
+  **HAY QUE SOLUCIONAR**: El objeto `Order` (Pedido) es el más crítico. Según [bbdd.mdx > orders](/ingenieria/bbdd):
+  1.  Cambiar `total` → `total_amount: number` en céntimos (quitar el símbolo € de la base de datos).
+  2.  Unificar estados a Inglés: `open` | `paid` | `cancelled` | `refunded`.
+  3.  Estandarizar IDs a `Id<"tables">` de Convex (evitar mezclar `#ORD-001` con IDs numéricos).
+  4.  Extraer items a tabla hija `order_items` (normalización).
+  5.  Añadir `source: string` (`pos` | `pda` | `carta` | `voice` | `agent`) para trazabilidad.
+</Note>
 
 ### 2.2 Table (Mesa)
 Analizamos aquí el objeto Mesa. El Dashboard lo ve como una figura geométrica con coordenadas, mientras que el POS lo ve como una entidad operativa con estados de ocupación. La alineación busca fusionar ambas visiones.
@@ -148,8 +183,17 @@ Analizamos aquí el objeto Mesa. El Dashboard lo ve como una figura geométrica 
 | orden activa | No existe ❌ | `currentOrderId` (Convex ✅) |
 | zona | `Environment` (padre) | `zone: string` (Convex) |
 
+<Note icon="triangle-exclamation" color="#FF0000">
+  **HAY QUE SOLUCIONAR**: Según [bbdd.mdx > tables](/ingenieria/bbdd):
+  1.  `capacity` debe ser `number` puro (no `"4P"`).
+  2.  Estados deben ser EN: `free` | `occupied` | `reserved` | `dirty`.
+  3.  Añadir `current_order_id: Id<"orders">` del POS.
+  4.  Añadir `label: string` para nombres personalizados ("VIP 1").
+</Note>
+
 ### 2.3 Category & Product
 El mayor conflicto aquí es la nomenclatura (Español vs Inglés). Esta tabla expone que estamos usando hasta tres nombres distintos para referirnos a la misma categoría o producto, lo cual causaría errores en una base de datos única.
+
 | Entidad | Campo | Dashboard (ES ⚠️) | POS (EN ✅) | Carta |
 |:--------|:------|:-------------------|:------------|:------|
 | **Category** | nombre | `nombre_categoria` | `name` | Key de `MenuData` |
@@ -160,6 +204,14 @@ El mayor conflicto aquí es la nomenclatura (Español vs Inglés). Esta tabla ex
 | | imagen | `url_imagen_producto`| `image` | `img_url` |
 | | SKU | No existe ❌ | `sku` | No tiene |
 | | Variantes | No existe ❌ | No existe ❌ | `variaciones{}` ✅ |
+
+<Note icon="triangle-exclamation" color="#FF0000">
+  **HAY QUE SOLUCIONAR (CRÍTICO)**: Según [bbdd.mdx > products](/ingenieria/bbdd):
+  - `nombre_producto` → `name`
+  - `precio_venta` → `price` (number en céntimos)
+  - `url_imagen_producto` / `img_url` → `image`
+  - Adoptar `sku`, `allergens`, `variants`, `preparation_time`, `available` del esquema propuesto.
+</Note>
 
 ### 2.4 Customer
 Aquí se evidencia el "agujero de datos" del cliente. Mientras el POS ya maneja perfiles con puntos y visitas, el Dashboard y la Carta aún no han formalizado este contrato, siendo una prioridad para la gestión de fidelización.
@@ -192,12 +244,13 @@ Para evitar redundancias, esta matriz define qué repositorio tiene la "verdad a
 
 ## 3. Estados Incompatibles e Infraestructura
 
-<Warning>
-  El Dashboard utiliza estados en español como strings, mientras que el POS y la propuesta Convex usan enums en inglés. Esta es la prioridad #1 de refactorización.
-</Warning>
+> [!TIP]
+> **Contexto de la Sección**: Analizamos los "Estados" (¿Está la mesa libre? ¿Está el pedido listo?). Si cada app usa un nombre distinto para el mismo estado, la sincronización en tiempo real se rompe.
 
-### 3.1 Mapeo de Estados (Mesas)
-Esta tabla actúa como un "traductor". Asegura que los enums técnicos en inglés (usados en base de datos) se mapeen correctamente a las etiquetas visuales en español que ven los usuarios en el Dashboard y el POS.
+<Note icon="circle-exclamation" color="#FF0000">
+  **🚨 INCONGRUENCIA ROJA**: El Dashboard gestiona el plano de mesas de forma visual, pero **no sabe** si hay un pedido activo en ellas. Es como tener un mapa de un parking que te dice dónde están los coches, pero no si están encendidos o apagados.
+</Note>
+
 | Estado | Dashboard | POS mock | POS Convex doc |
 |:-------|:----------|:---------|:---------------|
 | Libre | `'Libre'` | `'free'` | `'free'` |
@@ -206,6 +259,10 @@ Esta tabla actúa como un "traductor". Asegura que los enums técnicos en inglé
 | Sucia | No existe | `'dirty'` | `'dirty'` |
 | Mantenimiento | `'Mantenimiento'` | No existe | No existe |
 | Inactiva | `'Inactiva'` | No existe | No existe |
+
+<Note icon="triangle-exclamation" color="#FF0000">
+  **HAY QUE SOLUCIONAR**: Eliminar el uso de palabras en español como `'Libre'` o `'Ocupada'` dentro del código. Todo estado debe coincidir con [bbdd.mdx](/ingenieria/bbdd): `free` | `occupied` | `reserved` | `dirty`. La traducción al español ocurre solo en la capa visual (UI), nunca en el dato.
+</Note>
 
 ### 3.2 Próximos Pasos (Hoja de Ruta)
 1. <Check>Definir el `convex/schema.ts` unificado, tomando como base la propuesta Convex del POS y enriqueciéndola con los campos exclusivos del Dashboard y las variaciones de la Carta.</Check>
@@ -217,6 +274,10 @@ Esta tabla actúa como un "traductor". Asegura que los enums técnicos en inglé
 ---
 
 ## 4. Auditoría de Deuda Técnica
+
+<Note icon="shield-exclamation" color="#FF0000">
+  **🚨 ALERTA DE SEGURIDAD OPERATIVA**: Esta sección documenta el "veneno" que hay en los datos actuales. Son errores de base que impiden que el sistema sea profesional y seguro.
+</Note>
 
 Esta sección detalla los desvíos actuales entre el código verificado y el estándar ideal de producción. Es la hoja de ruta para la limpieza previa a la integración con Convex.
 
@@ -260,5 +321,8 @@ Aunque parezcan lo mismo, en Camarai cumplen roles y estados técnicos distintos
 ---
 
 <Note>
-  **Conclusión Estratégica**: La infraestructura visual de Camarai está lista (Nivel Dios), pero el motor de datos está actualmente "envenenado" con mocks que no respetan tipos numéricos ni nomenclatura pura. La fase de integración con Convex deberá limpiar estos 3 frentes simultáneamente para asegurar la integridad de la "Cerebro de Gestión".
+  **Conclusión Estratégica (RESUMEN EJECUTIVO)**: 
+  Tenemos un Ferrari en diseño visual (**Nivel Dios**), pero el motor de datos tiene piezas de diferentes coches que no encajan entre sí. 
+  
+  **La solución única**: Unificar todo al Inglés Técnico, usar números puros para el dinero (sin símbolos de € en la base de datos) y permitir que el Dashboard tome el control total como el "Cerebro" que es. Hasta que no limpiemos este "veneno", la integración con la base de datos real (Convex) será inestable.
 </Note>

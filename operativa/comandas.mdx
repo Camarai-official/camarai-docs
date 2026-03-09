@@ -3,122 +3,76 @@ title: "Comandas — El Historial de Todo lo que se ha Vendido"
 description: "Gestión y consulta del historial completo de pedidos del restaurante."
 ---
 
-![Vista Comandas](/images/comandas-view.png)
+<Tabs>
+  <Tab title="Historial de Pedidos">
+    ## ¿Qué es esta vista?
+    Las Comandas son **el registro de cada pedido** creado en el sistema. Es el libro mayor de auditoría: permite buscar, filtrar y exportar cualquier venta.
 
-## ¿Qué es esta vista?
+    La tabla muestra páginas de **10 pedidos** con las siguientes columnas principales:
 
-Las Comandas son **el registro de cada pedido** que se ha creado en el sistema, ya sea por el TPV, el KDS o manualmente. Esta pantalla es el historial de auditoría: puedes buscar cualquier comanda, ver su desglose, editarla si tiene algún error, cambiarle el estado o exportarla.
+    | Columna | Editable | Datos DB |
+    |---|---|---|
+    | **Nº Orden** | No | `order_number` |
+    | **Mesa** | Sí | `table_id` |
+    | **Nombre** | Sí | `client_name` |
+    | **Total** | No directo | Calculado de `order_items` |
+    | **Estado** | Sí | `status` |
+  </Tab>
 
-Piénsalo como el "libro mayor" de la cocina: todas las ventas del restaurante pasan por aquí.
+  <Tab title="Acciones y Tickets">
+    ## 🪟 Menú de Acciones (···)
+    ![Menú de Acciones](/images/modal-comandas-acciones.png)
 
----
+    | Opción | Acción Técnica |
+    |---|---|
+    | 👁️ **Ver detalles** | Renderiza el ticket visual desde `order_items`. |
+    | ✏️ **Editar comanda** | Abre el editor de dos columnas. |
+    | 📄 **Exportar** | Genera PDF/CSV basado en el filtrado actual. |
+    | 🚫 **Anular** | Mutation `voidOrder` en Convex. |
 
-## Base de Datos
+    ### 🪟 Modal: Ticket Visual
+    ![Modal Ver Detalles - Ticket](/images/modal-comandas-detalle.png)
+    Muestra el desglose completo (IVA 21%, Subtotal, Total) alimentado de la tabla `establishments`.
+  </Tab>
 
-Para información detallada sobre las tablas `orders`, `order_items`, `products`, `tables` y `staff`, consulta el [Diccionario de Datos Maestro](/ingenieria/bbdd).
+  <Tab title="Edición">
+    ## 🪟 Modal: Editar Comanda
+    ![Modal Editar Comanda](/images/modal-comandas-editar.png)
 
----
+    Dividido en dos columnas para máxima velocidad:
+    - **Izquierda**: Gestión de productos (buscador + cantidades +/-).
+    - **Derecha**: Detalles del servicio (Mesa, Cliente, Notas de cocina, Descuento %).
 
-## La tabla de pedidos: cómo navegar
+    <Note icon="floppy-disk">
+      Al guardar, se actualiza el documento en la colección `orders` y se recalculan los `order_items` relacionados.
+    </Note>
+  </Tab>
 
-La tabla muestra paginas de **10 pedidos** por defecto, con estas columnas configurables:
+  <Tab title="Especificación Técnica">
+    <Note icon="shield-check" color="#6366f1">
+      **Control de Acceso**: La visualización de facturación y anulación de tickets está restringida por la [Matriz de Roles](/ingenieria/roles).
+    </Note>
+    <Note icon="triangle-exclamation" color="#FF0000">
+      **🚨 HAY QUE SOLUCIONAR**: El campo `total` se está recibiendo como `string` (`"€70.50"`).
+      **Acción**: Debe cambiarse a `number` puro para evitar errores en reportes financieros.
+    </Note>
 
-| Columna | Editable | Columna DB |
-|---|---|---|
-| **Nº Orden** | No | `order_number` |
-| **Hora** | No | `created_at` (formateado) |
-| **Mesa** | Sí (modal editar) | `table_id` |
-| **Nombre** | Sí (modal editar) | `client_name` |
-| **Total** | No directo, depende de ítems | calculado de `order_items` |
-| **Estado** | Sí (menú acción rápida) | `status` |
+    <Note icon="language" color="#FF0000">
+      **🚨 HAY QUE SOLUCIONAR**: Los estados en la BBDD están en español (`'En Progreso'`).
+      **Acción**: Migrar a English Enums (`'open'`, `'paid'`, `'void'`) según la [Nomenclatura](/ingenieria/nomenclatura).
+    </Note>
 
----
+    | Campo | Dashboard (ES ⚠️) | Estándar Convex (EN ✅) |
+    | :--- | :--- | :--- |
+    | Estado | `'En Progreso'│'Completado'` | `'open'│'paid'│'void'` |
+    | Cliente | `client_name` | `customer_id` / `name` |
+    | Total | `total: string` | `total: number` |
+  </Tab>
 
-## 🪟 Menú de Acciones (···)
-
-![Menú de Acciones](/images/modal-comandas-acciones.png)
-
-Al pulsar los tres puntos **···** al final de cada fila aparece un menú contextual con todas las acciones posibles sobre esa comanda:
-
-| Opción | ¿Qué hace? |
-|---|---|
-| 👁️ **Ver detalles** | Abre el ticket completo con desglose de ítems |
-| ✏️ **Editar comanda** | Modifica ítems, mesa y añade notas de cocina |
-| 🔄 **Cambiar Estado** | Submenú: En Progreso / Completado / Cancelado |
-| 📄 **Exportar a PDF** | Genera el ticket en PDF *(pendiente de implementar)* |
-| 💳 **Marcar como pagada** | Marca el registro como cobrado |
-| 🚫 **Anular comanda** | AlertDialog de confirmación antes de anular |
-
----
-
-## 🪟 Modal: Ver Detalles (Ticket)
-
-![Modal Ver Detalles - Ticket](/images/modal-comandas-detalle.png)
-
-Este modal muestra el **ticket completo** tal como se imprimiría en papel. Incluye:
-
-- **Cabecera**: Logo, nombre del restaurante, dirección y teléfono
-- **Número de ticket y fecha/hora**
-- **Mesa y nombre del cliente**
-- **Línea por ítem**: cantidad, nombre del producto y precio total de esa línea
-- **Subtotal**, **IVA (21%)** y **TOTAL en negrita**
-- **Footer**: mensaje de despedida y URL del restaurante
-
-Dos botones en la parte inferior: **Imprimir** y **Editar** (que abre directamente el modal de edición).
-
-> **Tabla DB necesaria:** Para generar el ticket encabezado se necesita una tabla `establishments` con los campos `name`, `address`, `phone`, `logo_url`.
-
----
-
-## 🪟 Modal: Editar Comanda
-
-![Modal Editar Comanda](/images/modal-comandas-editar.png)
-
-Modal de dos columnas para modificar los detalles de la comanda con rapidez:
-
-**Columna izquierda — Ítems del pedido:**
-- Buscador de productos (`Buscar producto o plato...`)
-- Lista de ítems con controles `−` / `+` y botón de eliminar 🗑️
-- Precio unitario visible en cada ítem
-
-**Columna derecha — Detalles del servicio:**
-- **Ubicación**: Selector desplegable de mesa (alimentado de la tabla `tables`)
-- **Cliente**: Campo de texto con nombre del cliente
-- **Notas de Cocina**: Área de texto libre para instrucciones especiales
-- **Resumen económico**: Subtotal + campo de **Descuento (%)** + IVA 21% + **Total** actualizado en tiempo real
-
-Dos botones: **Cancelar** y **Guardar Cambios** (que actualiza el documento `orders` y sus `order_items`).
-
----
-
-## 🪟 Modal: Configuración de Vista (⚙️)
-
-![Modal Configuración de Vista](/images/modal-comandas-config.png)
-
-Permite personalizar qué columnas se muestran en la tabla y cuántas filas aparecen por página. Los cambios sólo afectan la sesión actual.
-
----
-
-## 🪟 Modal: Exportar Comandas
-
-![Modal Exportar](/images/modal-comandas-exportar.png)
-
-Permite exportar el historial de comandas filtrado por el DatePicker con opciones de:
-- **Formato**: CSV o PDF
-- **Campos**: Selección de qué columnas incluir
-- **Período**: Hereda el rango de fechas activo en la vista
-
----
-
-## 🚀 Plan de Mejoras (Roadmap Técnico)
-
-### 🎨 Frontend (UI/UX & Sincronización)
-- **Generación de Ticket PDF**: Implementar la lógica cliente (ej: `jspdf` o similar) para que el botón de exportación genere el documento visual.
-- **UX de Búsqueda**: El filtro de fecha debe incluir shortcuts de tiempo (Hoy/Ayer/Semana) para agilizar la auditoría operativa.
-- **Evolución del CTA**: Añadir un botón flotante "+" o "Nueva Comanda" para permitir la creación manual desde esta vista.
-- **Visualización de Staff**: Mostrar el campo `assigned_to` en la tabla para saber quién es responsable de cada pedido de un vistazo.
-
-### ⚙️ Backend (BBDD & Lógica Convex)
-- **Auditoría de Cambios**: Implementar un log de historial en `orders_audit` para registrar quién modificó una comanda ya cerrada y por qué.
-- **Integración de Pagos**: Crear el endpoint que vincule la comanda con la pasarela de pagos (Stripe/Redsys) para actualizar el `status` automáticamente.
-- **Indices de Búsqueda**: Optimizar la búsqueda por `client_name` mediante búsqueda por texto parcial en Convex para mejorar la velocidad en históricos grandes.
+  <Tab title="Roadmap">
+    ## 🚀 Futuras Mejoras
+    - **Auditoría de Cambios**: Registro de "quién editó qué" en cada pedido.
+    - **Integración Pasarela**: Vinculación real con Stripe para marcar "Pagada" automáticamente.
+    - **Shortcuts de Tiempo**: Filtros rápidos "Hoy/Semana/Mes" en el DatePicker.
+  </Tab>
+</Tabs>

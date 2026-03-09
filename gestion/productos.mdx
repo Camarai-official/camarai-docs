@@ -3,14 +3,66 @@ title: "Productos"
 description: "Gestión centralizada del catálogo de platos, bebidas y servicios."
 ---
 
-# Productos
+<Tabs>
+  <Tab title="Vista General">
+    ## El Corazón del Catálogo
+    En esta sección se definen todos los elementos que componen la oferta del restaurante. Es el núcleo de la base de datos de ventas.
 
-En esta sección se definen todos los elementos que componen la oferta del restaurante. Es el core de la base de datos de ventas.
+    ![Placeholder: Vista Listado de Productos](/images/TODO-productos-view-main.png)
 
-## Gestión de Ficha Técnica
+    | Funcionalidad | Descripción |
+    | :--- | :--- |
+    | **Buscador** | Filtro por nombre o referencia interna. |
+    | **Filtro Categoría** | Visualización segmentada por tipo de plato. |
+    | **Estado de Stock** | Indicador visual de disponibilidad inmediata. |
+  </Tab>
 
-- **Información Básica**: Nombre, descripción, imágenes.
-- **Precios y Costes**: Gestión de márgenes.
-- **Impuestos**: Vinculación con tipos de IVA.
-- **Variantes y Modificadores**: Opciones de personalización.
-- **Alérgenos**: Clasificación para la Carta Digital.
+  <Tab title="Ficha Técnica">
+    ## 🪟 Modal: Ficha de Producto
+    Es el mismo modal de alta densidad utilizado en la sección de Cartas, permitiendo una gestión 360°.
+
+    ````carousel
+    ![Tab General](/images/cartas-modal-producto-1.png)
+    <!-- slide -->
+    ![Tab Precios](/images/cartas-modal-producto-2.png)
+    <!-- slide -->
+    ![Tab Receta](/images/cartas-modal-producto-3.png)
+    <!-- slide -->
+    ![Tab Variantes](/images/cartas-modal-producto-4.png)
+    <!-- slide -->
+    ![Tab Disponibilidad](/images/cartas-modal-producto-5.png)
+    ````
+
+    ### Secciones del Modal
+    - **General**: Alérgenos, descripción e imágenes.
+    - **Precios**: Configuración de PVP por zona de consumo.
+    - **Receta**: Escandallo vinculado a `ingredientes`.
+    - **Variantes**: Modificadores y extras opcionales.
+    - **Disponibilidad**: Reglas de horario para la Carta Digital.
+  </Tab>
+
+  <Tab title="Especificación Técnica">
+    <Note icon="triangle-exclamation" color="#FF0000">
+      **🚨 HAY QUE SOLUCIONAR (CRÍTICO)**: El campo `nombre_producto` debe migrarse a `name` para alinearse con el POS y la Carta.
+    </Note>
+
+    <Note icon="money-bill" color="#FF0000">
+      **🚨 HAY QUE SOLUCIONAR**: Los precios deben ser `number` puros para cálculos automáticos de IVA.
+    </Note>
+
+    ### Esquema Convex: `products`
+    | Campo | Tipo | Estado |
+    | :--- | :--- | :--- |
+    | `name` | `string` | ✅ Estándar |
+    | `price` | `number` | ✅ Estándar |
+    | `category_id` | `Id<"categories">` | ✅ Relacional |
+    | `active` | `boolean` | ✅ Estado |
+  </Tab>
+
+  <Tab title="Roadmap">
+    ## 🚀 Futuras Mejoras
+    - **Carga Masiva**: Importación de catálogo vía Excel/CSV.
+    - **AI Description**: Generación automática de descripciones de platos sugerentes mediante IA.
+    - **Etiquetas Nutricionales**: Cálculo automático de Kcal basado en la receta.
+  </Tab>
+</Tabs>

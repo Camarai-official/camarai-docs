@@ -3,145 +3,71 @@ title: "Plano de Mesas — El Editor Visual del Salón"
 description: "Diseño interactivo de la distribución de mesas: drag & drop, formas, sillas, estados y QRs."
 ---
 
-![Vista Plano de Mesas](/images/plano-mesas-view.png)
+<Tabs>
+  <Tab title="Editor de Sala">
+    ## ¿Qué es esta vista?
+    El Plano de Mesas es el **editor visual de la sala**. Permite diseñar la distribución física del local mediante drag & drop, gestionando formas, tamaños y orientación de cada mesa u objeto decorativo.
 
-## ¿Qué es esta vista?
+    ![Vista Plano de Mesas](/images/plano-mesas-view.png)
 
-El Plano de Mesas es el **editor visual de la sala**. Puedes arrastrar mesas por el lienzo, cambiarles la forma (rectangular/circular), añadir sillas individualmente, marcar su estado operativo y generar sus QRs de mesa.
+    | Elemento | Propiedades |
+    | :--- | :--- |
+    | **Mesa** | Número, forma (rect/round), capacidad, estado. |
+    | **Objeto** | Barra, columnas, mobiliario decorativo. |
+    | **Ambiente** | El lienzo que contiene las mesas (Terraza, Salón). |
+  </Tab>
 
-Se accede desde la vista de Ambientes pulsando **"Ver Plano"** en cualquier ambiente. El parámetro `?envId=xxx` de la URL determina qué sala se carga.
+  <Tab title="Acciones y Controles">
+    ## 🛠️ Herramientas de Edición
 
----
+    <CardGroup cols={2}>
+      <Card title="Barra Superior" icon="toolbar">
+        ![Selector de Sala](/images/plano-mesas-selector.png)
+        - **Candado**: Bloquea el plano para evitar movimientos accidentales.
+        - **Añadir**: Dropdown para nuevas mesas/objetos.
+        - **Badges**: Resumen de ocupación en tiempo real.
+      </Card>
+      <Card title="Menú de Mesa" icon="ellipsis-vertical">
+        ![Menú de Mesa](/images/plano-mesas-tabla-menu.png)
+        - **Editar Sillas**: Modo interactivo en el canvas.
+        - **Ver QR**: Generación de tokens de mesa.
+        - **Estado**: Cambio rápido (Libre/Ocupada).
+      </Card>
+    </CardGroup>
 
-## ¿De qué tablas de la base de datos se alimenta?
+    ### 🪟 Modales de Detalle
+    - **Editar Mesa**: Ajuste de píxeles, número y color.
+    - **Plantillas Rápidas**: Aplicar diseños predefinidos de salón/terraza.
+  </Tab>
 
-### `environments` — El ambiente/sala activo
+  <Tab title="Especificación Técnica">
+    <Note icon="shield-check" color="#6366f1">
+      **Autorización**: Guardar cambios en el diseño del local requiere rol de **Admin** o **Manager**. Ver [Roles y Permisos](/ingenieria/roles).
+    </Note>
+    <Note icon="triangle-exclamation" color="#FF0000">
+      **🚨 HAY QUE SOLUCIONAR**: La `capacity` (capacidad) debe ser siempre un `number` puro (`4`), nunca un texto con letra como `'4P'`.
+    </Note>
 
-```ts
-{
-  _id: Id<"environments">,
-  name: string,
-  icon?: string,
-  color?: string,
-  status: "Abierto" | "Cerrado",
-  establishment_id: Id<"establishments">
-}
-```
+    <Note icon="language" color="#FF0000">
+      **🚨 HAY QUE SOLUCIONAR**: Los estados de mesa deben unificarse al estándar EN en BBDD (`'free'`, `'occupied'`, `'reserved'`, `'dirty'`).
+    </Note>
 
-### `tables` — Las mesas del plano
+    ### 🛠️ Mapeo de Sincronización
+    | Campo | Dashboard (ES ⚠️) | Estándar Convex (EN ✅) |
+    | :--- | :--- | :--- |
+    | Estado | `'Libre'│'Ocupada'` | `'free'│'occupied'` |
+    | Capacidad | `capacity: number` | `capacity: number` |
+    | Geometría | `x, y, width, height` | Mismo formato (píxeles) |
 
-```ts
-{
-  _id: Id<"tables">,
-  environment_id: Id<"environments">,
-  number: number,                        // número visible (0 = objeto decorativo)
-  x: number,                             // posición en el canvas (píxeles)
-  y: number,
-  width: number,                         // dimensiones del rectángulo
-  height: number,
-  shape: "rectangle" | "round",
-  capacity: number,                      // calculado de la suma de sillas activas
-  status: "Libre" | "Ocupada" | "Reservada" | "Mantenimiento" | "Inactiva",
-  // Estructura de sillas (cuántas hay activas por lado)
-  chairs?: {
-    top?: number[],                      // índices de sillas activas en la parte superior
-    bottom?: number[],
-    left?: number[],
-    right?: number[],
-    round?: number[]                     // para mesas circulares
-  },
-  is_object: boolean,                    // true = objeto decorativo (barra, columna...)
-  object_type?: string,                  // "Objeto Rectangular", "Barra"...
-  qr_token?: string,                     // token único del QR de la mesa
-  qr_last_generated?: number
-}
-```
+    <Note icon="code">
+      **Nota de Persistencia**: Actualmente la mutation `saveFloorPlan` no está activa; los cambios son locales hasta completar la integración con Convex.
+    </Note>
+  </Tab>
 
-> **Relaciones importantes**: Cuando el TPV abre una comanda, usa `table_id` para vincularla. Cuando una reserva se confirma, cambia `tables.status` a `"Reservada"`. La vista de Ambientes usa `tables.status` para calcular el panel de ocupación.
-
----
-
-## Queries necesarias en Convex
-
-```ts
-// Cargar todos los ambientes con sus mesas (para el selector de ambiente)
-getEnvironmentsWithTables(): Promise<(Environment & { tables: Table[] })[]>
-
-// Guardar posición tras drag & drop
-updateTablePosition(id: Id<"tables">, x: number, y: number): Promise<void>
-
-// Guardar todos los cambios del plano de una vez (batch update)
-saveFloorPlan(environmentId: Id<"environments">, tables: Table[]): Promise<void>
-
-// Cambiar estado de una mesa
-updateTableStatus(id: Id<"tables">, status: TableStatus): Promise<void>
-```
-
-> ⚠️ **Importante**: Actualmente el plano **no persiste en ninguna BD** — los cambios son locales y se pierden al recargar. `saveFloorPlan()` aún no existe en Convex.
-
----
-
-## Controles de la barra superior
-
-![Selector de Sala](/images/plano-mesas-selector.png)
-
-- **Selector de sala** (tabs con icono de cada ambiente): cambia el `activeEnvId`
-- **Badges de estado**: total mesas · libres · ocupadas · reservadas · mantenimiento — contados en tiempo real
-- **Candado** (🔒/🔓): bloquea el plano para evitar ediciones accidentales
-- **Volver a Ambientes**: navega a `/ambientes`
-- **Plantillas**: abre el `QuickTemplatesDialog`
-- **Añadir**: dropdown con Mesa Rectangular / Mesa Circular / Objeto Rectangular / Objeto Circular
-
----
-
-## Menú contextual de mesa (clic derecho / ···)
-
-![Menú de Mesa](/images/plano-mesas-tabla-menu.png)
-
-Al hacer clic en una mesa aparece un menú con:
-- **Editar Mesa** → abre `EditTableDialog`
-- **Cambiar Estado** → submenu con los 4 estados (Libre/Ocupada/Reservada/Mantenimiento)
-- **Editar Sillas** → activa el modo de edición de sillas directamente en el canvas
-- **Ver QR** → abre `QRConfigDialog`
-- **Duplicar** → clona la mesa con offset +20px
-- **Eliminar** → borra la mesa del plano
-
----
-
-## 🪟 Modal: Editar Mesa
-
-![Modal Editar Mesa — Parte 1](/images/plano-mesas-modal-editar.png)
-![Modal Editar Mesa — Parte 2](/images/plano-mesas-modal-editar-2.png)
-
-Campos editables:
-- Número de mesa
-- Ancho y alto (px) — actualiza automáticamente la capacidad
-- Forma: Rectangular / Circular
-- Color de fondo personalizado
-- Estado: todas las opciones del badge de estado
-- Capacidad: calculada automáticamente del número de sillas activas por lado
-
----
-
-## 🪟 Modal: Plantillas Rápidas
-
-![Modo Añadir Mesas](/images/plano-mesas-anadir.png)
-
-Permite aplicar una configuración predefinida de mesas al ambiente activo:
-- Plantillas de terraza (4, 6, 8, 12 mesas)
-- Plantillas de salón banquete (hasta 20 mesas)
-- Al aplicar, **reemplaza todas las mesas existentes** del ambiente
-
----
-
-## 🚀 Plan de Mejoras (Roadmap Técnico)
-
-### 🎨 Frontend (UI/UX & Sincronización)
-- **Sistema Undo/Redo**: Implementar un histórico de acciones en el cliente para permitir deshacer movimientos accidentales de mesas.
-- **Modo Edición estricto**: Deshabilitar el drag & drop por defecto y solo permitirlo cuando el "Candado" esté abierto, para evitar errores en tablets táctiles.
-- **Diferenciación Visual**: Mejorar el estilo de los objetos decorativos (`is_object`) para que no se confundan con mesas interactivas.
-
-### ⚙️ Backend (BBDD & Lógica Convex)
-- **Persistencia del Plano**: Crear la mutation `saveFloorPlan` que guarde masivamente el array de `tables` vinculado a un `environment_id`.
-- **Sincronización de Ocupación**: Implementar un trigger que cambie el `status` de la mesa a "Ocupada" automáticamente cuando se detecte una `order` activa vinculada a ese `table_id`.
-- **Validación de QR**: Crear una tabla `table_qr_sessions` para validar los tokens de QR y asegurar que solo las sesiones activas pueden pedir desde una mesa.
+  <Tab title="Roadmap">
+    ## 🚀 Futuras Mejoras
+    - **Undo/Redo**: Histórico de acciones para deshacer movimientos.
+    - **Sincronización Automática**: La mesa cambia a "Ocupada" sola cuando entra un pedido vinculado.
+    - **Validation QR**: Tabla `table_qr_sessions` para pedidos desde móvil seguros.
+  </Tab>
+</Tabs>
