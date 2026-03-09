@@ -2,7 +2,7 @@
 
 Este repositorio centraliza la **inteligencia estratégica** de Camarai. Documentamos el paso de un sistema basado en mocks a una arquitectura de producción reactiva.
 
-## 🧠 Estado de la Verdad Técnica
+## Estado de la Verdad Técnica
 
 Tras la última auditoría, hemos establecido los pilares para la integración con el Backend:
 
