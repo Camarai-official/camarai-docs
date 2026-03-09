@@ -1,4 +1,4 @@
-# 📚 Camarai Documentation Repository (Mintlify)
+# 📚 Camarai Documentation Repository
 
 Este repositorio centraliza la **inteligencia estratégica** de Camarai. Documentamos el paso de un sistema basado en mocks a una arquitectura de producción reactiva.
 
@@ -8,19 +8,19 @@ Tras la última auditoría, hemos establecido los pilares para la integración c
 
 1.  **Prioridad de Vistas Huérfanas**: Hemos detectado que completar las vistas sin lógica es el paso previo e indispensable para diseñar una BBDD (Convex) robusta. No se construye el esquema sin entender el flujo de datos total del Dashboard.
 2.  **Rol de n8n**: Definido exclusivamente para el **Agente IA** y **Comunicaciones Externas**. La lógica operativa interna reside en Convex. 
-3.  **Estandarización de Datos**: Sustitución de "veneno" (strings en cálculos matemáticos) por tipos numéricos puros y enums en inglés.
+3.  **Estandarización de Datos**: Sustitución de "veneno" (strings en cálculos matemáticos) por tipos numéricos puros y enums en inglés. ( solo comparativas de codigo del POS ,DASHBOARD Y CARTA ) 
 4.  **Hardware en Radar**: La integración con periféricos (impresoras/TPV) queda en fase de definición, evaluando la mejor vía de comunicación.
 
 ---
 
-## 🗺️ Roadmap de la Documentación (Objetivos de la Doc)
+## 🗺️ Roadmap de esta Documentación (Objetivos de la Doc)
 
 Este es el plan para que la "Doc" alcance su madurez, permitiendo el acceso rápido a cada rincón del sistema.
 
 ### 🏁 Fase 1: Auditoría Visual Completa (Galería)
 - [ ] **Captura de Pantallas**: Documentación visual de TODAS las vistas actuales (POS, Dash y Carta).
 - [ ] **Galería Histórica**: Estructurar Mintlify para que todas las capturas sean accesibles sin necesidad de eliminar versiones anteriores.
-- [ ] **Detección de Vacíos**: Listado visual de partes del Dashboard que carecen de backend.
+- [ ] **Detección de Vacíos**: Listado visual , arquitecturas, diagramas de partes del backend separando convex y n8n.
 
 ### 🏁 Fase 2: Diseño de BBDD y Contratos
 - [ ] **Esquema Convex**: Documentar el `schema.ts` unificado una vez saneadas las vistas huérfanas.
