@@ -1,47 +1,38 @@
 # 📚 Camarai Documentation Repository (Mintlify)
 
-Este repositorio contiene la **documentación técnica y estratégica** del ecosistema Camarai. No es el software en sí, sino el cerebro informativo que guía el desarrollo del Dashboard, POS, Carta y Agentes IA.
+Este repositorio centraliza la **inteligencia estratégica** de Camarai. Documentamos el paso de un sistema basado en mocks a una arquitectura de producción reactiva.
 
-## 🚀 Logros Recientes (Auditoría Técnica)
+## 🧠 Estado de la Verdad Técnica
 
-Hemos transformado una documentación estática en un activo vivo alineado con el código real:
+Tras la última auditoría, hemos establecido los pilares para la integración con el Backend:
 
-1.  **Auditoría de "Veneno" de Datos**: Mapeo exhaustivo de toda la deuda técnica (strings en cálculos, naming inconsistente, mocks hardcodeados).
-2.  **Regla de Oro Nº1**: Establecimiento del Dashboard como el cerebro único de gestión y autoridad de datos.
-3.  **Constitución de Nomenclatura**: Definición estricta de estándares (English-only, CamelCase, Tipos Numéricos puros).
-4.  **Omni-Sincronización**: Definición del principio de reactividad total entre dispositivos vía Convex.
-5.  **Inventario Verificado**: ~65 pantallas, ~146 componentes y 33 contratos de tipos (types) validados contra el código fuente.
-
----
-
-## 🗺️ Roadmap de la Documentación (Próximos Pasos)
-
-El objetivo es alcanzar el **100% de cobertura informativa** antes de la integración total con el Backend.
-
-### 🏁 Fase 1: Infraestructura de Datos (Cierre Inmediato)
-- [ ] **Documentar BBDD (Convex Schema)**: Finalizar `ingenieria/bbdd.mdx` una vez el esquema esté limpio de strings.
-- [ ] **Documentar 7 Vistas Huérfanas**: Crear las páginas de tipos y lógica para Clientes, Chat, Notificaciones, Inventario, Reservas y Dashboard.
-- [ ] **Contratos de API**: Documentar los webhooks actuales de n8n y su transición a mutaciones de Convex.
-
-### 🏁 Fase 2: Completado de Vistas Operativas
-- [ ] **Documentación del POS (Operativa)**: Detallar los flujos de `Caja`, `Mesas`, `KDS` y `Recibos` una vez salgan de placeholders.
-- [ ] **Flujo de la Carta**: Documentar la arquitectura de sesiones de WhatsApp y su vínculo con la identificación de mesas.
-- [ ] **Documentar Hardware**: Guía técnica de conexión de impresoras y terminales táctiles gestionados desde el Dashboard.
-
-### 🏁 Fase 3: Guía de Agentes IA
-- [ ] **Entrenamiento del Agente Cliente**: Documentar los prompts base y la lógica de recomendación (upselling).
-- [ ] **Lógica de Voz (V2)**: Especificar el contrato de datos para el Agente Camarero (Voice-to-Order).
+1.  **Prioridad de Vistas Huérfanas**: Hemos detectado que completar las vistas sin lógica es el paso previo e indispensable para diseñar una BBDD (Convex) robusta. No se construye el esquema sin entender el flujo de datos total del Dashboard.
+2.  **Rol de n8n**: Definido exclusivamente para el **Agente IA** y **Comunicaciones Externas**. La lógica operativa interna reside en Convex. 
+3.  **Estandarización de Datos**: Sustitución de "veneno" (strings en cálculos matemáticos) por tipos numéricos puros y enums en inglés.
+4.  **Hardware en Radar**: La integración con periféricos (impresoras/TPV) queda en fase de definición, evaluando la mejor vía de comunicación.
 
 ---
 
-## 🛠️ Tecnologías del Proyecto
-- **Generador**: [Mintlify](https://mintlify.com)
-- **Formato**: MDX (Markdown + React Components)
-- **Estructura**: Basada en productos (Dash, POS, Carta) y capas (Ingeniería, Operativa).
+## 🗺️ Roadmap de la Documentación (Objetivos de la Doc)
+
+Este es el plan para que la "Doc" alcance su madurez, permitiendo el acceso rápido a cada rincón del sistema.
+
+### 🏁 Fase 1: Auditoría Visual Completa (Galería)
+- [ ] **Captura de Pantallas**: Documentación visual de TODAS las vistas actuales (POS, Dash y Carta).
+- [ ] **Galería Histórica**: Estructurar Mintlify para que todas las capturas sean accesibles sin necesidad de eliminar versiones anteriores.
+- [ ] **Detección de Vacíos**: Listado visual de partes del Dashboard que carecen de backend.
+
+### 🏁 Fase 2: Diseño de BBDD y Contratos
+- [ ] **Esquema Convex**: Documentar el `schema.ts` unificado una vez saneadas las vistas huérfanas.
+- [ ] **Glosario de Enums**: Definir todos los estados (Libre, Ocupado, Sucio) en inglés técnico para la base de datos.
+
+### 🏁 Fase 3: Flujos de Agentes e IA
+- [ ] **Arquitectura n8n**: Mapeo de flujos para el Agente Cliente y notificaciones de Gerencia.
+- [ ] **Manual del Bot del Cliente**: Lógica de recomendaciones y links de sesión.
 
 ---
 
-## 💻 Desarrollo Local
+## 🛠️ Desarrollo Local
 
 ```bash
 # Instalar Mintlify CLI
@@ -51,5 +42,5 @@ npm i -g mintlify
 mintlify dev
 ```
 
-> [!TIP]
-> **Alineación Crítica**: Antes de sugerir una mejora en la UI o en el Schema de datos, consulta siempre los documentos de `Alineación` y `Nomenclatura` en la sección de Ingeniería.
+> [!IMPORTANT]
+> **Omni-Sincronización**: En Camarai, cualquier cambio en cualquier dispositivo (POS, PDA, KDS o Dashboard) se refleja instantáneamente en el resto del ecosistema. La documentación debe respetar este principio de "Verdad Única".

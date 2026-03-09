@@ -27,7 +27,7 @@ Inventario verificado de la plataforma tras la última auditoría técnica:
 Antes de conectar el backend, el sistema debe ser capaz de procesar datos reales sin corromperse.
 
 ### 1.1 Limpieza de "Veneno" (Data Sanitation)
-- **Cero Strings en Cálculos**: Refactorizar totales en `orders.ts` (Dash) y `mock-orders.js` (POS) de string (`'20€'`) a `number` (`20.5`).
+- **Saneamiento de Vistas Huérfanas**: Antes de construir la BBDD, es imperativo completar la lógica de las vistas que hoy solo son "cascarones". No se puede diseñar un esquema de Convex robusto sin haber definido primero el flujo de datos completo de cada pantalla.
 - **Nomenclatura Unificada**: Migrar `nombre_producto` -> `name`, `precio_venta` -> `price` en todos los repos.
 - **Tipado de Estados**: Sustituir strings `'Libre'`/'`Ocupada'` por enums técnicos `'free'`/`'occupied'`.
 
@@ -64,16 +64,16 @@ Migración de mocks locales a persistencia real y reactiva.
 |:-----|:--------------|:--------|
 | **Esquema** | Transposición de Types a `convex/schema.ts`. | Unificación total de la verdad. |
 | **Mutations**| Vincular **Dialogs** (Dash) y **Modals** (POS) a funciones de escritura. | Fin de los datos hardcodeados. |
-| **Susscripciones**| Implementar listeners para que los cambios fluyan sin refrescar pantalla. | Operativa reactiva 100%. |
+| **Suscripciones**| Implementar listeners para que los cambios fluyan sin refrescar pantalla. | Operativa reactiva 100%. |
 
 ---
 
-## Bloque 4: La Capa de Inteligencia (Bots & Agentes)
+## Bloque 4: Capa de Inteligencia y Exterior (n8n)
 
-Implementación de servicios de IA sobre datos ya saneados.
+Implementación de servicios de IA y conexiones externas. **n8n se reserva exclusivamente para flujos de agentes y comunicaciones con el exterior.**
 
-1.  **Agente Cliente (V1)**: Conexión estable WhatsApp -> Carta -> Convex.
+1.  **Agente Cliente (V1)**: Conexión estable WhatsApp -> Carta -> Convex (vía n8n).
 2.  **Agente Gerente (V1)**: Notificaciones automáticas de stock y cierres de caja.
-3.  **Agente Camarero (V2)**: Procesamiento de voz para creación de órdenes desde la PDA.
+3.  **Hardware**: Pendiente de definición. Se evaluará si la integración con impresoras y periféricos se realiza vía n8n o mediante un servicio local dedicado.
 
 ---
