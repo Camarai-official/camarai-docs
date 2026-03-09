@@ -1,11 +1,15 @@
 {
     "$schema": "https://mintlify.com/schema.json",
     "name": "Documentación Camarai",
+    "logo": {
+        "light": "/logo.png",
+        "dark": "/logo.png"
+    },
     "favicon": "/favicon.svg",
     "colors": {
-        "primary": "#0F172A",
-        "light": "#334155",
-        "dark": "#020617"
+        "primary": "#6366f1",
+        "light": "#818cf8",
+        "dark": "#4338ca"
     },
     "topbarLinks": [
         {
@@ -17,52 +21,59 @@
         {
             "group": "General",
             "pages": [
-                "index",
-                "introduction"
+                "general/index",
+                "general/roadmap",
+                "general/nomenclatura"
             ]
         },
         {
             "group": "Ingeniería",
             "pages": [
-                "bbdd",
-                "database-dictionary",
-                "audit-report"
+                "ingenieria/mapa-arquitectura",
+                "ingenieria/componentes",
+                "ingenieria/alineacion"
             ]
         },
         {
             "group": "Operativa",
             "pages": [
-                "dashboard",
-                "comandas",
-                "pos",
-                "planomesas",
-                "ambientes"
+                "operativa/dashboard",
+                "operativa/comandas",
+                "operativa/pos",
+                "operativa/kds",
+                "operativa/planomesas",
+                "operativa/ambientes",
+                "operativa/chat"
             ]
         },
         {
             "group": "Gestión",
             "pages": [
-                "inventario",
-                "cartas",
-                "reservas",
-                "personal",
-                "reportes"
+                "gestion/productos",
+                "gestion/categorias",
+                "gestion/ingredientes",
+                "gestion/inventario",
+                "gestion/cartas",
+                "gestion/reservas",
+                "gestion/personal",
+                "gestion/reportes"
             ]
         },
         {
             "group": "Marketing y Clientes",
             "pages": [
-                "clientes",
-                "promociones",
-                "notificaciones"
+                "marketing/clientes",
+                "marketing/promociones",
+                "marketing/notificaciones"
             ]
         },
         {
             "group": "Configuración",
             "pages": [
-                "configuracion",
-                "configuracion-perfil",
-                "configuracion-impuestos"
+                "configuracion/configuracion",
+                "configuracion/configuracion-perfil",
+                "configuracion/configuracion-impuestos",
+                "configuracion/SETTING_ROW_GUIDE"
             ]
         }
     ]

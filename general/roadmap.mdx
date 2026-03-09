@@ -1,0 +1,79 @@
+---
+title: "Hoja de Ruta"
+sidebarTitle: "Roadmap"
+description: "Plan de evolución técnica para la unificación del ecosistema: Dashboard, POS, Carta y Bot."
+---
+
+## Estado Actual del Sistema (Métricas Reales)
+
+Inventario verificado de la plataforma tras la última auditoría técnica:
+
+<CardGroup cols={3}>
+  <Card title="~65 Pantallas" icon="browser">
+    Dashboard (58), POS (6), Carta (1).
+  </Card>
+  <Card title="~146 Componentes" icon="puzzle">
+    Inventario total de UI, Dialogs y Modals.
+  </Card>
+  <Card title="33 Types Base" icon="code">
+    Contratos actuales (30 Dashboard, 3 Carta).
+  </Card>
+</CardGroup>
+
+---
+
+## Bloque 1: Saneamiento de Datos
+
+Antes de conectar el backend, el sistema debe ser capaz de procesar datos reales sin corromperse.
+
+### 1.1 Limpieza de "Veneno" (Data Sanitation)
+- **Cero Strings en Cálculos**: Refactorizar totales en `orders.ts` (Dash) y `mock-orders.js` (POS) de string (`'20€'`) a `number` (`20.5`).
+- **Nomenclatura Unificada**: Migrar `nombre_producto` -> `name`, `precio_venta` -> `price` en todos los repos.
+- **Tipado de Estados**: Sustituir strings `'Libre'`/'`Ocupada'` por enums técnicos `'free'`/`'occupied'`.
+
+### 1.2 Completado de Types Faltantes (Dashboard)
+Definición de contratos para las vistas sin tipado actual:
+- `customers.ts`: CRM y fidelización.
+- `chat.ts`: Logs de IA y comunicación interna.
+- `notifications.ts`: Alertas push.
+- `inventory.ts`: Trazabilidad de stock y mermas.
+- `reservations.ts`: Integración con libro de reservas.
+
+---
+
+## Bloque 2: Madurez Operativa (Omni-Sincronización)
+
+El objetivo es que la UI sea totalmente reactiva y bidireccional entre todos los puntos del local.
+
+### 2.1 Sincronización en Tiempo Real
+- **Omni-direccionalidad**: Cualquier cambio realizado en **cualquier dispositivo** (PDA del camarero, Terminal del POS, KDS de cocina o Dashboard de gestión) debe reflejarse en **todos los dispositivos** de forma instantánea vía Convex.
+- **KDS Interactivo**: Evolucionar la vista estática a un tablero Kanban donde el estado de un ticket se actualice globalmente al arrastrarlo.
+- **División de Cuentas**: Implementar la lógica de prorrateo real en `modal-dividir-cuenta.html`.
+
+### 2.2 Dashboard de Autoridad
+- **Panel de Control BOT**: Vista de gestión para monitorear el Agente Cliente (WhatsApp).
+- **Editor de Comanda**: Permite a la gerencia ajustar comandas en tiempo real desde el Dashboard si es necesario.
+
+---
+
+## Bloque 3: Integración de Datos (Capa Convex)
+
+Migración de mocks locales a persistencia real y reactiva.
+
+| Fase | Tarea Crítica | Impacto |
+|:-----|:--------------|:--------|
+| **Esquema** | Transposición de Types a `convex/schema.ts`. | Unificación total de la verdad. |
+| **Mutations**| Vincular **Dialogs** (Dash) y **Modals** (POS) a funciones de escritura. | Fin de los datos hardcodeados. |
+| **Susscripciones**| Implementar listeners para que los cambios fluyan sin refrescar pantalla. | Operativa reactiva 100%. |
+
+---
+
+## Bloque 4: La Capa de Inteligencia (Bots & Agentes)
+
+Implementación de servicios de IA sobre datos ya saneados.
+
+1.  **Agente Cliente (V1)**: Conexión estable WhatsApp -> Carta -> Convex.
+2.  **Agente Gerente (V1)**: Notificaciones automáticas de stock y cierres de caja.
+3.  **Agente Camarero (V2)**: Procesamiento de voz para creación de órdenes desde la PDA.
+
+---

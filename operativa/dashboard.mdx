@@ -50,10 +50,14 @@ Para personalizar tu panel, pulsa el botón ⚙️ en la esquina superior derech
 |---|---|---|
 | **Comandas Recientes** | Los últimos 5-10 pedidos activos en tiempo real | `orders` |
 | **Alertas de Stock** | Lista de ingredientes con stock ≤ al mínimo configurado | `ingredients` |
-| **Distribución de Aforo** | % de ocupación por zona (Terraza, Salón, Barra) | `tables`, `environments` |
-| **Ranking de Equipo** | Leaderboard del personal por ventas gestionadas | `orders`, `staff` |
-| **Top Productos** | Los platos más vendidos del período | `order_items`, `products` |
-| **Desglose de Costes** | Distribución de gastos fijos vs. variables | `expenses` *(tabla pendiente)* |
+| Widget | Métrica / Función | Origen de Datos (BBDD) |
+| :--- | :--- | :--- |
+| **Ventas Totales** | Ingresos brutos filtrados por rango. | orders |
+| **Ticket Medio** | Promedio de gasto por comanda cerrada. | orders |
+| **Ranking Top Platos** | Volumen de ventas por producto. | order_items, products |
+| **Alertas de Stock** | Alerta temprana de insumos bajo mínimos. | ingredients |
+| **Ocupación de Sala** | % de mesas activas vs. totales. | tables |
+| **Leaderboard Staff** | Eficiencia de venta por empleado. | staff, orders |
 
 ---
 

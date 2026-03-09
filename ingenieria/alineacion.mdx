@@ -1,0 +1,264 @@
+---
+title: "Alineación de Datos"
+description: "Estado actual de los contratos de datos en los 4 productos. Types, mocks, agujeros y desalineaciones."
+---
+
+<Note>
+  Este documento audita los **contratos de datos** (types, mocks, schemas) de los **4 repos** del ecosistema y expone las incompatibilidades que hay que resolver antes de implementar Convex.
+</Note>
+
+> [!IMPORTANT]
+> **Regla de Oro Nº1**: El **Dashboard** centraliza TODO el peso de gestión (CMS, empleados, roles, permisos, configuraciones, impresoras). El **POS** es una terminal operativa ligera con lo mínimo para trabajar. El Dashboard es el **Creador/Dueño** y el POS es el **Consumidor/Ejecutor**.
+
+Para una navegación rápida:
+- Para las reglas del estándar propuesto, ver [Nomenclatura](/ingenieria/nomenclatura).
+- Para el inventario de vistas y rutas, ver [Mapa de Arquitectura](/ingenieria/mapa-arquitectura).
+- Para el catálogo de componentes, ver [Componentes UI](/ingenieria/componentes).
+
+---
+
+## 1. Inventario Técnico por Producto
+
+Organización de tipos, modelos y mocks actuales en cada repositorio.
+
+<Tabs>
+  <Tab title="Dashboard">
+    ### 1.1 Sistema de Tipos
+    **Ubicación**: `src/types/` — **9 archivos TypeScript** — **~30 types**
+
+    Esta tabla detalla los archivos de definición de tipos (`.ts`) que rigen la estructura de datos en el Dashboard. Es el "diccionario" oficial que utiliza el desarrollador para asegurar que los datos no se rompan entre componentes.
+
+    | # | Archivo | Types definidos | Cubre vista(s) |
+    |:--|:--------|:----------------|:---------------|
+    | 1 | `catalog.ts` | `Product`, `Category`, `Tax`, `Ingredient`, `IngredientCategory`, `AssociatedIngredient`, `UnitOfMeasure` | productos, categorias, ingredientes |
+    | 2 | `environments.ts` | `Environment`, `Table`, `TableStatus`, `EnvironmentStatus` | ambientes, plano-mesas |
+    | 3 | `orders.ts` | `Order`, `OrderDetailItem`, `OrderDetails`, `OrderStatus` | comandas, kds, pos |
+    | 4 | `staff.ts` | `StaffMember`, `Schedule`, `DayOfWeek`, `TimeLog`, `AbsenceRequest`, `ShiftLog`, `TimeReportEntry`, `User`, `StaffRole` | personal |
+    | 5 | `fichaje.ts` | `IncidenciaFichaje`, `TipoIncidencia`, `EstadoIncidencia`, `DispositivoFichaje`, `TipoDispositivo`, `EstadoDispositivo`, `MetodoFichaje` | personal (fichajes) |
+    | 6 | `menu.ts` | `Carta`, `ElementoCarta`, `MenuCombo`, `ElementoMenuCombo` | carta |
+    | 7 | `establishments.ts` | `Establishment` | settings |
+    | 8 | `devices.ts` | `Device`, `DeviceType`, `ConnectionMethod`, `DeviceRole` | settings |
+    | 9 | `reports.ts` | `Movement` | reportes (muy básico) |
+
+    ### 1.2 Otros Contratos de Alineación (`src/lib/`)
+    Aquí listamos archivos que no son definiciones de tipos puras, pero que actúan como "leyes" de consistencia visual o lógica en todo el sistema, como los colores asociados a cada rol de empleado.
+    | # | Archivo | Función de Alineación |
+    |:--|:--------|:-----------------------|
+    | 1 | `role-colors.ts` | **Contrato Visual**: Mapeo de `StaffRole` -> Colores Tailwind (consistencia en todo el UI). |
+    | 2 | `export-utils.ts` | **Contrato de Reportes**: Define qué campos de la `Order` son exportables a CSV/Excel. |
+    | 3 | `utils.ts` | Utilidades base de Tailwind (`cn`). |
+
+    **Mocks y Hooks**: `src/data/` contiene 10 archivos de mock data. `src/hooks/` contiene 6 hooks operativos (`use-mobile`, `useDevices`, etc.).
+
+    ### 1.3 Vistas del Dashboard SIN types (Agujeros)
+    Este inventario identifica las páginas que ya existen físicamente o están planificadas, pero que carecen de un archivo de tipos dedicado. Son áreas donde el contrato de datos aún es volátil o está pendiente de definición.
+
+    | # | Vista | Estado en `src/app` | Archivo que falta | Qué debería definir |
+    |:--|:------|:-------------------|:------------------|:--------------------|
+    | 1 | `/clientes` | 🔲 No implementado | `customers.ts` | `Customer`, `CustomerTag`, historial |
+    | 2 | `/chat` | 🔲 No implementado | `chat.ts` | `Conversation`, `Message`, `Channel` |
+    | 3 | `/notificaciones` | ✅ Implementado | `notifications.ts` | `Notification`, `AlertType`, `NotificationStatus` |
+    | 4 | `/promociones` | ✅ Implementado | `promotions.ts` | `Promotion`, `Coupon`, `DiscountRule`, `CampaignStats` |
+    | 5 | `/inventario` | ✅ Implementado | `inventory.ts` | `StockMovement`, `Merma`, `Purchase` |
+    | 6 | `/reservas` | ✅ Implementado | `reservations.ts` | `Reservation` con fecha, hora, personas, estado |
+    | 7 | `/` (dashboard) | ✅ Implementado | `dashboard.ts` | `DashboardWidget`, `KPI`, `MetricConfig` |
+  </Tab>
+
+  <Tab title="POS (Venta)">
+    ### 2.1 Modelo de Datos del POS (Producción)
+    **Lenguaje**: Vanilla JS — **No tiene TypeScript ni types formales.**
+    Los modelos se deducen de `src/data/mock-*.js` y la propuesta Convex en `docs/project/estructura-datos.md`.
+
+    ### 2.2 Mock Data (las "interfaces" implícitas)
+    Al ser un proyecto en Vanilla JS, el POS no tiene archivos `.ts`. Esta tabla extrae la estructura real de los datos que se están usando en los archivos de prueba (`mock-*.js`), sirviendo como base para crear el futuro esquema de base de datos.
+
+    | # | Archivo | Entidad | Campos reales del mock |
+    |:--|:--------|:--------|:-----------------------|
+    | 1 | `mock-store.js` | **Category** | `id`, `name` |
+    | 2 | `mock-store.js` | **Product** | `id`, `categoryId`, `name`, `price` |
+    | 3 | `mock-pos.js` | **Table** | `id`, `label`, `number`, `capacity`, `status`, `statusColor` |
+    | 4 | `mock-pos.js` | **Client** | `id`, `name`, `initials`, `color`, `phone`, `email` |
+    | 5 | `mock-pos.js` | **Order** | `ref`, `location`, `time`, `wait`, `server`, `total`, `status`, `statusClass` |
+    | 6 | `mock-orders.js` | **Order** (pendientes) | Igual + campos de estilo UI |
+    | 7 | `mock-config.js` | **AppConfig** | `user{name,role}`, `store{name,currency,taxRate}`, `ui{currentTable,texts{}}` |
+    | 8 | `mock-ui.js` | **TableStatusLegend** | `label`, `color`, `shadow` |
+    | 9 | `mock-ui.js` | **PaymentMethod** | `id`, `label`, `icon`, `active` |
+    | 10 | `mock-ui.js` | **ChatNode** | `id`, `name`, `status`, `active`, `color` |
+    | 11 | `mock-ui.js` | **ChatMessage** | `type`, `user`, `time`, `text`, `duration`, `progress` |
+
+    ### 2.3 Propuesta Convex propia del POS
+    Esta es la hoja de ruta de datos diseñada específicamente para la migración a la nube (Convex). Define las tablas y campos que se consideran esenciales para que el sistema de venta sea robusto y escalable.
+    En `docs/project/estructura-datos.md`:
+
+    | # | Tabla Convex | Campos propuestos |
+    |:--|:-------------|:------------------|
+    | 1 | `products` | `name`, `price`, `categoryId`, `image`, `sku`, `active` |
+    | 2 | `categories` | `name`, `order`, `icon` |
+    | 3 | `tables` | `number`, `capacity`, `zone`, `status(free,occupied,reserved,dirty)`, `currentOrderId` |
+    | 4 | `orders` | `tableId`, `userId`, `customerId`, `items[]`, `status(open,pending_payment,paid,void)`, `totals{}`, `payments[]` |
+    | 5 | `customers` | `name`, `phone`, `email`, `points`, `lastVisit` |
+  </Tab>
+
+  <Tab title="Carta Digital">
+    ### 3.1 Types de la Carta
+    Define la estructura de datos que viaja desde el móvil del cliente. Es el contrato más "externo" y crítico, ya que debe ser compatible con lo que el Dashboard administra y lo que el POS recibe.
+    **Repo**: `carta.camarai.es-main` — **1 archivo TypeScript** — `src/types/index.ts`
+
+    | # | Type | Campos | Notas |
+    |:--|:-----|:-------|:------|
+    | 1 | `PedidoItem` | `id_categoria_detectada`, `nombre_producto`, `variaciones{currency, item_id, name, price}`, `cantidad`, `img_url?`, `descripcion?`, `hasVariations?` | ⚠️ Campos en español |
+    | 2 | `Pedido` | `{ [key: string]: PedidoItem }` | Diccionario indexado por key |
+    | 3 | `MenuData` | `{ [category: string]: PedidoItem[] }` | Menú agrupado por categoría |
+
+    ### 3.2 APIs y Flujo
+    **APIs**: 2 endpoints en `src/pages/api/` que actúan como puente hacia n8n:
+    - `obtenerCarta.ts` — POST `{ session }` → devuelve `MenuData`.
+    - `generarComanda.ts` — POST `{ data: { session, line_items: [ { quantity, catalog_object_id, note } ] } }`.
+
+    **Flujo**: WhatsApp Bot → envía link `carta.camarai.es?session=X` → cliente navega carta → añade al carrito → `generarComanda` → pedido llega al POS
+  </Tab>
+</Tabs>
+
+---
+
+## 2. Análisis de Desalineación Crítica
+
+Comparativa directa de campos entre Dashboard, POS y Carta. Las discrepancias marcadas con ⚠️ deben resolverse en el schema unificado.
+
+### 2.1 Order (Pedido)
+Esta tabla es el corazón de la desalineación. Compara cómo se define un "Pedido" en los tres sistemas, revelando que campos tan básicos como el `id` o el `total` usan formatos totalmente distintos que deben unificarse.
+| Campo | Dashboard (`orders.ts`) | POS (mock / doc Convex) | Carta (`types/index.ts`) |
+|:------|:------------------------|:------------------------|:-------------------------|
+| id | `id?: string` | `ref: '#ORD-001'` (mock) / auto `_id` (Convex) | No tiene (genera vía API) |
+| total | `total: string` ⚠️ | `total: '20.97€'` (mock ⚠️) / `totals.total: number` (Convex ✅) | Calculado en checkout (no persistido) |
+| estado | `'En Progreso'│'Cancelado'│'Completado'` (ES) ⚠️ | `'Enviado'│'Abierto'` (mock ES ⚠️) / `'open'│'pending_payment'│'paid'│'void'` (Convex ✅) | No tiene (la carta solo envía) |
+| mesa | `table: string` | `location: 'Mesa 1'` (mock) / `tableId: string` (Convex ✅) | Implícito vía `session` |
+| items | `OrderDetailItem[]` (inline) | `items[]{productId, qty, price, course, itemStatus}` (Convex ✅) | `Pedido{ [key]: PedidoItem }` ⚠️ formato diferente |
+| pago | No existe ❌ | `payments[]{method, amount, timestamp}` (Convex ✅) | No aplica (no cobra) |
+| timestamps | `time: string`, `date: string` | `createdAt: number`, `updatedAt: number` (Convex ✅) | No tiene |
+
+### 2.2 Table (Mesa)
+Analizamos aquí el objeto Mesa. El Dashboard lo ve como una figura geométrica con coordenadas, mientras que el POS lo ve como una entidad operativa con estados de ocupación. La alineación busca fusionar ambas visiones.
+| Campo | Dashboard (`environments.ts`) | POS (mock / doc Convex) |
+|:------|:------------------------------|:------------------------|
+| id | `id: number` ⚠️ | `id: number` (mock) / auto `_id` (Convex) |
+| capacidad | `capacity: number` ✅ | `capacity: '4P'` (mock ⚠️) / `capacity: number` (Convex ✅) |
+| estado | `'Libre'│'Ocupada'│'Reservada'│'Mantenimiento'│'Inactiva'` (ES) ⚠️ | `'free'│'occupied'│'reserved'│'dirty'` (EN ✅) |
+| geometría | `x`, `y`, `width`, `height`, `rotation`, `shape`, `chairs{}` ✅ | No tiene |
+| orden activa | No existe ❌ | `currentOrderId` (Convex ✅) |
+| zona | `Environment` (padre) | `zone: string` (Convex) |
+
+### 2.3 Category & Product
+El mayor conflicto aquí es la nomenclatura (Español vs Inglés). Esta tabla expone que estamos usando hasta tres nombres distintos para referirnos a la misma categoría o producto, lo cual causaría errores en una base de datos única.
+| Entidad | Campo | Dashboard (ES ⚠️) | POS (EN ✅) | Carta |
+|:--------|:------|:-------------------|:------------|:------|
+| **Category** | nombre | `nombre_categoria` | `name` | Key de `MenuData` |
+| | orden | No existe ❌ | `order` | Orden array |
+| | icono | No existe ❌ | `icon` | No tiene |
+| **Product** | nombre | `nombre_producto` | `name` | `nombre_producto` |
+| | precio | `precio_venta` | `price` | `variaciones.price` |
+| | imagen | `url_imagen_producto`| `image` | `img_url` |
+| | SKU | No existe ❌ | `sku` | No tiene |
+| | Variantes | No existe ❌ | No existe ❌ | `variaciones{}` ✅ |
+
+### 2.4 Customer
+Aquí se evidencia el "agujero de datos" del cliente. Mientras el POS ya maneja perfiles con puntos y visitas, el Dashboard y la Carta aún no han formalizado este contrato, siendo una prioridad para la gestión de fidelización.
+| | Dashboard | POS | Carta |
+|:--|:----------|:----|:------|
+| Existe | ❌ | ✅ `name`, `phone`, `email`, `points`, `lastVisit` | ❌ (vía `session` de WhatsApp) |
+
+### 2.5 Conceptos exclusivos y Decisiones
+Para evitar redundancias, esta matriz define qué repositorio tiene la "verdad absoluta" sobre cada concepto. Bajo la **Regla Nº1**, el Dashboard asume la autoridad sobre la configuración de cualquier entidad, incluso si el POS la utiliza operativamente.
+
+| Concepto | Dashboard | POS | Carta | Decisión Final |
+|:---------|:----------|:----|:------|:---------|
+| `Environment` (zonas + geometría) | ✅ | ❌ | ❌ | **Dashboard** (Dueño de la infraestructura) |
+| `Fichaje` / incidencias (7 types) | ✅ | ❌ | ❌ | **Dashboard** (Dueño de RRHH) |
+| `Carta` / `MenuCombo` (4 types) | ✅ | ❌ | ❌ | **Dashboard** (Dueño del CMS) |
+| `Device` / periféricos (4 types) | ✅ | ❌ | ❌ | **Dashboard** (Dueño de configuración técnica) |
+| `Establishment` | ✅ | ❌ | ❌ | **Dashboard** (Dueño de identidad) |
+| `Staff` / personal (9 types) | ✅ | ❌ | ❌ | **Dashboard** (Dueño de acceso) |
+| `PaymentMethod` (6 métodos) | ❌ | ✅ | ❌ | **Dashboard** (Gestiona la lista) → POS (Usa) |
+| `ChatNode` (Terminales/Nodos) | ❌ | ✅ | ❌ | **Dashboard** (Crea nodos) → POS (Se identifica) |
+| `ChatMessages` (Historial) | ❌ | ✅ | ❌ | **Dashboard** (Auditoría/Persistencia) |
+| `Order.payments[]` | ❌ | ✅ | ❌ | Adoptar del POS (Lógica de cierre) |
+| `Order.course` (tiempos) | ❌ | ✅ | ❌ | Adoptar del POS (Flujo cocina) |
+| `Table.currentOrderId` | ❌ | ✅ | ❌ | Adoptar del POS (Estado operativo) |
+| `PedidoItem.variaciones` | ❌ | ❌ | ✅ | Adoptar de Carta (Estructura venta) |
+| `LanguageContext` (i18n) | ❌ | ❌ | ✅ | Evaluar i18n global centralizado |
+| `session` (WhatsApp link) | ❌ | ❌ | ✅ | **Adoptar** (Vínculo vital Dashboard-Carta-POS) |
+
+---
+
+## 3. Estados Incompatibles e Infraestructura
+
+<Warning>
+  El Dashboard utiliza estados en español como strings, mientras que el POS y la propuesta Convex usan enums en inglés. Esta es la prioridad #1 de refactorización.
+</Warning>
+
+### 3.1 Mapeo de Estados (Mesas)
+Esta tabla actúa como un "traductor". Asegura que los enums técnicos en inglés (usados en base de datos) se mapeen correctamente a las etiquetas visuales en español que ven los usuarios en el Dashboard y el POS.
+| Estado | Dashboard | POS mock | POS Convex doc |
+|:-------|:----------|:---------|:---------------|
+| Libre | `'Libre'` | `'free'` | `'free'` |
+| Ocupada | `'Ocupada'` | `'occupied'` | `'occupied'` |
+| Reservada | `'Reservada'` | `'reserved'` | `'reserved'` |
+| Sucia | No existe | `'dirty'` | `'dirty'` |
+| Mantenimiento | `'Mantenimiento'` | No existe | No existe |
+| Inactiva | `'Inactiva'` | No existe | No existe |
+
+### 3.2 Próximos Pasos (Hoja de Ruta)
+1. <Check>Definir el `convex/schema.ts` unificado, tomando como base la propuesta Convex del POS y enriqueciéndola con los campos exclusivos del Dashboard y las variaciones de la Carta.</Check>
+2. <Check>Crear un contrato de types TypeScript compartido.</Check>
+3. <Check>Migrar los campos del Dashboard y la Carta de español a inglés.</Check>
+4. <Check>Rellenar los 7 agujeros de types faltantes del Dashboard.</Check>
+5. <Check>Integrar el flujo WhatsApp→Carta→POS vía Convex (session → tableId → orderId).</Check>
+
+---
+
+## 4. Auditoría de Deuda Técnica
+
+Esta sección detalla los desvíos actuales entre el código verificado y el estándar ideal de producción. Es la hoja de ruta para la limpieza previa a la integración con Convex.
+
+### 4.1 Análisis de "Veneno" de Datos (Hardcoding)
+
+| Producto | Entidad | Hallazgo de Deuda Técnica | Gravedad |
+|:---------|:--------|:--------------------------|:---------|
+| **Dashboard** | Orders | Totales grabados como strings con símbolo (`'€70.50'`). Impide cálculos matemáticos. | 🔴 Crítica |
+| **Dashboard** | Catalog | Hybrid Language: Atributos en ES (`nombre_producto`) y EN (`firstName`) cruzados. | 🔴 Alta |
+| **POS** | Orders | UI Poisoning: El dato contiene clases de Tailwind (`bg-accent`). Ruptura de arquitectura. | 🔴 Alta |
+| **POS** | Payment | El cálculo de cambio de moneda intenta operar con strings (`received - '20.97€'`). | 🔴 Crítica |
+| **Carta** | API | Dependencia de webhooks externos (`bot1.camarai.es`). Punto único de fallo. | 🔴 Alta |
+| **Carta** | Menu | Nomenclatura manual: Mapeo de `product.url` a `img_url` en caliente. | 🟡 Media |
+
+### 4.2 Agujeros de Infraestructura
+
+#### Dashboard
+- **Desconexión Operativa**: Las mesas en el plano de sala no están vinculadas a su `orderId` activo. Son visualmente dinámicas pero lógicamente estáticas.
+- **IDs Inconsistentes**: Mezcla de IDs numéricos (`1`) y strings (`'staff-1'`). Requiere estandarización a `Id<"table">` de Convex.
+
+#### POS
+- **Simulación de Pasarela**: La validación de pagos no-efectivo es un `return true`. No existe integración real con hardware de cobro.
+
+#### Carta
+- **Fragilidad de Sesión**: La sesión se captura por URL pero no hay un contrato de validación contra el Dashboard/Convex.
+
+---
+
+## 5. Glosario Técnico: Modals vs Dialogs
+
+Aunque parezcan lo mismo, en Camarai cumplen roles y estados técnicos distintos:
+
+| Término | Producto | Implementación | Contexto de Uso |
+|:--------|:---------|:---------------|:----------------|
+| **Dialog** | Dashboard | Radix UI / Shadcn | Ventanas interactivas complejas que requieren una acción del administrador (ej. Editar producto). |
+| **Modal** | POS | Templates HTML puros | Ventanas de estado que bloquean el flujo operativo del camarero para una tarea atómica (ej. Pagar, Dividir). |
+
+> [!NOTE]
+> **Diferencia Clave**: El **Dialog** es una pieza composible de React orientada a la gestión. El **Modal** es un fragmento inyectado en el DOM orientado a la velocidad táctil.
+
+---
+
+<Note>
+  **Conclusión Estratégica**: La infraestructura visual de Camarai está lista (Nivel Dios), pero el motor de datos está actualmente "envenenado" con mocks que no respetan tipos numéricos ni nomenclatura pura. La fase de integración con Convex deberá limpiar estos 3 frentes simultáneamente para asegurar la integridad de la "Cerebro de Gestión".
+</Note>
