@@ -14,7 +14,7 @@ Este repositorio centraliza la **inteligencia estratégica** de Camarai. Documen
 | **Base de Datos** | ✅ Especificación completa | [`ingenieria/bbdd.mdx`](ingenieria/bbdd.mdx) — 25 tablas, ~200 campos |
 | **Alineación de Datos** | 🟡 Sincronizado con BBDD | [`ingenieria/alineacion.mdx`](ingenieria/alineacion.mdx) |
 | **Backend Convex** | 🔴 Pendiente | Vista por crear en Ingeniería |
-| **Capturas de Pantalla** | 🟡 11 faltantes | Ver sección "Auditoría Visual" |
+| **Capturas de Pantalla** | 🟡 24 faltantes | Ver sección "Auditoría Visual" |
 
 > [!IMPORTANT]
 > **Omni-Sincronización**: En Camarai, cualquier cambio en cualquier dispositivo (POS, PDA, KDS o Dashboard) se refleja instantáneamente en el resto del ecosistema. La documentación debe respetar este principio de "Verdad Única".
@@ -26,7 +26,7 @@ Este repositorio centraliza la **inteligencia estratégica** de Camarai. Documen
 ### Fase 1: Auditoría Visual Completa *(En progreso)*
 - [x] Estructura de Tabs y Tablas en todas las vistas.
 - [x] Placeholders de imágenes con nombres estandarizados (`TODO-*.png`).
-- [ ] Captura de pantallas de las 16 vistas/modals pendientes.
+- [ ] Captura de pantallas de las 24 vistas/modals pendientes.
 
 ### Fase 2: Especificación de BBDD *(Completada)*
 - [x] Especificación maestra con trazabilidad Tabla → Vista → Rol.
@@ -51,7 +51,7 @@ Este repositorio centraliza la **inteligencia estratégica** de Camarai. Documen
 
 ---
 
-## Auditoría Visual — Capturas Pendientes (11)
+## Auditoría Visual — Capturas Pendientes (24)
 
 ### Gestión de Catálogo y Stock (3)
 - [ ] `TODO-productos-view-main.png` — Listado de productos con filtros.
@@ -69,8 +69,21 @@ Este repositorio centraliza la **inteligencia estratégica** de Camarai. Documen
 - [ ] `TODO-chat-view-main.png` — Vista principal del chat.
 - [ ] `TODO-chat-agent-alerts.png` — Alerta de agente IA en el chat.
 
-### Terminales Operativos (POS, PDA) (1)
+### Terminales Operativos (POS & KDS, PDA) (14)
 - [ ] `TODO-pda-camarero-view.png` — Interfaz principal de la PWA del camarero.
+- [ ] `TODO-pos-view-main.png` — Pantalla principal del POS (`index.html`).
+- [ ] `TODO-pos-modal-auth.png` — Login / PIN del empleado (`modal-auth.html`).
+- [ ] `TODO-pos-modal-descuento.png` — Aplicación de descuentos (`modal-descuento.html`).
+- [ ] `TODO-pos-modal-dividir-cuenta.png` — División de cuenta (`modal-dividir-cuenta.html`).
+- [ ] `TODO-pos-modal-editar-precio.png` — Edición manual de precio (`modal-editar-precio.html`).
+- [ ] `TODO-pos-modal-modificar-pedido.png` — Ajuste rápido de ticket (`modal-modificar-pedido.html`).
+- [ ] `TODO-pos-modal-opciones-pedido.png` — Opciones del pedido / notas (`modal-opciones-pedido.html`).
+- [ ] `TODO-pos-modal-marchar.png` — Aviso de "Marchar Plato" (`modal-marchar.html`).
+- [ ] `TODO-pos-modal-pay.png` — Pasarela de pago final (`modal-pay.html`).
+- [ ] `TODO-pos-modal-void.png` — Cancelación de plato/ticket (`modal-void-reason.html`).
+- [ ] `TODO-pos-modal-configuracion.png` — Configuración de terminal (`modal-configurar-cuenta.html`).
+- [ ] `TODO-pos-modal-user.png` — Opciones de usuario / Turno (`modal-user-options.html`).
+- [ ] `TODO-pos-modal-chat.png` — Chat interno del POS (`modal-chat.html`).
 
 ### Imágenes Potencialmente Sobrantes
 - `modal-carta-general.png` / `modal-carta-whatsapp.png` — Reemplazadas.
