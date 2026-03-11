@@ -8,7 +8,9 @@ description: "Gestión centralizada del catálogo de platos, bebidas y servicios
     ## El Corazón del Catálogo
     En esta sección se definen todos los elementos que componen la oferta del restaurante. Es el núcleo de la base de datos de ventas.
 
-    ![Placeholder: Vista Listado de Productos](/images/TODO-productos-view-main.png)
+    <Frame>
+      <img src="/images/cartas-tab-productos.png" alt="Vista Listado de Productos en el Dashboard" />
+    </Frame>
 
     | Funcionalidad | Descripción |
     | :--- | :--- |
@@ -18,49 +20,65 @@ description: "Gestión centralizada del catálogo de platos, bebidas y servicios
   </Tab>
 
   <Tab title="Ficha Técnica">
-    ## 🪟 Modal: Ficha de Producto
-    Es el mismo modal de alta densidad utilizado en la sección de Cartas, permitiendo una gestión 360°.
+    ## Modal: Ficha de Producto
+    Es el mismo modal de alta densidad utilizado en la sección de [Gestión de Menú](/gestion/cartas-dashboard), permitiendo una gestión 360°.
 
-    ````carousel
-    ![Tab General](/images/cartas-modal-producto-1.png)
-    <!-- slide -->
-    ![Tab Precios](/images/cartas-modal-producto-2.png)
-    <!-- slide -->
-    ![Tab Receta](/images/cartas-modal-producto-3.png)
-    <!-- slide -->
-    ![Tab Variantes](/images/cartas-modal-producto-4.png)
-    <!-- slide -->
-    ![Tab Disponibilidad](/images/cartas-modal-producto-5.png)
-    ````
+    <CardGroup cols={2}>
+      <Card title="General">
+        <Frame>
+          <img src="/images/modal-producto-general.png" alt="Modal Producto — Tab General" />
+        </Frame>
+      </Card>
+      <Card title="Precios">
+        <Frame>
+          <img src="/images/modal-producto-precios.png" alt="Modal Producto — Tab Precios" />
+        </Frame>
+      </Card>
+      <Card title="Receta">
+        <Frame>
+          <img src="/images/modal-producto-receta.png" alt="Modal Producto — Tab Receta" />
+        </Frame>
+      </Card>
+      <Card title="Variantes">
+        <Frame>
+          <img src="/images/modal-producto-variantes.png" alt="Modal Producto — Tab Variantes" />
+        </Frame>
+      </Card>
+      <Card title="Disponibilidad">
+        <Frame>
+          <img src="/images/modal-producto-disponibilidad.png" alt="Modal Producto — Tab Disponibilidad" />
+        </Frame>
+      </Card>
+    </CardGroup>
 
     ### Secciones del Modal
-    - **General**: Alérgenos, descripción e imágenes.
-    - **Precios**: Configuración de PVP por zona de consumo.
-    - **Receta**: Escandallo vinculado a `ingredientes`.
-    - **Variantes**: Modificadores y extras opcionales.
-    - **Disponibilidad**: Reglas de horario para la Carta Digital.
+    - **General**: Nombre, imagen (128×128), categoría y descripción.
+    - **Precios**: PVP, impuesto aplicable y cálculo de rentabilidad (Margen Bruto).
+    - **Receta**: Escandallo vinculado a `ingredients` para coste de producción.
+    - **Variantes**: Modificadores y extras opcionales (ej: "Grande" +1.50€).
+    - **Disponibilidad**: Horario, visibilidad y checkboxes de alérgenos (Gluten, Crustáceos, Huevos, Pescado, Cacahuetes, Soja).
   </Tab>
 
   <Tab title="Especificación Técnica">
-    <Note icon="triangle-exclamation" color="#FF0000">
-      **🚨 HAY QUE SOLUCIONAR (CRÍTICO)**: El campo `nombre_producto` debe migrarse a `name` para alinearse con el POS y la Carta.
-    </Note>
-
-    <Note icon="money-bill" color="#FF0000">
-      **🚨 HAY QUE SOLUCIONAR**: Los precios deben ser `number` puros para cálculos automáticos de IVA.
-    </Note>
+    <Warning>
+      **MIGRACIÓN PENDIENTE**: El campo `nombre_producto` debe migrarse a `name` y los precios de `string` a `number` (céntimos) para alinearse con Convex. Ver [Alineación de Datos](/ingenieria/alineacion).
+    </Warning>
 
     ### Esquema Convex: `products`
     | Campo | Tipo | Estado |
     | :--- | :--- | :--- |
     | `name` | `string` | ✅ Estándar |
-    | `price` | `number` | ✅ Estándar |
+    | `price` | `number` | ✅ Estándar (céntimos) |
     | `category_id` | `Id<"categories">` | ✅ Relacional |
     | `active` | `boolean` | ✅ Estado |
+    | `image` | `string` (URL) | ✅ Convex Storage |
+    | `description` | `string` | ✅ Descripción |
+    | `allergens` | `string[]` | ✅ Lista de alérgenos |
+    | `variants` | `array` | ✅ Modificadores |
   </Tab>
 
   <Tab title="Roadmap">
-    ## 🚀 Futuras Mejoras
+    ## Próximas Mejoras
     - **Carga Masiva**: Importación de catálogo vía Excel/CSV.
     - **AI Description**: Generación automática de descripciones de platos sugerentes mediante IA.
     - **Etiquetas Nutricionales**: Cálculo automático de Kcal basado en la receta.

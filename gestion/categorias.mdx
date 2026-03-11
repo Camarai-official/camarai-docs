@@ -8,38 +8,80 @@ description: "Organización y jerarquía del menú para el POS y la Carta Digita
     ## Organización del Menú
     Las categorías permiten agrupar los productos para facilitar su localización en el punto de venta y darlos de alta de forma estructurada en la Carta Digital.
 
-    ![Placeholder: Vista Listado de Categorías](/images/TODO-categorias-view-main.png)
+    <Frame>
+      <img src="/images/cartas-tab-categorias.png" alt="Vista Listado de Categorías en el Dashboard" />
+    </Frame>
 
-    ### 🪟 Modal: Editar Categoría
-    ![Modal Categoría](/images/cartas-modal-categoria.png)
-
-    | Campo | Descripción |
+    | Columna | Descripción |
     | :--- | :--- |
-    | **Nombre** | Título de la sección (ej: "Entrantes"). |
-    | **Carta Asignada** | Menú al que pertenece la categoría. |
-    | **Icono** | Imagen representativa para el POS/Carta. |
+    | **Icono** | Imagen representativa de la categoría. |
+    | **Categoría** | Nombre visible (ej: "Entrantes", "Carnes"). |
+    | **Productos** | Número de productos asignados. |
+    | **Visibilidad** | Visible / Oculta en la Carta Digital. |
+    | **Acciones** | Editar ✏️, Ocultar 👁️, Eliminar 🗑️. |
   </Tab>
 
-  <Tab title="Parámetros Avanzados">
-    ## Control de Visibilidad
-    - **Jerarquía**: Controla el orden manual de aparición.
-    - **Visibilidad**: Activar/Desactivar secciones enteras por temporada.
-    - **Horarios**: (Roadmap) Categorías que solo aparecen en desayunos o cenas.
+  <Tab title="Modal Categoría">
+    ## Modal: Crear/Editar Categoría
+    Dialog con **3 tabs** para configurar todos los aspectos de una categoría.
+
+    ### Tab General
+    <Frame>
+      <img src="/images/modal-categoria-general.png" alt="Modal Categoría — Tab General" />
+    </Frame>
+
+    | Campo | Tipo | Descripción |
+    | :--- | :--- | :--- |
+    | **Nombre** | `string` | Título de la sección (ej: "Entrantes"). |
+    | **Descripción** | `string` | Descripción opcional. |
+    | **Categoría Padre** | `Id<"categories">` | Para crear subcategorías. |
+    | **Orden de Visualización** | `number` | Menor número = aparece antes. |
+    | **Impresora de Destino (KDS)** | `Id<"kds_stations">` | Dirige tickets de esta categoría a la pantalla/impresora correcta. |
+    | **Visible en Carta** | `boolean` | Toggle: mostrar esta categoría en las cartas activas. |
+
+    ### Tab Apariencia
+    <Frame>
+      <img src="/images/modal-categoria-apariencia.png" alt="Modal Categoría — Tab Apariencia" />
+    </Frame>
+
+    | Campo | Tipo | Descripción |
+    | :--- | :--- | :--- |
+    | **Icono** | `string` | Selector de iconos (ej: "Cubiertos"). |
+    | **Color** | `string` | Paleta de 5 colores para el badge. |
+    | **Imagen de Banner** | `string` (URL) | Se usa como fondo visual en la App. |
+    | **Vista Previa en App** | — | Muestra cómo se verá la categoría en el menú digital del cliente. |
+
+    ### Tab Productos
+    <Frame>
+      <img src="/images/modal-categoria-productos.png" alt="Modal Categoría — Tab Productos" />
+    </Frame>
+
+    Gestiona qué productos pertenecen a esta categoría. Utiliza el buscador para asignar y desasignar productos con un clic.
   </Tab>
 
   <Tab title="Especificación Técnica">
-    <Note icon="language" color="#FF0000">
-      **🚨 HAY QUE SOLUCIONAR**: Cambiar `nombre_categoria` por `name` en Convex para unificación con la Carta Digital.
-    </Note>
+    <Warning>
+      **MIGRACIÓN PENDIENTE**: Cambiar `nombre_categoria` por `name` en Convex para unificación con la Carta Digital. Ver [Alineación de Datos](/ingenieria/alineacion).
+    </Warning>
 
-    ### Relación de Datos
-    - **Tabla**: `categories`
-    - **Link**: Cada categoría debe apuntar a un `menu_id`.
+    ### Esquema Convex: `categories`
+    | Campo | Tipo | Descripción |
+    | :--- | :--- | :--- |
+    | `name` | `string` | Nombre visible de la categoría. |
+    | `description` | `string` | Descripción opcional. |
+    | `menu_id` | `Id<"menu">` | Carta a la que pertenece. |
+    | `parent_id` | `Id<"categories">` | Categoría padre (jerarquía). |
+    | `icon` | `string` | Icono representativo. |
+    | `color` | `string` | Color del badge. |
+    | `order` | `number` | Orden de visualización. |
+    | `visible` | `boolean` | Visibilidad en la Carta Digital. |
+    | `kds_station_id` | `Id<"kds_stations">` | Impresora/pantalla destino. |
   </Tab>
 
   <Tab title="Roadmap">
-    ## 🚀 Futuras Mejoras
+    ## Próximas Mejoras
     - **Subcategorías**: Implementar niveles infinitos de jerarquía.
     - **Estilos Personalizados**: Colores de fondo específicos por categoría en la Carta Digital.
+    - **Categorías por Horario**: Mostrar solo categorías relevantes según la franja horaria.
   </Tab>
 </Tabs>

@@ -14,7 +14,7 @@ Este repositorio centraliza la **inteligencia estratégica** de Camarai. Documen
 | **Base de Datos** | ✅ Especificación completa | [`ingenieria/bbdd.mdx`](ingenieria/bbdd.mdx) — 25 tablas, ~200 campos |
 | **Alineación de Datos** | 🟡 Sincronizado con BBDD | [`ingenieria/alineacion.mdx`](ingenieria/alineacion.mdx) |
 | **Backend Convex** | 🔴 Pendiente | Vista por crear en Ingeniería |
-| **Capturas de Pantalla** | 🔴 16 faltantes | Ver sección "Auditoría Visual" |
+| **Capturas de Pantalla** | 🟡 10 faltantes | Ver sección "Auditoría Visual" |
 
 > [!IMPORTANT]
 > **Omni-Sincronización**: En Camarai, cualquier cambio en cualquier dispositivo (POS, PDA, KDS o Dashboard) se refleja instantáneamente en el resto del ecosistema. La documentación debe respetar este principio de "Verdad Única".
@@ -51,7 +51,7 @@ Este repositorio centraliza la **inteligencia estratégica** de Camarai. Documen
 
 ---
 
-## Auditoría Visual — Capturas Pendientes (16)
+## Auditoría Visual — Capturas Pendientes (10)
 
 ### Gestión de Catálogo y Stock (3)
 - [ ] `TODO-productos-view-main.png` — Listado de productos con filtros.
@@ -69,16 +69,10 @@ Este repositorio centraliza la **inteligencia estratégica** de Camarai. Documen
 - [ ] `TODO-chat-view-main.png` — Vista principal del chat.
 - [ ] `TODO-chat-agent-alerts.png` — Alerta de agente IA en el chat.
 
-### Inteligencia Artificial (6)
-- [ ] `TODO-agente-cliente-wa-welcome.png` — WhatsApp: Saludo y carta.
-- [ ] `TODO-agente-cliente-wa-booking.png` — WhatsApp: Flujo de reserva.
-- [ ] `TODO-agente-gerente-wa-alert.png` — WhatsApp: Alerta stock bajo.
-- [ ] `TODO-agente-gerente-wa-kpi.png` — WhatsApp: Resumen de ventas.
-- [ ] `TODO-agente-camarero-voice-ui.png` — Interfaz de toma de pedidos por voz.
-- [ ] `TODO-agente-tpv-chat-ui.png` — Chat del Agente TPV en Dashboard.
+### Terminales Operativos (POS, PDA) (1)
+- [ ] `TODO-pda-camarero-view.png` — Interfaz principal de la PWA del camarero.
 
 ### Imágenes Potencialmente Sobrantes
-- `cocina-view.png` — Versión antigua del KDS.
 - `modal-carta-general.png` / `modal-carta-whatsapp.png` — Reemplazadas.
 - `modal-categoria-general.png` / `apariencia.png` — Reemplazadas.
 - `modal-empleado.png` — Redundante con `personal-modal-*`.
@@ -105,7 +99,7 @@ mintlify dev
 camarai-docs/
 ├── general/          # Índice, Roadmap, Nomenclatura
 ├── ingenieria/       # BBDD, Roles, Autenticación, Alineación, Componentes
-├── operativa/        # Dashboard, Comandas, Plano Mesas, Chat, POS, KDS
+├── operativa/        # Dashboard, Comandas, Plano Mesas, Chat, POS, PDA Camarero
 ├── gestion/          # Productos, Categorías, Ingredientes, Inventario, Reservas, Personal, Reportes, Cartas
 ├── marketing/        # Clientes, Promociones, Notificaciones
 ├── configuracion/    # Configuración General, Perfil, Impuestos

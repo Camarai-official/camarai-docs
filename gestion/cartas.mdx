@@ -1,79 +1,186 @@
 ---
-title: "Cartas — El Menú Digital del Restaurante"
-description: "Creación y gestión de cartas, categorías y productos. Tres tabs, un único punto de control."
+title: "Carta Digital — La Experiencia del Cliente"
+sidebarTitle: "Carta Digital"
+description: "Menú digital accesible desde el móvil del comensal. Escanear QR → WhatsApp → ver la carta → hacer pedido."
+---
+
+La **Carta Digital** es la aplicación web que el cliente final ve en su móvil al escanear el QR de la mesa. No es un PDF estático: es una interfaz interactiva, multiidioma y conectada en tiempo real con el [Agente Cliente de WhatsApp](/agentes/agente-cliente).
+
+<CardGroup cols={2}>
+  <Card title="📱 Experiencia Móvil" icon="mobile-screen">
+    Navegación táctil optimizada para smartphones. Sin descargas, sin apps.
+  </Card>
+  <Card title="🤖 Conectada al Agente" icon="whatsapp">
+    El cliente puede pedir directamente por WhatsApp hablando con el bot de IA.
+  </Card>
+</CardGroup>
+
+> [!IMPORTANT]
+> **¿Dónde se configura?** Todo el contenido que aparece en la Carta Digital (cartas, categorías, productos, precios, alérgenos) se gestiona **exclusivamente** desde el [Dashboard → Gestión de Menú](/gestion/cartas-dashboard). La Carta Digital es un **consumidor** de esos datos.
+
 ---
 
 <Tabs>
-  <Tab title="Gestión de Menú">
-    ## ¿Qué es esta vista?
-    Esta vista agrupa en un solo lugar las **3 capas del menú**: la Carta (el documento), las Categorías (apartados) y los Productos (platos individuales).
+  <Tab title="Experiencia Móvil">
+    ## Lo que ve el Cliente
 
-    La jerarquía es: `Carta → Categoría → Producto`.
+    Al escanear el QR de la mesa, y ser atendido por el **Agente Cliente**, el comensal accede a una web con las categorías y productos del restaurante.
 
-    | Nivel | Descripción | Tabla Convex |
-    | :--- | :--- | :--- |
-    | **Carta** | El menú global (Verano, Vinos, etc.) | `menus` |
-    | **Categoría** | Entrantes, Carnes, Postres, etc. | `categories` |
-    | **Producto** | El plato o bebida individual con su precio. | `products` |
+    <CardGroup cols={3}>
+      <Card title="1. Selección de Idioma">
+        <Frame>
+          <img src="/images/carta-digital-idiomas.png" alt="Selector de Idioma" />
+        </Frame>
+        Interfaz fluida para seleccionar el idioma preferido al abrir la carta.
+      </Card>
+      <Card title="2. Explorar la Carta">
+        <Frame>
+          <img src="/images/carta-digital-main.png" alt="Vista Principal de la Carta" />
+        </Frame>
+        Navegación visual por categorías, con fotos, descripciones de los platos y precios.
+      </Card>
+      <Card title="3. Resumen del Pedido">
+        <Frame>
+          <img src="/images/carta-digital-pedido.png" alt="Resumen del Pedido" />
+        </Frame>
+        El comensal puede revisar su selección antes de confirmar o enviar a cocina.
+      </Card>
+    </CardGroup>
 
-    ### 🪟 Modal: Editar Categoría
-    ![Modal Categoría](/images/cartas-modal-categoria.png)
-    Permite cambiar el nombre, asignar a una carta distinta y subir un icono específico.
+
   </Tab>
 
-  <Tab title="Productos y Variantes">
-    ## 🪟 Modal: Ficha de Producto (5 Tabs)
-    Es el centro de configuración del producto, incluyendo escandallos y precios por zona.
+  <Tab title="Flujo del Cliente">
+    ## El Viaje del Comensal
 
-    ````carousel
-    ![Tab General](/images/cartas-modal-producto-1.png)
-    <!-- slide -->
-    ![Tab Precios](/images/cartas-modal-producto-2.png)
-    <!-- slide -->
-    ![Tab Receta](/images/cartas-modal-producto-3.png)
-    <!-- slide -->
-    ![Tab Variantes](/images/cartas-modal-producto-4.png)
-    <!-- slide -->
-    ![Tab Disponibilidad](/images/cartas-modal-producto-5.png)
-    ````
+    El flujo completo desde que el cliente se sienta hasta que recibe su pedido:
 
-    | Sección | Detalle Clave |
-    | :--- | :--- |
-    | **General** | Alérgenos y descripción. |
-    | **Precios** | PVP por zona (Barra/Terraza). |
-    | **Receta** | Descuento automático de `ingredients`. |
-    | **Variantes** | Modificadores: Punto de carne, Tamaño, etc. |
+    <Steps>
+      <Step title="1. Escanear QR de la mesa">
+        Cada mesa tiene un QR único generado desde [Ambientes](/operativa/ambientes). El QR contiene la URL de la carta + el ID de la mesa.
+      </Step>
+      <Step title="2. Registro Transparente vía Camarauth">
+        Al acceder al enlace del QR, el sistema redirige a [Camarauth](https://camarauth-docs.camarai.es/) — el sistema de autenticación propio de Camarai. El cliente **no percibe un formulario de registro**; el flujo le redirige directamente a WhatsApp con un mensaje predefinido de **emojis cifrados** (o la adaptación que se defina) que actúa como token de registro. Al enviar ese mensaje, el cliente queda registrado automáticamente en la tabla `customers` vinculado al restaurante.
+      </Step>
+      <Step title="3. Conversación con el Agente">
+        El [Agente Cliente](/agentes/agente-cliente) recibe el mensaje de registro, decodifica el token, crea el registro del cliente y le responde con el mensaje de bienvenida configurado en el Dashboard. Le envía el link a la Carta Digital y le ofrece recomendaciones.
+      </Step>
+      <Step title="4. Navegación por la Carta">
+        El cliente navega las categorías, revisa precios, filtra por alérgenos y añade productos al carrito.
+      </Step>
+      <Step title="5. Completar Pedido">
+        Al pulsar "Completar Pedido", se genera una comanda automáticamente:
+        - Se crea un documento en `orders` con estado `open`.
+        - Se vincula a la mesa (`table_id`).
+        - Los ítems se registran en `order_items`.
+        - El POS y KDS reciben el pedido en tiempo real.
+      </Step>
+      <Step title="6. Upselling por WhatsApp">
+        El agente puede sugerir complementos ("¿Quieres añadir una bebida?") y el cliente puede añadir más productos sin volver a escanear el QR.
+      </Step>
+    </Steps>
   </Tab>
 
   <Tab title="Especificación Técnica">
-    <Note icon="triangle-exclamation" color="#FF0000">
-      **🚨 HAY QUE SOLUCIONAR (CRÍTICO)**: Actualmente existe una desalineación lingüística. El Dashboard usa `nombre_producto` y la Carta/POS usan `name`. 
-      **Acción**: Todo el esquema debe migrarse a Inglés Técnico en Convex.
-    </Note>
+    ### Arquitectura de la Carta
 
-    <Note icon="money-bill-transfer" color="#FF0000">
-      **🚨 HAY QUE SOLUCIONAR**: Los precios se están guardando como strings con símbolo (`'20.97€'`). 
-      **Acción**: Deben ser `number` puros para permitir cálculos automáticos de IVA y descuentos.
-    </Note>
+    | Aspecto | Detalle |
+    | :--- | :--- |
+    | **Framework** | Next.js / React |
+    | **Hosting** | Vercel |
+    | **Backend** | Convex (lectura reactiva) |
+    | **Comunicación** | WhatsApp via Evolution API + n8n |
+    | **Componentes** | 9 componentes React |
+    | **Pantallas** | 1 vista principal |
 
-    ### 🛠️ Mapeo de Sincronización
-    | Campo | Dashboard (ES ⚠️) | Estándar Convex (EN ✅) |
+    ### Types de la Carta
+
+    ```ts
+    // Estructura del menú que consume la Carta Digital
+    interface MenuData {
+      menu_id: string;
+      name: string;
+      categories: CategoryData[];
+    }
+
+    interface CategoryData {
+      category_id: string;
+      name: string;
+      icon: string;
+      color: string;
+      products: ProductData[];
+    }
+
+    interface ProductData {
+      product_id: string;
+      name: string;
+      description: string;
+      price: number;         // En céntimos (1250 = 12.50€)
+      image: string;         // URL desde Convex Storage
+      allergens: string[];   // ["gluten", "eggs", "fish"]
+      variants: Variant[];
+      available: boolean;
+    }
+
+    interface Variant {
+      name: string;           // "Grande", "Extra queso"
+      price_delta: number;    // Precio adicional en céntimos
+    }
+    ```
+
+    ### Flujo de Pedido
+
+    ```ts
+    // Estructura del pedido generado por la Carta
+    interface PedidoItem {
+      product_id: string;
+      name: string;
+      quantity: number;
+      price: number;           // Precio unitario en céntimos
+      variant?: string;        // Variante seleccionada
+      notes?: string;          // Observaciones del cliente
+    }
+
+    interface Pedido {
+      table_id: string;         // ID de la mesa (del QR)
+      customer_id: string;      // ID del cliente (del registro)
+      items: PedidoItem[];
+      status: "open" | "paid" | "void";
+      created_at: number;       // Timestamp
+    }
+    ```
+
+    ### Mapeo con Convex
+
+    | Dato en la Carta | Tabla Convex | Campo |
     | :--- | :--- | :--- |
-    | Nombre | `nombre_producto` | `name` |
-    | Precio | `precio_venta` | `price` |
-    | Imagen | `url_imagen_producto` | `image` |
-    | Estado | `'Activo' / 'Inactivo'` | `active: boolean` |
+    | Categorías del menú | `categories` | `name`, `icon`, `color`, `visible` |
+    | Productos con precio | `products` | `name`, `price`, `image`, `allergens` |
+    | Mesa asignada | `tables` | `_id` (incrustado en el QR) |
+    | Cliente registrado | `customers` | `name`, `phone` |
+    | Pedido generado | `orders` + `order_items` | `status`, `table_id`, `items` |
+
+    <Note icon="rotate" color="#6366f1">
+      **Sincronización**: Si el admin cambia un precio en el Dashboard, el cliente ve el precio actualizado **instantáneamente** en su móvil sin refrescar la página (suscripción reactiva de Convex).
+    </Note>
   </Tab>
 
   <Tab title="Roadmap">
-    ## 🚀 Futuras Mejoras
+    ## Próximas Mejoras
 
-    ### 🎨 Frontend
-    - **Edge Resizing**: Optimización de imágenes de productos para carga instantánea.
-    - **QR Preview**: Previsualización real de la Carta Digital desde el Dashboard.
+    ### Fase 1: Capturas Reales (Completado ✅)
+    - [x] Sustituir las imágenes placeholder por capturas reales del móvil.
+    - [x] Añadir captura de la vista de detalle de producto.
+    - [x] Añadir captura del flujo de WhatsApp en acción.
 
-    ### ⚙️ Backend (Convex)
-    - **Trigger de Inventario**: Descuento automático de stock al generar una comanda.
-    - **Versionado**: Programación de cambios de carta (ej: Menú de Navidad automático).
+    ### Fase 2: Funcionalidades V1 (Q1 2026)
+    - [ ] **Pago desde la Carta**: Integración con Stripe/Bizum para pagar directamente desde el móvil.
+    - [ ] **Llamada al Camarero**: Botón para solicitar atención sin salir de la app.
+    - [ ] **Historial de Pedidos**: Que el cliente vea qué ha pedido en la sesión actual.
+
+    ### Fase 3: Inteligencia (Q2 2026)
+    - [ ] **Recomendaciones IA**: "Los clientes que piden X también añaden Y".
+    - [ ] **Filtros por Alérgenos**: Vista filtrada que oculta productos con alérgenos del perfil del comensal.
+    - [ ] **Personalización por Hora**: Mostrar solo productos disponibles en el horario actual (ej: no mostrar desayunos a las 22:00).
   </Tab>
 </Tabs>

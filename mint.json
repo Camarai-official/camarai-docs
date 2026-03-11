@@ -45,6 +45,7 @@
                 "operativa/planomesas",
                 "operativa/ambientes",
                 "operativa/chat",
+                "gestion/cartas-dashboard",
                 "gestion/productos",
                 "gestion/categorias",
                 "gestion/ingredientes",
@@ -61,10 +62,10 @@
             ]
         },
         {
-            "group": "POS & KDS (Terminales Operativas)",
+            "group": "Terminales Operativos (POS, KDS, PDA)",
             "pages": [
                 "operativa/pos",
-                "operativa/kds"
+                "operativa/pda-camarero"
             ]
         },
         {

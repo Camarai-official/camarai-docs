@@ -1,24 +1,30 @@
 <Tabs>
   <Tab title="Gestión por Prompt">
-    ## El Dashboard Inteligente
-    Chat integrado en el Dashboard que permite realizar cualquier acción mediante prompts de texto.
+    ## El Cerebro del Dashboard
+    <Warning>
+      **⚠️ Funcionalidad para Versión Futura:**
+      El Agente TPV está en desarrollo. Próximamente estará integrado como un chat lateral directamente en el Dashboard para asistir en la administración del sistema.
+    </Warning>
 
-    ![Placeholder: Chat Integrado Dashboard](/images/TODO-agente-tpv-chat-ui.png)
+    El Agente TPV es una interfaz conversacional integrada directamente en el Dashboard. Olvida navegar por menús infinitos; simplemente describe lo que necesitas y la IA lo ejecutará por ti.
 
-    ### Comandos Proactivos
-    - "Dime qué camarero ha facturado más hoy".
-    - "Sube los precios de la carta un 5%".
+
+    ### Comandos de Poder
+    - *"Sube el precio de todas las cervezas un 10%"*
+    - *"Crea una nueva categoría 'Especiales de Verano' y añade los 3 productos más vendidos de julio"*
+    - *"Dime qué camarero ha tenido mejor ticket medio esta semana"*
+    - *"Activa el modo terraza para todos los productos de la categoría 'Entrantes'"*
   </Tab>
 
   <Tab title="Especificaciones Técnicas">
     | Aspecto | Detalle |
     |:--------|:--------|
-    | **Canal** | Prompt (Chat Dashboard). |
-    | **Funciones** | Editar precios, crear productos, generar reportes. |
-    | **Permisos** | Requiere confirmación humana para ✏️ Escritura. |
+    | **Interfaz** | Chat lateral en Dashboard Administrativo. |
+    | **Acciones** | CRUD de productos, categorías, precios y configuración de local. |
+    | **Confirmación** | Requiere aprobación humana para cualquier cambio destructivo o masivo. |
 
-    <Note icon="shield-check">
-      Integrando toda la potencia de la IA en la operativa diaria.
+    <Note icon="key" color="#8b5cf6">
+      **Acceso Seguro**: Los comandos del Agente TPV solo están disponibles para usuarios con rol `owner` o `admin`.
     </Note>
   </Tab>
 </Tabs>

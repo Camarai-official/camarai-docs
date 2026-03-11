@@ -1,32 +1,68 @@
 <Tabs>
-  <Tab title="Interacción WhatsApp">
-    ## El Asistente del Cliente
-    Recomienda platos, hace upselling, envía el link de la Carta Digital y gestiona reservas de forma autónoma.
+  <Tab title="Journey del Cliente">
+    ## El Agente Cliente en Acción
+    El Agente Cliente automatiza todo el ciclo de venta desde el escaneo del QR hasta la confirmación del pago, eliminando fricciones y tiempos de espera.
 
-    ![Placeholder: Chat WhatsApp Cliente (Saludo y Carta)](/images/TODO-agente-cliente-wa-welcome.png)
+    <Steps>
+      <Step title="1. Escaneo de Mesa">
+        El cliente escanea el QR físico de su mesa. No necesita descargar ninguna app; se le redirige automáticamente a WhatsApp a través de **Camarauth**.
+        
+        <Frame caption="Escaneo de mesa 5 en el restaurante">
+          <img src="/images/agentes/agente-cliente-qr.png" width="200" />
+        </Frame>
+      </Step>
 
-    ### Flujo de Venta
-    - **Upselling**: "He visto que has pedido una hamburguesa, ¿te gustaría añadir unas patatas trufadas?".
-    - **Link Dinámico**: Envía la URL con sesión única para pedidos sin fricción.
+      <Step title="2. Bienvenida e Idioma">
+        El bot detecta al nuevo cliente y le saluda en su idioma o permite elegirlo. Solicita su nombre para personalizar la atención.
+        
+        <Frame caption="Interfaz de bienvenida multi-idioma">
+          <img src="/images/agentes/agente-cliente-welcome.png" width="200" />
+        </Frame>
+      </Step>
+
+      <Step title="3. Envío de Carta Digital">
+        El agente envía el link a la **Carta Digital**. El cliente puede interactuar directamente o pedir recomendaciones en el chat.
+        
+        <Frame caption="Envío de la carta interactiva">
+          <img src="/images/agentes/agente-cliente-carta.png" width="200" />
+        </Frame>
+      </Step>
+
+      <Step title="4. Selección de Productos">
+        En la Carta Digital (no es PWA), el cliente añade productos al carrito. Si un producto está agotado, se muestra en tiempo real.
+        
+        <Frame caption="Vista de productos con precios y estado">
+          <img src="/images/agentes/agente-cliente-productos.png" width="200" />
+        </Frame>
+      </Step>
+
+      <Step title="5. Resumen y Confirmación">
+        Al finalizar el pedido, el bot envía un resumen detallado por WhatsApp para la confirmación final y gestión del pago.
+        
+        <Frame caption="Confirmación de pedido y total acumulado">
+          <img src="/images/agentes/agente-cliente-pago.png" width="200" />
+        </Frame>
+      </Step>
+    </Steps>
   </Tab>
 
-  <Tab title="Gestión de Reservas">
-    ## Reservas Inteligentes
-    ![Placeholder: Chat WhatsApp Cliente (Flujo Reserva)](/images/TODO-agente-cliente-wa-booking.png)
-
-    El agente consulta en tiempo real la tabla `reservations` y `tables` para confirmar disponibilidad sin intervención humana.
+  <Tab title="Capacidades Proactivas">
+    ### Más que un simple Bot
+    - **Upselling Inteligente**: "He visto que has pedido una hamburguesa, ¿te gustaría añadir unas patatas trufadas?".
+    - **Gestión de Reservas**: Consulta disponibilidad real en las tablas `reservations` y `tables`.
+    - **Fidelización**: Recuerda pedidos anteriores y preferencias del cliente.
   </Tab>
 
   <Tab title="Especificaciones Técnicas">
     | Aspecto | Detalle |
     |:--------|:--------|
     | **Canal** | WhatsApp (Evolution API) |
-    | **Orquestación** | n8n |
+    | **Orquestación** | n8n + AI Agent Engine |
     | **Tablas Convex (Lee)** | `products`, `categories`, `menu`, `establishments` |
-    | **Tablas Convex (Escribe)** | `reservations`, `customers` |
+    | **Tablas Convex (Escribe)** | `reservations`, `customers`, `orders` |
 
-    <Note icon="triangle-exclamation" color="#FF0000">
-      **🚨 HAY QUE SOLUCIONAR**: Implementar una validación de sesión más robusta entre el Agente y la Carta.
+    <Note icon="shield-check" color="#00FF00">
+      **Seguridad**: Cada interacción está vinculada a una sesión única generada por Camarauth para evitar suplantaciones de mesa.
     </Note>
   </Tab>
 </Tabs>

@@ -1,0 +1,275 @@
+---
+title: "Gestión de Menú — Cartas, Categorías y Productos"
+sidebarTitle: "Gestión de Menú"
+description: "Vista del Dashboard para diseñar y administrar las cartas digitales, sus categorías y la librería de productos."
+---
+
+La sección **Gestión de Menú** es el centro de control del Dashboard para toda la oferta gastronómica. Desde aquí el administrador crea cartas digitales, organiza categorías y gestiona el catálogo completo de productos. Cualquier cambio aquí se sincroniza en tiempo real con la [Carta Digital del cliente](/gestion/cartas) y el [POS](/operativa/pos).
+
+<CardGroup cols={2}>
+  <Card title="Cerebro de la Oferta" icon="brain">
+    Todo se configura aquí. La Carta Digital y el POS solo **consumen** estos datos.
+  </Card>
+  <Card title="Sincronización Instantánea" icon="rotate">
+    Los cambios llegan a todos los dispositivos en menos de 100ms vía Convex.
+  </Card>
+</CardGroup>
+
+---
+
+<Tabs>
+  <Tab title="Cartas">
+    ## Listado de Cartas Digitales
+    Una carta es el contenedor principal de la oferta. Un restaurante puede tener múltiples cartas activas simultáneamente (ej: "Carta Principal", "Carta de Vinos", "Menú del Día").
+
+    <Frame>
+      <img src="/images/cartas-tab-cartas.png" alt="Tab Cartas — Listado de cartas digitales" />
+    </Frame>
+
+    | Columna | Descripción | Campo Convex |
+    | :--- | :--- | :--- |
+    | **Img** | Icono representativo de la carta. | `icon` |
+    | **Carta** | Nombre de la carta. | `name` |
+    | **Descripción** | Resumen breve del contenido. | `description` |
+    | **Estado** | Activa / Inactiva (`active: boolean`). | `active` |
+    | **Acciones** | Editar ✏️, Ocultar 👁️, Eliminar 🗑️. | — |
+
+    <Note icon="database">
+      **Tabla Convex**: `menu` — Cada fila es un documento de esta colección.
+    </Note>
+
+    ### Acciones disponibles
+    - **Nueva Carta**: Abre el modal "Editar Carta Digital" en modo creación.
+    - **Editar**: Abre el modal con los datos de la carta seleccionada.
+    - **Ocultar**: Toggle de visibilidad sin borrar la carta.
+    - **Eliminar**: Borrado con confirmación (impide borrado si tiene productos activos).
+  </Tab>
+
+  <Tab title="Categorías">
+    ## Listado de Categorías
+    Las categorías agrupan los productos dentro de una carta. Son los bloques que el cliente ve al navegar el menú (ej: "Entrantes", "Carnes", "Postres").
+
+    <Frame>
+      <img src="/images/cartas-tab-categorias.png" alt="Tab Categorías — Listado de categorías" />
+    </Frame>
+
+    | Columna | Descripción | Campo Convex |
+    | :--- | :--- | :--- |
+    | **Icono** | Icono visual de la categoría. | `icon` |
+    | **Categoría** | Nombre visible. | `name` |
+    | **Productos** | Número de productos asignados. | Calculado |
+    | **Visibilidad** | Visible / Oculta en la Carta Digital. | `visible` |
+    | **Acciones** | Editar ✏️, Ocultar 👁️, Eliminar 🗑️. | — |
+
+    <Note icon="database">
+      **Tabla Convex**: `categories` — Cada categoría apunta a un `menu_id`.
+    </Note>
+  </Tab>
+
+  <Tab title="Productos">
+    ## Librería de Productos
+    El catálogo completo de platos, bebidas y artículos del establecimiento. Cada producto pertenece a una categoría y puede aparecer en múltiples cartas.
+
+    <Frame>
+      <img src="/images/cartas-tab-productos.png" alt="Tab Productos — Librería de productos" />
+    </Frame>
+
+    | Columna | Descripción | Campo Convex |
+    | :--- | :--- | :--- |
+    | **Imagen** | Foto del producto (128×128). | `image` |
+    | **Producto** | Nombre del plato/bebida. | `name` |
+    | **Categoría** | Badge con la categoría asignada. | `category_id` |
+    | **Precio** | PVP en euros. | `price` |
+    | **Estado** | Disponible / No disponible. | `active` |
+    | **Acciones** | Editar ✏️, Ocultar 👁️, Eliminar 🗑️. | — |
+
+    <Note icon="database">
+      **Tabla Convex**: `products` — Vinculado a `categories` y `menu`.
+    </Note>
+  </Tab>
+
+  <Tab title="Modal Carta">
+    ## Modal: Editar Carta Digital
+    Al crear o editar una carta, se abre este dialog con **2 tabs** internas.
+
+    ### Tab General
+    <Frame>
+      <img src="/images/modal-carta-general.png" alt="Modal Carta — Tab General" />
+    </Frame>
+
+    | Campo | Tipo | Descripción |
+    | :--- | :--- | :--- |
+    | **Nombre de la Carta** | `string` | Título visible (ej: "Carta Principal"). |
+    | **Descripción** | `string` | Texto breve para el admin. |
+    | **Icono Representativo** | `string` | Selector de iconos (ej: BookOpen). |
+    | **Color de Identidad** | `string` | Paleta de 5 colores (violeta, rosa, naranja, verde, azul). |
+    | **Carta Activa** | `boolean` | Toggle: si está activa, es visible para los clientes. |
+
+    ### Tab WhatsApp
+    <Frame>
+      <img src="/images/modal-carta-whatsapp.png" alt="Modal Carta — Tab WhatsApp" />
+    </Frame>
+
+    Esta tab es **clave** para la integración con el [Agente Cliente](/agentes/agente-cliente):
+
+    | Campo | Tipo | Descripción |
+    | :--- | :--- | :--- |
+    | **Pedidos por WhatsApp** | `boolean` | Habilita el flujo de pedidos via bot. |
+    | **Pedidos por Voz (IA)** | `boolean` | Procesa audios automáticamente. |
+    | **Mensaje de Bienvenida** | `string` | Texto que envía el agente al iniciar conversación. |
+    | **Disponibilidad** | `time range` | Horario de disponibilidad (ej: 12:00 - 23:00). |
+    | **Vista Previa** | — | Simulación del chat de WhatsApp con el mensaje de bienvenida y las categorías. |
+
+    <Note icon="whatsapp" color="#25D366">
+      La **Vista Previa** muestra exactamente cómo verá el cliente la conversación con el agente, incluyendo el mensaje de bienvenida y el listado de categorías.
+    </Note>
+  </Tab>
+
+  <Tab title="Modal Categoría">
+    ## Modal: Crear/Editar Categoría
+    Dialog con **3 tabs** para configurar todos los aspectos de una categoría.
+
+    ### Tab General
+    <Frame>
+      <img src="/images/modal-categoria-general.png" alt="Modal Categoría — Tab General" />
+    </Frame>
+
+    | Campo | Tipo | Descripción |
+    | :--- | :--- | :--- |
+    | **Nombre de la Categoría** | `string` | Título visible (ej: "Entrantes", "Postres"). |
+    | **Descripción** | `string` | Descripción opcional. |
+    | **Categoría Padre (Jerarquía)** | `Id<"categories">` | Para crear subcategorías. |
+    | **Orden de Visualización** | `number` | Menor número = aparece antes. |
+    | **Impresora de Destino (KDS)** | `Id<"kds_stations">` | Dirige los tickets de esta categoría a la impresora/pantalla correcta. |
+    | **Visible en Carta** | `boolean` | Toggle: mostrar esta categoría en las cartas activas. |
+
+    ### Tab Apariencia
+    <Frame>
+      <img src="/images/modal-categoria-apariencia.png" alt="Modal Categoría — Tab Apariencia" />
+    </Frame>
+
+    | Campo | Tipo | Descripción |
+    | :--- | :--- | :--- |
+    | **Icono** | `string` | Selector de iconos (ej: "Cubiertos"). |
+    | **Color** | `string` | Paleta de 5 colores para el badge. |
+    | **Imagen de Banner (Opcional)** | `string` (URL) | Se usará como fondo visual en la App. |
+    | **Vista Previa en App** | — | Muestra cómo se verá esta categoría en el menú digital del cliente. |
+
+    ### Tab Productos
+    <Frame>
+      <img src="/images/modal-categoria-productos.png" alt="Modal Categoría — Tab Productos" />
+    </Frame>
+
+    Gestiona qué productos pertenecen a esta categoría mediante un buscador. Los productos se asignan y desasignan con un clic.
+  </Tab>
+
+  <Tab title="Modal Producto">
+    ## Modal: Crear/Editar Producto
+    Dialog completo con **5 tabs** para la configuración 360° de cada producto.
+
+    ### Tab General
+    <Frame>
+      <img src="/images/modal-producto-general.png" alt="Modal Producto — Tab General" />
+    </Frame>
+
+    | Campo | Tipo | Descripción |
+    | :--- | :--- | :--- |
+    | **Imagen** | Upload (128×128) | Foto del producto. Se sube a Convex File Storage. |
+    | **Nombre del Producto** | `string` | Nombre visible (ej: "Hamburguesa Clásica"). |
+    | **Categoría** | `Id<"categories">` | Selector desplegable. |
+    | **Descripción** | `string` | Ingredientes principales, preparación. |
+
+    ### Tab Precios
+    <Frame>
+      <img src="/images/modal-producto-precios.png" alt="Modal Producto — Tab Precios" />
+    </Frame>
+
+    | Campo | Tipo | Descripción |
+    | :--- | :--- | :--- |
+    | **Precio de Venta (€)** | `number` | PVP sin IVA. |
+    | **Impuesto Aplicable** | `Id<"taxes">` | Selector de tipo de IVA (21%, 10%, 4%, 0%). |
+    | **Rentabilidad** | Calculado | Precio de Venta - Coste de Escandallo = **Margen Bruto** (€ y %). |
+
+    <Warning>
+      **Migración Pendiente**: Los precios deben ser `number` en céntimos (`1250` = 12.50€) para evitar errores de redondeo. Ver [Alineación de Datos](/ingenieria/alineacion).
+    </Warning>
+
+    ### Tab Receta / Escandallo
+    <Frame>
+      <img src="/images/modal-producto-receta.png" alt="Modal Producto — Tab Receta" />
+    </Frame>
+
+    Vinculación con la tabla `ingredients` para:
+    - Descuento automático de stock por cada venta.
+    - Cálculo de coste de producción (para el Margen Bruto).
+
+    ### Tab Variantes
+    <Frame>
+      <img src="/images/modal-producto-variantes.png" alt="Modal Producto — Tab Variantes" />
+    </Frame>
+
+    Gestión de modificadores opcionales:
+    - **Nombre**: Descripción de la variante (ej: "Grande", "Extra queso").
+    - **Precio**: Coste adicional (ej: +1.50€).
+
+    ### Tab Disponibilidad y Alérgenos
+    <Frame>
+      <img src="/images/modal-producto-disponibilidad.png" alt="Modal Producto — Tab Disponibilidad" />
+    </Frame>
+
+    | Campo | Tipo | Descripción |
+    | :--- | :--- | :--- |
+    | **Visible para la venta** | `boolean` | El producto aparecerá en las cartas digitales activas. |
+    | **Horario de Disponibilidad** | `time range` | Limita la venta a un horario específico (ej: solo para cenas). |
+    | **Alérgenos** | `string[]` | Checkboxes: Gluten, Crustáceos, Huevos, Pescado, Cacahuetes, Soja. |
+
+    <Note icon="shield-check" color="#10B981">
+      Los alérgenos son fundamentales para el [Agente Cliente](/agentes/agente-cliente), que los usa para recomendar platos seguros al comensal.
+    </Note>
+  </Tab>
+
+  <Tab title="Especificación Técnica">
+    <Warning>
+      **ESTADO DE ALINEACIÓN**: Actualmente el sistema está en fase de migración de nombres en español (`nombre_producto`) a **Inglés Técnico** (`name`) para total compatibilidad con Convex.
+    </Warning>
+
+    ### Contrato de Datos (Mapeo)
+
+    | Campo Funcional | ID Frontend (Legacy) | ID Convex (Estándar) | Tipo |
+    | :--- | :--- | :--- | :--- |
+    | Nombre | `nombre_producto` | `name` | `string` |
+    | Precio | `precio_venta` | `price` | `number` (céntimos) |
+    | Imagen | `url_imagen_producto` | `image` | `string` (URL) |
+    | Categoría | `id_categoria_detectada` | `category_id` | `Id<"categories">` |
+    | Estado | `'Activo' / 'Inactivo'` | `active` | `boolean` |
+
+    ### Tablas Convex involucradas
+    | Tabla | Uso |
+    | :--- | :--- |
+    | `menu` | Contenedor de cartas digitales. |
+    | `categories` | Agrupadores lógicos dentro de cada carta. |
+    | `products` | Catálogo de artículos con precio y variantes. |
+    | `ingredients` | Materia prima para escandallos. |
+    | `taxes` | Tipos de IVA aplicables. |
+
+    ### Sincronización Real-Time
+    1. El administrador cambia un precio en el **Dashboard**.
+    2. La mutación en **Convex** dispara una actualización.
+    3. El cliente ve el precio actualizado en su móvil en **< 100ms** sin refrescar la página.
+    4. El **POS** también recibe la actualización y muestra el nuevo precio.
+  </Tab>
+
+  <Tab title="Roadmap">
+    ## Próximas Mejoras
+
+    ### Fase 1: Saneamiento (Q1 2026)
+    - [ ] **Migración Monetaria**: Pasar todos los campos `string` de precio (ej: `"12.50€"`) a `number` en céntimos (`1250`).
+    - [ ] **Traducción de Esquema**: Unificación de nomenclatura en todas las aplicaciones.
+
+    ### Fase 2: Inteligencia (Q2 2026)
+    - [ ] **Upselling Automático**: Recomendaciones basadas en el carrito (ej: sugerir "Vino Blanco" si se añade "Pescado").
+    - [ ] **Previsualización QR**: Ver exactamente qué verá el cliente mediante un simulador integrado en el Dashboard.
+    - [ ] **Carga Masiva**: Importación de catálogo vía Excel/CSV.
+    - [ ] **AI Description**: Generación automática de descripciones de platos sugerentes mediante IA.
+  </Tab>
+</Tabs>

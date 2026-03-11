@@ -3,81 +3,86 @@ title: "Ambientes — El Plano del Restaurante"
 description: "Gestión de salas y mesas, generación de QRs y plano interactivo."
 ---
 
-![Vista Ambientes](/images/ambientes-view-main.png)
+<Tabs>
+  <Tab title="Vista General">
+    ![Vista Ambientes](/images/ambientes-view-main.png)
 
-## ¿Qué es esta vista?
+    ## ¿Qué es esta vista?
 
-Los Ambientes son la **estructura física del restaurante** dentro del sistema: salones, terrazas, barras... Cada ambiente agrupa un conjunto de mesas, cada una con su capacidad y estado actual. Desde aquí se generan los **códigos QR** de cada mesa y se accede al plano visual interactivo.
+    Los Ambientes son la **estructura física del restaurante** dentro del sistema: salones, terrazas, barras... Cada ambiente agrupa un conjunto de mesas, cada una con su capacidad y estado actual. Desde aquí se generan los **códigos QR** de cada mesa y se accede al plano visual interactivo.
 
-Esta es la base que utilizan las Reservas (para asignar mesa) y el TPV (para saber en qué mesa poner la comanda).
+    Esta es la base que utilizan las Reservas (para asignar mesa) y el TPV (para saber en qué mesa poner la comanda).
 
----
+    ---
 
-## Base de Datos
+    ## Base de Datos
 
-Esta vista se alimenta de las tablas `environments` y `tables`. Para consultar el detalle de sus columnas y tipos, visita el [Diccionario Maestro de BBDD](/ingenieria/bbdd).
+    Esta vista se alimenta de las tablas `environments` y `tables`. Para consultar el detalle de sus columnas y tipos, visita el [Diccionario Maestro de BBDD](/ingenieria/bbdd).
 
----
+    ---
 
-## Relaciones con otras vistas
+    ## Relaciones con otras vistas
 
-```mermaid
-graph TD
-    ENV[environments] -->|1:N| TAB[tables]
-    TAB -->|via table_id| ORD[orders]
-    TAB -->|via table_id| RES[reservations]
-    ENV -->|via envId param| PLANO[/plano-mesas]
-```
+    ```mermaid
+    graph TD
+        ENV[environments] -->|1:N| TAB[tables]
+        TAB -->|via table_id| ORD[orders]
+        TAB -->|via table_id| RES[reservations]
+        ENV -->|via envId param| PLANO[/plano-mesas]
+    ```
 
----
+    ---
 
-## Queries necesarias en Convex
+    ## Queries necesarias en Convex
 
-```ts
-// Todos los ambientes con sus mesas
-getEnvironmentsWithTables(): Promise<(Environment & { tables: Table[] })[]>
+    ```ts
+    // Todos los ambientes con sus mesas
+    getEnvironmentsWithTables(): Promise<(Environment & { tables: Table[] })[]>
 
-// Cambiar el estado de un ambiente
-updateEnvironmentStatus(id: Id<"environments">, status: "Abierto"|"Cerrado"): Promise<void>
+    // Cambiar el estado de un ambiente
+    updateEnvironmentStatus(id: Id<"environments">, status: "Abierto"|"Cerrado"): Promise<void>
 
-// Regenerar QR (genera nuevo token, invalida el anterior)
-regenerateTableQR(tableId: Id<"tables">): Promise<string> // devuelve nuevo token
-```
+    // Regenerar QR (genera nuevo token, invalida el anterior)
+    regenerateTableQR(tableId: Id<"tables">): Promise<string> // devuelve nuevo token
+    ```
 
----
+    ---
 
-## 🪟 Modal: Gestión de QRs
+    ## 🪟 Modal: Gestión de QRs
 
-![Modal Gestión QRs](/images/ambientes-modal-qr.png)
+    ![Modal Gestión QRs](/images/ambientes-modal-qr.png)
 
-Permite para un ambiente concreto:
-- Ver los QRs de todas sus mesas en formato rejilla.
-- **Regenerar**: Invalida el token actual y crea uno nuevo (seguridad ante fotos antiguas).
-- **Descargar**: Genera archivos ZIP con los QRs en PNG o PDF.
-- **Imprimir**: Maqueta una hoja A4 con los QRs listos para recortar.
+    Permite para un ambiente concreto:
+    - Ver los QRs de todas sus mesas en formato rejilla.
+    - **Regenerar**: Invalida el token actual y crea uno nuevo (seguridad ante fotos antiguas).
+    - **Descargar**: Genera archivos ZIP con los QRs en PNG o PDF.
+    - **Imprimir**: Maqueta una hoja A4 con los QRs listos para recortar.
 
----
+    ---
 
-## Métricas calculadas en UI (sin query extra)
+    ## Métricas calculadas en UI (sin query extra)
 
-El panel de cada ambiente card calcula en el cliente:
-- **Mesas totales** = `tables.length`
-- **Mesas libres** = `tables.filter(t => t.status === 'Libre').length`
-- **Ocupación** = Barra de progreso basada en `Ocupada + Reservada`.
+    El panel de cada ambiente card calcula en el cliente:
+    - **Mesas totales** = `tables.length`
+    - **Mesas libres** = `tables.filter(t => t.status === 'Libre').length`
+    - **Ocupación** = Barra de progreso basada en `Ocupada + Reservada`.
 
----
+  </Tab>
 
-## 🚀 <Tab title="Especificación Técnica">
+  <Tab title="Especificación Técnica">
     <Note icon="shield-check" color="#6366f1">
       **Jerarquía**: La creación de nuevos ambientes y la edición de su capacidad máxima está restringida al **Admin**. Ver [Roles y Permisos](/ingenieria/roles).
     </Note>
 
-### 🎨 Frontend (UI/UX & Sincronización)
-- **Reactividad de Estados**: Implementar una suscripción real a los cambios de `tables.status` para que los contadores del ambiente se actualicen sin refrescar la página.
-- **Validación de Borrado**: Impedir el borrado de un ambiente si tiene mesas con comandas abiertas o reservas confirmadas.
-- **Previsualización de QRs**: Mejorar el modal de gestión para permitir previsualizar el diseño del QR (branding del restaurante) antes de descargarlo.
+    ### 🎨 Frontend (UI/UX & Sincronización)
+    - **Reactividad de Estados**: Implementar una suscripción real a los cambios de `tables.status` para que los contadores del ambiente se actualicen sin refrescar la página.
+    - **Validación de Borrado**: Impedir el borrado de un ambiente si tiene mesas con comandas abiertas o reservas confirmadas.
+    - **Previsualización de QRs**: Mejorar el modal de gestión para permitir previsualizar el diseño del QR (branding del restaurante) antes de descargarlo.
 
-### ⚙️ Backend (BBDD & Lógica Convex)
-- **Normalización de Relaciones**: Asegurar que todas las mesas tengan un `establishment_id` explícito e indexado para búsquedas multi-tenant seguras.
-- **Lógica de Ocupación Reflejada**: El estado de la mesa debe derivarse de la existencia de una `order` no pagada en lugar de ser un campo estático en `tables`.
-- **Audit Log de QRs**: Registrar cada vez que un QR es regenerado para invalidar vouchers de mesa antiguos en el sistema de pedidos web.
+    ### ⚙️ Backend (BBDD & Lógica Convex)
+    - **Normalización de Relaciones**: Asegurar que todas las mesas tengan un `establishment_id` explícito e indexado para búsquedas multi-tenant seguras.
+    - **Lógica de Ocupación Reflejada**: El estado de la mesa debe derivarse de la existencia de una `order` no pagada en lugar de ser un campo estático en `tables`.
+    - **Audit Log de QRs**: Registrar cada vez que un QR es regenerado para invalidar vouchers de mesa antiguos en el sistema de pedidos web.
+  </Tab>
+</Tabs>
+
