@@ -14,7 +14,7 @@ Este repositorio centraliza la **inteligencia estratégica** de Camarai. Documen
 | **Base de Datos** | ✅ Especificación completa | [`ingenieria/bbdd.mdx`](ingenieria/bbdd.mdx) — 25 tablas, ~200 campos |
 | **Alineación de Datos** | 🟡 Sincronizado con BBDD | [`ingenieria/alineacion.mdx`](ingenieria/alineacion.mdx) |
 | **Backend Convex** | 🔴 Pendiente | Vista por crear en Ingeniería |
-| **Capturas de Pantalla** | 🟡 10 faltantes | Ver sección "Auditoría Visual" |
+| **Capturas de Pantalla** | 🟡 11 faltantes | Ver sección "Auditoría Visual" |
 
 > [!IMPORTANT]
 > **Omni-Sincronización**: En Camarai, cualquier cambio en cualquier dispositivo (POS, PDA, KDS o Dashboard) se refleja instantáneamente en el resto del ecosistema. La documentación debe respetar este principio de "Verdad Única".
@@ -51,7 +51,7 @@ Este repositorio centraliza la **inteligencia estratégica** de Camarai. Documen
 
 ---
 
-## Auditoría Visual — Capturas Pendientes (10)
+## Auditoría Visual — Capturas Pendientes (11)
 
 ### Gestión de Catálogo y Stock (3)
 - [ ] `TODO-productos-view-main.png` — Listado de productos con filtros.
