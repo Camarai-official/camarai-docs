@@ -1,0 +1,73 @@
+---
+title: "Plano de Mesas — El Editor Visual del Salón"
+description: "Diseño interactivo de la distribución de mesas: drag & drop, formas, sillas, estados y QRs."
+---
+
+<Tabs>
+  <Tab title="Editor de Sala">
+    ## ¿Qué es esta vista?
+    El Plano de Mesas es el **editor visual de la sala**. Permite diseñar la distribución física del local mediante drag & drop, gestionando formas, tamaños y orientación de cada mesa u objeto decorativo.
+
+    ![Vista Plano de Mesas](/images/plano-mesas-view.png)
+
+    | Elemento | Propiedades |
+    | :--- | :--- |
+    | **Mesa** | Número, forma (rect/round), capacidad, estado. |
+    | **Objeto** | Barra, columnas, mobiliario decorativo. |
+    | **Ambiente** | El lienzo que contiene las mesas (Terraza, Salón). |
+  </Tab>
+
+  <Tab title="Acciones y Controles">
+    ## 🛠️ Herramientas de Edición
+
+    <CardGroup cols={2}>
+      <Card title="Barra Superior" icon="toolbar">
+        ![Selector de Sala](/images/plano-mesas-selector.png)
+        - **Candado**: Bloquea el plano para evitar movimientos accidentales.
+        - **Añadir**: Dropdown para nuevas mesas/objetos.
+        - **Badges**: Resumen de ocupación en tiempo real.
+      </Card>
+      <Card title="Menú de Mesa" icon="ellipsis-vertical">
+        ![Menú de Mesa](/images/plano-mesas-tabla-menu.png)
+        - **Editar Sillas**: Modo interactivo en el canvas.
+        - **Ver QR**: Generación de tokens de mesa.
+        - **Estado**: Cambio rápido (Libre/Ocupada).
+      </Card>
+    </CardGroup>
+
+    ### 🪟 Modales de Detalle
+    - **Editar Mesa**: Ajuste de píxeles, número y color.
+    - **Plantillas Rápidas**: Aplicar diseños predefinidos de salón/terraza.
+  </Tab>
+
+  <Tab title="Especificación Técnica">
+    <Note icon="shield-check" color="#6366f1">
+      **Autorización**: Guardar cambios en el diseño del local requiere rol de **Admin** o **Manager**. Ver [Roles y Permisos](/ingenieria/roles).
+    </Note>
+    <Note icon="triangle-exclamation" color="#FF0000">
+      **🚨 HAY QUE SOLUCIONAR**: La `capacity` (capacidad) debe ser siempre un `number` puro (`4`), nunca un texto con letra como `'4P'`.
+    </Note>
+
+    <Note icon="language" color="#FF0000">
+      **🚨 HAY QUE SOLUCIONAR**: Los estados de mesa deben unificarse al estándar EN en BBDD (`'free'`, `'occupied'`, `'reserved'`, `'dirty'`).
+    </Note>
+
+    ### 🛠️ Mapeo de Sincronización
+    | Campo | Dashboard (ES ⚠️) | Estándar Convex (EN ✅) |
+    | :--- | :--- | :--- |
+    | Estado | `'Libre'│'Ocupada'│'Reservada'│'Sucia'` | `'free'│'occupied'│'reserved'│'dirty'` |
+    | Capacidad | `capacity: number` | `capacity: number` |
+    | Geometría | `x, y, width, height` | Mismo formato (píxeles) |
+
+    <Note icon="code">
+      **Nota de Persistencia**: Actualmente la mutation `saveFloorPlan` no está activa; los cambios son locales hasta completar la integración con Convex.
+    </Note>
+  </Tab>
+
+  <Tab title="Roadmap">
+    ## 🚀 Futuras Mejoras
+    - **Undo/Redo**: Histórico de acciones para deshacer movimientos.
+    - **Sincronización Automática**: La mesa cambia a "Ocupada" sola cuando entra un pedido vinculado.
+    - **Validation QR**: Tabla `table_qr_sessions` para pedidos desde móvil seguros.
+  </Tab>
+</Tabs>

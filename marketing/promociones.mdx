@@ -1,0 +1,45 @@
+---
+title: "Promociones y Campañas"
+description: "Gestión de campañas de marketing y fidelización por WhatsApp."
+---
+
+<Tabs>
+  <Tab title="Campañas Activas">
+    ## Marketing vía WhatsApp
+    Gestión y monitorización de campañas directas al cliente. El sistema utiliza Evolution API para enviar los incentivos.
+
+    ![Placeholder: Vista Listado de Campañas](/images/TODO-marketing-promociones-main.png)
+
+    | Métrica | Objetivo |
+    | :--- | :--- |
+    | **Tasa de Apertura** | % de lectura real en WhatsApp. |
+    | **Conversión** | Pedidos realizados tras recibir la promo. |
+    | **ROI** | Retorno de inversión por campaña. |
+  </Tab>
+
+  <Tab title="Editor de Campaña">
+    ## 🪟 Modal: Nueva Campaña
+    ![Placeholder: Modal Edición de Campaña](/images/TODO-marketing-promociones-modal.png)
+
+    ### Vista Previa Dinámica
+    ![Placeholder: Vista Previa WhatsApp](/images/TODO-marketing-promociones-preview.png)
+    Permite ver exactamente cómo verá el cliente el mensaje con sus variables dinámicas (ej: `{nombre}`).
+  </Tab>
+
+  <Tab title="Especificación Técnica">
+    <Note icon="whatsapp" color="#25D366">
+      **Conexión**: Requiere instancia activa en Evolution API. Los mensajes se envían mediante un webhook programado en n8n que consulta la tabla `campaigns`.
+    </Note>
+
+    ### Datos Requeridos
+    - **Audiencia**: Query a `customers` filtrando por etiquetas.
+    - **Programación**: Timestamp de lanzamiento en `campaigns.scheduled_at`.
+  </Tab>
+
+  <Tab title="Roadmap">
+    ## 🚀 Futuras Mejoras
+    - **A/B Testing**: Envío de dos variantes de mensaje para medir cuál funciona mejor.
+    - **Cupones QR**: Generación de códigos de un solo uso para aplicar en el TPV.
+    - **Automatización**: Campañas automáticas de "Feliz Cumpleaños".
+  </Tab>
+</Tabs>

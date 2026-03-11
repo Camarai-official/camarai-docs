@@ -1,0 +1,110 @@
+---
+title: "Inventario — El Control de lo que Tienes en Cocina"
+description: "Gestión de ingredientes, stock, costes y trazabilidad de movimientos."
+---
+
+![Vista Gestión de Inventario](/images/inventario-view.png)
+
+## ¿Qué es esta vista?
+
+El Inventario es el **cerebro operativo del almacén**. Aquí vive cada ingrediente que usa la cocina: su stock actual, su precio de coste, su unidad de medida y el nivel mínimo de alerta. Si el stock de un ingrediente cae por debajo de ese mínimo, la celda se pone en rojo y el widget de "Alertas de Stock" del Dashboard se activa.
+
+Todo lo que ocurre con ese ingrediente —compras, mermas, ajustes manuales— queda registrado en su historial de movimientos.
+
+---
+
+## Base de Datos
+
+El módulo de inventario gestiona el stock a través de 3 colecciones principales. Para el detalle de las columnas en `ingredients`, `ingredient_categories` y `stock_movements`, consulta el [Diccionario Maestro de BBDD](/ingenieria/bbdd).
+
+---
+
+## La tabla de ingredientes
+
+Cada fila representa un ingrediente con estas columnas:
+
+| Columna | Campo DB | Nota |
+|---|---|---|
+| **Ingrediente** | `name` | |
+| **Categoría** | `category_id` | Mostrado como badge |
+| **Stock** | `stock` | En rojo si está por debajo de `alert_min` |
+| **Alerta (Mín.)** | `alert_min` | Umbral de aviso |
+| **Unidad** | `unit` | Kg, Unidades, Litros... |
+| **Costo** | `cost_base` | Precio de compra por unidad |
+
+Hay 4 botones de acción por fila: **Ajustar Stock**, **Editar**, **Historial** y **Eliminar** 🗑️.
+
+---
+
+## 🪟 Modal: Nuevo / Editar Ingrediente
+
+![Modal Nuevo Ingrediente](/images/modal-inventario-ingrediente.png)
+![Modal Editar Ingrediente](/images/modal-inventario-editar.png)
+
+Modal con **tres secciones** apiladas (con scroll):
+
+**1. Información General**
+- `Nombre *` → campo de texto libre
+- `Categoría *` → selector desplegable (categorías de `ingredient_categories`)
+- `Costo Base (€)` → precio unitario de compra
+- `Unidad Principal` → Unidades / Kg / Litros / Gramos
+
+**2. Control de Stock**
+- `Stock Actual` → cantidad en almacén ahora mismo
+- `Min. Alerta` → umbral bajo el que se activa la alerta roja
+- `Máx. Meta` → stock objetivo (para calcular cuánto hay que pedir)
+
+**3. Unidades de Medida**
+- Permite añadir conversiones personalizadas (ej: "1 caja = 12 unidades")
+
+Botones: **Cerrar** y **Guardar Cambios**.
+
+> ⚠️ **Incongruencia**: El campo `Unidad Principal` y el apartado "Unidades de Medida" parecen solaparse. Habría que clarificar si `Unidad Principal` ya es la unidad base o si es sólo el nombre de presentación, para evitar confusión al rellenar el formulario.
+
+---
+
+## 🪟 Modal: Ajuste de Stock
+
+![Modal Ajuste de Stock](/images/modal-inventario-ajuste.png)
+
+Se usa para actualizaciones rápidas del stock sin necesidad de editar el ingrediente completo. Permite registrar una **entrada** o **salida** con:
+- Tipo de movimiento: Ajuste / Merma / Compra
+- Cantidad
+- Motivo / notas libres
+
+Al guardar, crea un nuevo documento en la tabla `stock_movements`.
+
+---
+
+## 🪟 Modal: Historial de Movimientos
+
+El historial muestra todos los cambios de stock de ese ingrediente, separados en tres tabs:
+
+### Tab "Todo"
+![Historial — Tab Todo](/images/modal-inventario-historial-todo.png)
+
+Visión cronológica de **todos los movimientos**: ajustes, mermas y compras mezclados. Es el log completo del ingrediente.
+
+### Tab "Mermas"
+![Historial — Tab Mermas](/images/modal-inventario-historial-mermas.png)
+
+Filtra sólo los movimientos de tipo `merma` (pérdidas por caducidad, roturas, etc.). Clave para analizar el desperdicio y mejorar la rentabilidad.
+
+### Tab "Compras"
+![Historial — Tab Compras](/images/modal-inventario-historial-compras.png)
+
+Filtra sólo los movimientos de tipo `compra`. Permite ver el historial de abastecimiento y su coste acumulado.
+
+---
+
+## 🚀 Plan de Mejoras (Roadmap Técnico)
+
+### 🎨 Frontend (UI/UX & Sincronización)
+- **Paginación / Virtualización**: Implementar `IntersectionObserver` o paginación por bloques para manejar inventarios de más de 100 artículos sin degradar el rendimiento.
+- **Integración Cámara/Escáner**: Añadir soporte para lectura de códigos de barras (EAN-13) usando la cámara del dispositivo para entradas rápidas de stock.
+- **Feedback de Alertas**: Mejorar el diseño del toggle "Solo Alertas" para que sea más evidente visualmente cuando está activo.
+
+### ⚙️ Backend (BBDD & Lógica Convex)
+- **Escandallos Dinámicos**: Implementar la lógica que descuenta automáticamente ingredientes de `current_stock` al marcar un ítem como "servido" en el KDS.
+- **Manejo de Multialmacén**: Expandir la tabla para soportar múltiples ubicaciones (Cámara Frigorífica, Barra, Almacén Seco).
+- **Proyecciones de Compra**: Crear una query que calcule la cantidad necesaria a comprar basándose en `stock_max - current_stock` para generar sugerencias de pedido a proveedores.

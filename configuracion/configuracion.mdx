@@ -1,0 +1,127 @@
+---
+title: "Configuración — El Panel de Control del Sistema"
+description: "Acceso a todas las configuraciones del establecimiento: perfil, notificaciones, dispositivos, impuestos y facturación."
+---
+
+![Vista Configuración](/images/configuracion-view.png)
+
+## ¿Qué es esta vista?
+
+La vista de Configuración es un **índice de secciones de ajuste** del sistema. No tiene tablas ni listas de datos — cada opción lleva a una sub-página específica. Piénsalo como el panel de "Settings" de un iPhone: una lista de secciones, cada una con su propio formulario.
+
+---
+
+## Secciones disponibles
+
+| Sección | URL | ¿Qué configura? |
+|---|---|---|
+| 👤 **Perfil y Empresa** | `/settings/profile` | Datos del local, logo, dirección, teléfono, CIF |
+| 🔔 **Notificaciones** | `/settings/notifications` | Alertas de pedidos, reservas y stock |
+| 🖨️ **Dispositivos e Impresoras** | `/settings/profile?tab=devices` | TPV, KDS, impresoras térmicas |
+| % **Impuestos** | `/settings/taxes` | Tipos de IVA y cargos aplicables |
+| ⏱️ **Informe de Horas** | `/reportes` (redirect) | Redirige a la tab de horas de Reportes |
+| 💳 **Facturación y Suscripción** | — (disabled) | Historial de facturas del plan Camarai *(no implementado)* |
+
+---
+
+## ¿De qué tablas se alimentan las sub-páginas?
+
+### Sub-página: Perfil y Empresa → `establishments`
+
+```ts
+{
+  _id: Id<"establishments">,
+  nombre: string,              // "Restaurante Camarai"
+  cif?: string,                // "B12345678"
+  telefono?: string,
+  email?: string,
+  direccion?: string,
+  ciudad?: string,
+  codigo_postal?: string,
+  pais?: string,
+  logo_url?: string,           // URL del logo subido
+  timezone: string,            // "Europe/Madrid"
+  currency: string,            // "EUR"
+  receipt_footer?: string,     // mensaje de despedida en el ticket
+  website?: string,
+  whatsapp_number?: string,    // número de WhatsApp Business
+  owner_id: Id<"users">,
+  plan: "free" | "starter" | "pro" | "enterprise",
+  created_at: number
+}
+```
+
+### Sub-página: Notificaciones → `notification_settings`
+
+```ts
+{
+  _id: Id<"notification_settings">,
+  establishment_id: Id<"establishments">,
+  // Alertas de stock
+  stock_alerts: boolean,
+  stock_alert_channel: "email" | "whatsapp" | "push" | "all",
+  // Alertas de reservas
+  reservation_alerts: boolean,
+  reservation_reminder_hours: number,   // enviar recordatorio N horas antes
+  // Alertas de personal
+  clock_incident_alerts: boolean,
+  // Canal de notificaciones admin
+  admin_email?: string,
+  admin_whatsapp?: string
+}
+```
+
+### Sub-página: Impuestos → `taxes`
+
+```ts
+{
+  _id: Id<"taxes">,
+  nombre: string,              // "IVA General", "IVA Reducido", "Exento"
+  porcentaje: number,          // 21, 10, 4, 0
+  es_defecto: boolean,         // el IVA que se aplica por defecto a nuevos productos
+  establishment_id: Id<"establishments">
+}
+```
+
+### Sub-página: Dispositivos → `pos_terminals` + `pos_printers` + `kds_stations`
+
+(Ver [POS y KDS](/operativa/pos) para los esquemas completos de estas tablas)
+
+### Sub-página: Facturación → `subscriptions` *(pendiente)*
+
+```ts
+// subscriptions — tabla pendiente de diseño
+{
+  _id: Id<"subscriptions">,
+  establishment_id: Id<"establishments">,
+  plan: "free" | "starter" | "pro" | "enterprise",
+  status: "active" | "past_due" | "cancelled",
+  billing_cycle: "monthly" | "annual",
+  next_billing_date: number,
+  stripe_subscription_id?: string     // referencia a Stripe
+}
+```
+
+---
+
+## 🪟 Sub-página: Perfil y Empresa
+
+![Configuración Perfil](/images/configuracion-perfil.png)
+
+Formulario completo del establecimiento con:
+- Datos generales (nombre, CIF, dirección, teléfono, email, web)
+- Zona horaria y moneda
+- Upload de logo
+- Número de WhatsApp Business
+- Footer personalizado del ticket impreso
+- Tab "Dispositivos": lista de terminales POS, KDS e impresoras vinculadas
+
+---
+
+## 🚨 Incongruencias detectadas
+
+- **"Facturación y Suscripción" deshabilitado** con el atributo `disabled`: Al hacer clic no pasa nada. Es la única sección no implementada — crítica para la monetización del producto.
+- **"Informe de Horas" redirige a Reportes**: Confunde al usuario. Mejor enlazar directamente a `/reportes?tab=hours` o integrar el informe aquí.
+- **Sin sub-página para notificaciones**: El enlace `/settings/notifications` existe en el menú pero hay que verificar si la sub-página está implementada.
+- **`establishments.plan`**: El plan de suscripción está en la tabla del establecimiento pero `subscriptions` no existe aún como tabla separada.
+- **Sin soporte multi-establecimiento en la UI**: Aunque el esquema tiene `establishment_id` en casi todas las tablas, la UI sólo muestra un local. Faltaría un selector de establecimiento para cadenas.

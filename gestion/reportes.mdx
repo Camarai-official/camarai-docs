@@ -1,0 +1,58 @@
+---
+title: "Reportes — El Panel de Análisis del Negocio"
+description: "Facturación, ventas, personal y cierre de caja. Análisis técnico de los 7 tipos de informes."
+---
+
+## ¿Qué es esta vista?
+
+Los Reportes son la **capa de inteligencia de negocio** del sistema. A diferencia del Dashboard (que da una foto del momento), aquí se analizan períodos históricos, rendimiento por producto y se ejecutan los cierres de jornada.
+
+---
+
+## Tabs Principales
+
+### 1. Facturación (Billing)
+![Tab Facturación](/images/reportes-tab-billing.png)
+Muestra el listado de tickets generados. Cruza datos de `orders`, `order_items` y `taxes` para mostrar el desglose de IVA exacto.
+
+### 2. Ventas (Performance)
+![Tab Ventas](/images/reportes-tab-performance.png)
+Ranking de productos más vendidos ($ y unidades).
+- **Query**: Agrupa `order_items` por `product_id` filtrando por el rango de fecha seleccionado en el DatePicker superior.
+
+### 3. Personal (Horas)
+![Tab Personal](/images/reportes-tab-hours.png)
+Sumatorio de horas trabajadas por empleado. Cruza la tabla `staff` con `time_logs`.
+- **Cálculo**: Se restan los `clock-out` de los `clock-in` descontando los períodos de `break` registrados.
+
+### 4. Cierre de Caja (Cash)
+![Tab Cierre](/images/reportes-tab-cash.png)
+Cuadre de la jornada. Compara lo vendido según el TPV (teórico) con lo contado físicamente en el cajón (real).
+
+**Tabla Convex: `cash_sessions`**
+```ts
+{
+  _id: Id<"cash_sessions">,
+  opened_at: number,
+  opening_cash: number,
+  closed_at?: number,
+  theoretical_cash: number, // Suma de tickets pagados en efectivo
+  real_cash?: number,        // Introducido por el admin
+  difference?: number,
+  establishment_id: Id<"establishments">
+}
+```
+
+---
+
+## 🚀 Plan de Mejoras (Roadmap Técnico)
+
+### 🎨 Frontend (UI/UX & Sincronización)
+- **Generación Real de Informes**: Implementar las librerías de cliente para exportación a Excel (XLSX) y PDF que procesen los datos visibles en las tablas.
+- **Gráficos Interactivos**: Mejorar la visualización de la pestaña WhatsApp convirtiendo los datos mock en gráficos reales de tendencias.
+- **Persistencia de Drafts**: Usar `sessionStorage` para mantener los datos introducidos en el Cierre de Caja si el usuario cambia de pestaña accidentalmente.
+
+### ⚙️ Backend (BBDD & Lógica Convex)
+- **Optimización de Históricos**: Crear índices compuestos `(establishment_id, timestamp)` en `order_items` para garantizar reportes fluidos en rangos anuales.
+- **Cierre de Caja (Persistence)**: Implementar la tabla `cash_sessions` y las mutations necesarias para guardar y validar el cuadre de caja contra el teórico de Convex.
+- **Métricas de Notificaciones**: Vincular la pestaña de engagement con una query agregada a la tabla `notification_log` para mostrar efectividad real.

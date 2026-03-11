@@ -1,0 +1,48 @@
+---
+title: "Ingredientes y Recetas"
+description: "Control de escandallos y composición de productos."
+---
+
+<Tabs>
+  <Tab title="Listado de Ingredientes">
+    ## Gestión de Materia Prima
+    Permite gestionar la materia prima del establecimiento y vincularla a los productos para el control de inventario automático.
+
+    ![Placeholder: Vista Listado de Ingredientes](/images/TODO-ingredientes-view-main.png)
+
+    | Funcionalidad | Uso Técnico |
+    | :--- | :--- |
+    | **Control de Stock** | Cantidades actuales en el almacén. |
+    | **Unidad de Medida** | Gramos, Unidades, Litros, etc. |
+    | **Stock Mínimo** | Umbral para disparar alertas al Agente Gerente. |
+  </Tab>
+
+  <Tab title="Ficha de Ingrediente">
+    ## 🪟 Modal: Detalle de Ingrediente
+    ![Modal Ingrediente](/images/modal-inventario-ingrediente.png)
+
+    Este modal permite configurar:
+    - Nombre y categoría logística.
+    - Coste por unidad para cálculo de rentabilidad.
+    - Proveedor habitual.
+  </Tab>
+
+  <Tab title="Especificación Técnica">
+    <Note icon="triangle-exclamation" color="#FF0000">
+      **🚨 HAY QUE SOLUCIONAR**: Los stocks se están manejando como `string` en algunos puntos de la UI.
+      **Acción**: Deben ser `number` decimales para soportar mediciones precisas (ej: 0.5kg).
+    </Note>
+
+    ### Esquema: `ingredients`
+    - `name: string`
+    - `unit: string` (enum: kg, l, units)
+    - `current_stock: number`
+    - `min_stock: number`
+  </Tab>
+
+  <Tab title="Roadmap">
+    ## 🚀 Futuras Mejoras
+    - **Alertas Predictivas**: IA que predice cuándo se acabará un ingrediente basándose en ventas históricas.
+    - **Gestión de Proveedores**: Órdenes de compra automáticas al llegar al stock mínimo.
+  </Tab>
+</Tabs>

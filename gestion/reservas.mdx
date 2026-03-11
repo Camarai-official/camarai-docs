@@ -1,0 +1,60 @@
+---
+title: "Reservas — El Libro de Visitas Digital"
+description: "Gestión de reservas de mesa, asignación visual y notificaciones WhatsApp Business."
+---
+
+![Vista Reservas](/images/reservas-view-main.png)
+
+## ¿Qué es esta vista?
+
+Es el centro de gestión de clientes. Permite ver el calendario de ocupación futura y gestionar las solicitudes que llegan via Web o WhatsApp.
+
+---
+
+## Base de Datos
+
+Las reservas se gestionan a través de la tabla `reservations`. Para el detalle de sus campos técnicos, consulta la [Base de Datos Maestro](/ingenieria/bbdd).
+
+---
+
+## 🪟 Modal: Nueva Reserva
+
+![Modal Nueva Reserva](/images/reservas-modal-nueva.png)
+
+Formulario de creación rápida que incluye:
+- Buscador de clientes (si el teléfono ya existe, carga el nombre).
+- Selector de mesa: Solo muestra mesas de `tables` cuya capacidad sea `>= guests` y que no tengan otra reserva en la misma franja horaria (+/- 2 horas).
+
+---
+
+## 🪟 Modal: Configuración WhatsApp
+
+![Modal WhatsApp](/images/reservas-modal-notificaciones.png)
+
+Desde aquí se gestiona la comunicación automática con el cliente:
+- **Confirmación**: Se envía al marcar la reserva como "Confirmada".
+- **Recordatorio**: Se programa automáticamente para 2 horas antes de la reserva.
+- **Cancelación**: Notifica al cliente de la anulación.
+
+---
+
+## Flujo Técnico de Notificación
+
+1. El admin cambia estado a `Confirmada`.
+2. Una **Action de Convex** llama a la API de WhatsApp Business.
+3. Se registra el envío en `notification_log`.
+4. El campo `reservations.notified` cambia a `true`.
+
+---
+
+## 🚀 Plan de Mejoras (Roadmap Técnico)
+
+### 🎨 Frontend (UI/UX & Sincronización)
+- **Bloqueo Inteligente de Horarios**: Impedir la creación de reservas en horas donde el restaurante está cerrado según el horario configurado en el establecimiento.
+- **Validación de Teléfono**: Implementar un input con selector de bandera internacional para asegurar que el teléfono tiene el formato E.164 requerido por WhatsApp.
+- **Vista de Agenda Semanal**: Añadir una vista de "Lista de hoy" frente a "Vista de Calendario" para agilizar la entrada de clientes en la puerta.
+
+### ⚙️ Backend (BBDD & Lógica Convex)
+- **Validación de Solapamiento**: Crear una función de servidor que bloquee la asignación de la misma mesa a dos reservas si el margen entre ellas es inferior a la "duración media de ocupación".
+- **Webhook de WhatsApp**: Implementar un listener que procese las respuestas de los clientes (ej: responder "1" para confirmar, "2" para cancelar) y actualice el `status` de la reserva en Convex.
+- **Integración con Aforo**: Vincular las reservas con la tabla `capacity_control` para suspender reservas automáticas via web si se ha alcanzado el límite de PAX del establecimiento.

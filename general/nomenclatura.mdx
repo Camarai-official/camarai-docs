@@ -1,0 +1,109 @@
+---
+title: "Constitución de Nomenclatura"
+sidebarTitle: "Nomenclatura"
+description: "Leyes obligatorias para el nombrado de datos y estados en Camarai. Cero tolerancia al Spanglish."
+---
+
+## La Regla de Oro: "Clean Data, Fast Terminals"
+
+En Camarai, la nomenclatura no es una sugerencia estética; es un **seguro contra el fallo**. Un error en el nombrado de un campo puede romper la sincronización entre el Dashboard (Cerebro) y el POS (Músculo).
+
+> [!IMPORTANT]
+> **Prohibido el Spanglish**: Todo código (variables, campos de BBDD, types, carpetas) se escribe un **inglés técnico impecable**. Los términos en español quedan reservados exclusivamente para la **interfaz de usuario (Label)**.
+
+---
+
+## 1. El Diccionario de la Verdad (Propiedades)
+
+Queda terminantemente prohibido el uso de guiones bajos (`_`) o hibridación en los nombres de propiedades. Usamos **camelCase**.
+
+| Entidad | ❌ Prohibido (ES/Híbrido) | ✅ Obligatorio (EN Clean) | Razón Técnica |
+|:--------|:--------------------------|:--------------------------|:--------------|
+| **Producto** | `nombre_producto` | `name` | Brevedad y compatibilidad con APIs externas. |
+| **Precio** | `precio_venta` | `price` | Estandarización para pasarelas de pago. |
+| **Categoría** | `id_categoria_detectada` | `categoryId` | Los IDs deben ser explícitos de su origen. |
+| **Stock** | `stock_actual` | `currentStock` | Claridad en el estado del inventario. |
+| **Mesa** | `mesa_numero` | `tableNumber` | Unificación entre plano de sala y POS. |
+
+---
+
+## 2. Tipado Numérico (No Strings en Valores)
+
+Los datos para cálculos matemáticos deben ser **puros**. El Dashboard y el POS fallan hoy porque arrastran símbolos de moneda en el dato.
+
+- **Precios**:
+    - ❌ `total: '20.50€'`
+    - ✅ `total: 20.50` (Tipo `number`)
+- **Cantidades**:
+    - ❌ `capacity: '4P'`
+    - ✅ `capacity: 4` (Tipo `number`)
+- **Unidades**:
+    - ❌ `amount: '1.5kg'`
+    - ✅ `amount: 1.5` + `unit: 'kg'`
+
+---
+
+## 3. Máquina de Estados (Enums en Inglés)
+
+Los estados de un pedido o una mesa son **lógica**, no texto. Nunca uses el nombre que verá el cliente para definir el estado en el código.
+
+- **Mesa**:
+    - ❌ `'Ocupada'`, `'Libre'`, `'Reservada'`
+    - ✅ `'occupied'`, `'available'`, `'reserved'`
+- **Pedido**:
+    - ❌ `'Enviado'`, `'Pendiente'`, `'Pagado'`
+    - ✅ `'sent'`, `'pending'`, `'paid'`
+- **Personal**:
+    - ❌ `'Activo'`, `'Baja'`
+    - ✅ `'active'`, `'on_leave'`
+
+---
+
+## 4. El Tiempo es un Número (Unix)
+
+No guardamos horas legibles en la base de datos. La fecha se calcula en el momento de mostrarla.
+
+- ❌ `time: '14:30'`, `date: '02/03/2026'`
+- ✅ `createdAt: 1741484100000` (Unix Timestamp en ms)
+
+---
+
+## 5. El Dato no se Maquilla (No UI Poisoning)
+
+Un objeto de datos de Convex **jamás** debe contener clases de CSS o colores. El dato le dice a la app *qué es*, no *cómo se ve*.
+
+- ❌ `{ status: 'occupied', color: 'red-500', shadow: 'shadow-lg' }`
+- ✅ `{ status: 'occupied' }` (La UI ya sabrá que el estado `occupied` se pinta de rojo).
+
+---
+
+## 6. IDs: El Estándar Convex
+
+Para asegurar que los 4 productos hablan el mismo idioma:
+1.  **En Backend (Convex)**: Usamos el ID interno `Id<"tableName">`.
+2.  **En Frontend**: Tratamos los IDs siempre como `string`.
+3.  **Híbridos**: ❌ Nunca mezcles números (`1`) con strings (`'abc'`). Estandariza a strings globalmente.
+- ❌ `total: '20.97€'`
+- ✅ `total: 20.97` + `currency: 'EUR'` en config
+
+---
+
+## 7. Arquitectura de Interfaz (UI vs Logic)
+
+Para evitar que el código sea un "espagueti" de componentes, diferenciamos estrictamente por su función tecnológica:
+
+### 7.1 Dialog (Dashboard) vs Modal (POS)
+| Concepto | Tecnología | Propósito |
+|:---------|:-----------|:----------|
+| **Dialog** | React / Radix UI | Gestión compleja. Espera entrada de datos masiva o edición de objetos (ej. `ProductDialog`). |
+| **Modal** | Pure HTML / JS | Operativa rápida. Bloquea el flujo para una acción atómica (ej. `PaymentModal`). No tiene estado complejo. |
+
+### 7.2 Feature vs UI Component
+- **Feature**: Componente con "conciencia" de negocio. Sabe hablar con Convex o n8n (ej. `OrderList`).
+- **UI Component**: Componente "tonto" o atómico. Solo recibe props y pinta (ej. `Button`, `Badge`).
+
+---
+
+<Warning>
+  **Sanción Técnica**: Cualquier Pull Request que contenga campos en español, tipos de datos "sucios" (ej. `'20€'`) o componentes que mezclen lógica de Feature en una carpeta de UI será rechazado automáticamente de la rama `main`.
+</Warning>

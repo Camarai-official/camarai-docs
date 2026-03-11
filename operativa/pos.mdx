@@ -1,0 +1,79 @@
+---
+title: "POS y KDS — Los Terminales de Venta y Cocina"
+description: "Panel de acceso y configuración del Punto de Venta (POS) y la pantalla de cocina (KDS)."
+---
+
+<Tabs>
+  <Tab title="TPV / POS">
+    ![Vista Terminales POS y KDS](/images/cocina-view.png)
+
+    ## ¿Qué es esto?
+    El TPV (Terminal Punto de Venta) es la herramienta principal del camarero o cajero para realizar ventas, asignar pedidos a mesas y gestionar el cobro final.
+
+    | Función | Descripción | Importancia |
+    | :--- | :--- | :--- |
+    | **Venta Directa** | Cobro rápido sin necesidad de asignar mesa. | Alta (Barra/Take away) |
+    | **Gestión de Mesas** | Vinculación de pedidos al plano de sala. | Alta (Servicio sala) |
+    | **Cierre de Caja** | Arqueo al final del turno. | Crítica (Control) |
+
+    ### 🛠️ Especificación Técnica (BBDD)
+    | Tabla Convex | Uso |
+    |---|---|
+    | `pos_terminals` | Listado de terminales físicos registrados. |
+    | `pos_sessions` | Control de quién abrió la caja y cuándo. |
+    | `pos_printers` | Gestión de impresoras de tickets. |
+  </Tab>
+
+  <Tab title="Cocina / KDS">
+    <Note icon="image" color="#FF0000">
+      **⚠️ PENDIENTE**: Captura real de la vista KDS en funcionamiento. La app del POS/KDS está en desarrollo.
+    </Note>
+
+    ## ¿Qué es esto?
+    El KDS (Kitchen Display System) sutituye a la impresora de tickets tradicional en cocina por una pantalla interactiva donde los cocineros ven los pedidos, los marcan como listos y reciben alertas de retraso.
+
+    | Característica | Detalle Funcional |
+    | :--- | :--- |
+    | **Filtro por Estación** | El KDS de "Fríos" solo ve ensaladas; el de "Fuegos" carne/pescado. |
+    | **Alertas Temporales** | Los pedidos cambian a **rojo** si superan el tiempo límite. |
+    | **Layout** | Vista en rejilla (tickets) o lista (platos individuales). |
+
+    ### 🛠️ Especificación Técnica (BBDD)
+    | Tabla Convex | Uso |
+    |---|---|
+    | `orders` | Fuente de las comandas a preparar. |
+    | `kds_stations` | Configuración persistente de cada pantalla de cocina. |
+  </Tab>
+
+  <Tab title="Configuración">
+    ## 🪟 Modales de Ajuste
+
+    Ambos sistemas se configuran mediante modales accesibles por el administrador desde el Dashboard.
+
+    <CardGroup cols={2}>
+      <Card title="Configurar POS" icon="cash-register">
+        *Pendiente: captura del modal de configuración del POS.*
+        - Selección de Terminal e Impresora.
+        - Métodos de pago (Efectivo/Tarjeta).
+      </Card>
+      <Card title="Configurar KDS" icon="utensils">
+        *Pendiente: captura del modal de configuración del KDS.*
+        - Categorías visibles.
+        - Tiempo de alerta (minutos).
+        - Sonidos de notificación.
+      </Card>
+    </CardGroup>
+  </Tab>
+
+  <Tab title="Roadmap">
+    ## 🚀 Futuras Mejoras
+
+    ### 🎨 Frontend
+    - **Deep Linking**: Botón "Iniciar Sesión" directo a la URL de la app Vanilla.
+    - **Monitor de Hardware**: Indicador visual de estado online/offline de impresoras.
+
+    ### ⚙️ Backend (Convex)
+    - **Heartbeat**: Actualización de `last_seen` en terminales cada 60s.
+    - **Bloqueo Concurrencia**: Impedir que dos empleados abran el mismo terminal a la vez.
+  </Tab>
+</Tabs>

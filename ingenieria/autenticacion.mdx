@@ -1,0 +1,104 @@
+---
+title: "Autenticación y Camarauth"
+description: "Sistemas de login, seguridad por WhatsApp y el SDK oficial de Camarauth."
+---
+
+# Ecosistema de Autenticación
+
+Camarai utiliza una estrategia de autenticación híbrida diseñada para la máxima seguridad en el Dashboard y la máxima agilidad en la sala del restaurante. El pilar central de esta estrategia es **Camarauth**.
+
+---
+
+## Matriz de Selección de Método
+¿Cuál usar y cuándo? Esta tabla define el canal oficial según el perfil y dispositivo.
+
+| Canal | Método | Dispositivo | Caso de Uso |
+| :--- | :--- | :--- | :--- |
+| **Administración** | Email / Password | PC / Laptop | Configuración profunda y finanzas. |
+| **Sala (Rápido)** | PIN (4 dígitos) | Tablet / PDA | Cambio de camarero en mitad de servicio. |
+| **Agentes / Móvil** | **Camarauth** (WA) | Smartphone | Notificaciones críticas y acceso remoto. |
+| **Clientes** | WhatsApp Link | Smartphone | Acceso a Carta Digital y Reservas. |
+
+---
+
+## Qué es Camarauth
+Camarauth no es un simple redireccionamiento; es un ecosistema de librerías para Node.js y React que gestionan el ciclo de vida de la sesión en tiempo real.
+
+## Integración Técnica del SDK
+
+### 1. El Hook Maestro: `usePinAuth`
+Para el desarrollo de interfaces (Dashboard y POS), el SDK proporciona los hooks necesarios para gestionar el estado de la autenticación sin boilerplate adicional.
+
+```tsx
+const { 
+  pin,           // El código numérico generado
+  emojis,        // Representación visual amigable (🎭)
+  whatsappLink,  // URL para abrir WhatsApp con el mensaje pre-llenado
+  qrCodeUrl,     // QR para escaneo rápido desde escritorio
+  generate       // Función para disparar la creación de un nuevo PIN
+} = usePinAuth({ 
+  apiUrl: 'http://localhost:3001',
+  whatsappNumber: '+34XXXXXXX' 
+});
+```
+
+### 2. Backend: `CamarauthBackend`
+El servidor actúa como puente entre la aplicación y la **Evolution API** (WhatsApp), gestionando WebSockets con **Socket.io** para una respuesta instantánea.
+
+- **Configuración Requerida**:
+  - `evolutionApiUrl`: Dirección de la pasarela WhatsApp.
+  - `evolutionApiKey`: Credencial de acceso.
+  - `evolutionInstanceName`: Instancia específica vinculada al local.
+
+---
+
+## Características Únicas del SDK
+
+### PIN Encoding (Emojis)
+Una de las innovaciones de Camarauth es la codificación de PINs en emojis. Esto mejora la experiencia de usuario (UX) al hacer que el código sea visualmente memorable y difícil de confundir con otros números en pantalla.
+
+### Auto-Regeneración y Tiempo Real
+- **WebSocket**: El cliente (React) se suscribe a un canal de Socket.io. En cuanto el usuario pulsa el link en WhatsApp, el backend recibe la notificación de la Evolution API y la comunica al frontend en **milisegundos**.
+- **Sesiones Seguras**: Genera JWTs (JSON Web Tokens) con mecanismos de **auto-refresh** para mantener la sesión activa sin fricciones innecesarias.
+
+---
+
+## Repositorios y Recursos Oficiales
+
+Acceso directo a todo el ecosistema de código de **Camarauth** para desarrolladores.
+
+<CardGroup cols={2}>
+  <Card title="SDK Core" icon="github" href="https://github.com/Camarai-official/camarauth-sdk">
+    Lógica de generación de PIN y comunicación con Evolution API.
+  </Card>
+  <Card title="Documentación SDK" icon="book" href="https://camarauth-docs.camarai.es/">
+    Guías de integración y referencia de API.
+  </Card>
+</CardGroup>
+
+<div className="flex flex-row gap-4 mt-6">
+  <Button href="https://github.com/Camarai-official/camarauth-docs.camarai.es" variant="primary" icon="github">
+    Repo: Docs MDX
+  </Button>
+  <Button href="https://github.com/Camarai-official/camarauth-sdk" variant="outline" icon="code">
+    Repo: SDK Source
+  </Button>
+  <Button href="https://camarauth-docs.camarai.es/react/overview" variant="outline" icon="react">
+    React SDK Docs
+  </Button>
+</div>
+
+---
+
+## Tabla de Referencia de Repositorios
+
+| Componente | Repositorio GitHub | Rama Principal |
+| :--- | :--- | :--- |
+| **Camarauth SDK** | [camarauth-sdk](https://github.com/Camarai-official/camarauth-sdk) | `main` |
+| **Docs Site** | [camarauth-docs](https://github.com/Camarai-official/camarauth-docs.camarai.es) | `main` |
+| **React Hooks** | [camarauth-sdk/react](https://github.com/Camarai-official/camarauth-sdk/tree/main/react) | `main` |
+| **Node.js Core** | [camarauth-sdk/core](https://github.com/Camarai-official/camarauth-sdk/tree/main/core) | `main` |
+
+<Note>
+  **Aviso**: El acceso a estos repositorios está sujeto a los permisos de la organización **Camarai-official**.
+</Note>

@@ -1,0 +1,38 @@
+---
+title: "PDA del Camarero (Toma de Pedidos)"
+sidebarTitle: "PDA del Camarero"
+description: "Dispositivo móvil para la gestión ágil de mesas y comandas a pie de sala."
+---
+
+La **PDA del Camarero** es una Aplicación Web Progresiva (PWA) instalable en el teléfono móvil del personal de sala. Funciona como un **mini POS portátil** que permite agilizar la toma de comandas directamente en la mesa, sin necesidad de ir a la terminal principal.
+
+<Note icon="image" color="#FF0000">
+  **⚠️ PENDIENTE**: En breve se añadirán las capturas de la interfaz real de la PDA en funcionamiento.
+</Note>
+
+## Características Principales
+
+<CardGroup cols={2}>
+  <Card title="📱 PWA Instalable" icon="mobile">
+    No requiere descargas desde App Store o Google Play. Se añade a la pantalla de inicio del dispositivo como una app nativa PWA.
+  </Card>
+  <Card title="🍽️ Gestión en Sala" icon="utensils">
+    Toma de pedidos ágil, sincronizando directamente con la cocina (KDS) y la caja (POS) en tiempo real.
+  </Card>
+</CardGroup>
+
+## Flujo de Trabajo
+
+En la operativa actual (previo a la implementación del Agente de Voz), la PDA centraliza la atención presencial:
+
+1. **Apertura de Mesa**: El camarero selecciona la mesa en su dispositivo.
+2. **Toma de Comanda**: Navega por las categorías, selecciona productos y añade modificadores o notas al instante.
+3. **Envío a Cocina**: Al confirmar, el pedido aparece de manera inmediata en la pantalla de KDS, eliminando desplazamientos.
+4. **Seguimiento**: Permite consultar el estado del pedido, realizar upselling ofreciendo postres, o lanzar un aviso de cobro a la caja principal.
+
+### Arquitectura Técnica
+| Aspecto | Detalle |
+|---|---|
+| **Tipo de App** | PWA (Progressive Web App) |
+| **Tiempo Real** | Integración nativa con Convex (lectura/escritura) |
+| **Tablas Clave** | `tables`, `orders`, `order_items`, `products`, `categories` |

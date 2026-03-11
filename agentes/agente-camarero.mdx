@@ -1,0 +1,36 @@
+<Tabs>
+  <Tab title="Operativa por Voz">
+    ## Comandas a Manos Libres
+    El Agente Camarero permite que el personal de sala procese pedidos sin dejar de atender al cliente, utilizando comandos de voz naturales que se transforman en tickets de cocina instantáneos.
+
+    <Frame caption="Interfaz de voz en WhatsApp">
+      <img src="/images/agentes/agente-camarero-audio.png" width="200" />
+    </Frame>
+
+    <Warning>
+      **⚠️ Funcionalidad para Versión Futura:**
+      Toda la operativa inteligente mediante comandos de voz explicada a continuación estará disponible en próximas versiones.
+      
+      Actualmente, la toma de pedidos se gestiona mediante la **PDA del Camarero** (un mini POS portátil en formato PWA que el camarero lleva en su móvil). Desde esta PDA, el camarero toma el pedido manualmente sin necesidad de que el cliente escanee ningún QR y gestiona las comandas de las mesas. ¡Añadiremos capturas de la interfaz de la PDA muy pronto!
+    </Warning>
+
+    ### Flujo de Trabajo (Versión Futura)
+    1. **Dictado Natural**: El camarero presiona un botón en su dispositivo y dicta: *"Dos menús del día, uno con sopa y otro con ensalada, y una caña fría para la mesa 4"*.
+    2. **Transcripción e Intención**: El motor de IA transcribe la voz y extrae los productos, modificadores y la ubicación (mesa).
+    3. **Sugerencia y Confirmación**: El bot muestra en pantalla un resumen rápido con botones: [Confirmar] o [Corregir].
+    4. **Inyección en Tiempo Real**: Al confirmar, el pedido aparece simultáneamente en el POS y en la pantalla de KDS (Cocina).
+  </Tab>
+
+  <Tab title="Especificaciones Técnicas">
+    | Aspecto | Detalle |
+    |:--------|:--------|
+    | **Canal** | App nativa / WhatsApp Voice |
+    | **Motor de Audio** | OpenAI Whisper / Google Speech-to-Text |
+    | **Procesamiento** | LLM de extracción de entidades (intelly-parser) |
+    | **Tablas Convex** | `products`, `categories`, `tables`, `orders`, `order_items` |
+
+    <Note icon="bolt" color="#FFD700">
+      **Velocidad**: El proceso completo desde que el camarero termina de hablar hasta que el ticket llega a la cocina es de **menos de 3 segundos**.
+    </Note>
+  </Tab>
+</Tabs>

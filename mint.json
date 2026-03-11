@@ -1,0 +1,87 @@
+{
+    "$schema": "https://mintlify.com/schema.json",
+    "name": "Documentación Camarai",
+    "logo": {
+        "light": "/logo.png",
+        "dark": "/logo.png"
+    },
+    "favicon": "/favicon.svg",
+    "colors": {
+        "primary": "#6366f1",
+        "light": "#818cf8",
+        "dark": "#4338ca"
+    },
+    "topbarLinks": [
+        {
+            "name": "App TPV",
+            "url": "http://localhost:3000"
+        }
+    ],
+    "navigation": [
+        {
+            "group": "General",
+            "pages": [
+                "general/index",
+                "general/roadmap"
+            ]
+        },
+        {
+            "group": "Ingeniería y Datos",
+            "pages": [
+                "ingenieria/mapa-arquitectura",
+                "ingenieria/componentes",
+                "ingenieria/bbdd",
+                "ingenieria/roles",
+                "ingenieria/autenticacion",
+                "ingenieria/alineacion",
+                "general/nomenclatura"
+            ]
+        },
+        {
+            "group": "Dashboard (Cerebro)",
+            "pages": [
+                "operativa/dashboard",
+                "operativa/comandas",
+                "operativa/planomesas",
+                "operativa/ambientes",
+                "operativa/chat",
+                "gestion/cartas-dashboard",
+                "gestion/productos",
+                "gestion/categorias",
+                "gestion/ingredientes",
+                "gestion/inventario",
+                "gestion/reservas",
+                "gestion/personal",
+                "gestion/reportes",
+                "marketing/clientes",
+                "marketing/promociones",
+                "marketing/notificaciones",
+                "configuracion/configuracion",
+                "configuracion/configuracion-perfil",
+                "configuracion/configuracion-impuestos"
+            ]
+        },
+        {
+            "group": "Terminales Operativos (POS, KDS, PDA)",
+            "pages": [
+                "operativa/pos",
+                "operativa/pda-camarero"
+            ]
+        },
+        {
+            "group": "Carta Digital (Venta Cliente)",
+            "pages": [
+                "gestion/cartas"
+            ]
+        },
+        {
+            "group": "Agentes IA (Inteligencia)",
+            "pages": [
+                "agentes/agente-cliente",
+                "agentes/agente-gerente",
+                "agentes/agente-camarero",
+                "agentes/agente-tpv"
+            ]
+        }
+    ]
+}

@@ -1,0 +1,245 @@
+---
+title: "Componentes UI"
+sidebarTitle: "Componentes UI"
+description: "Catálogo completo de componentes, templates, reutilización y código muerto de los 4 productos Camarai."
+---
+
+## Alcance
+
+Inventario verificado de **todos los componentes de UI** en los 4 repos del ecosistema. Cada archivo listado existe en el código real — no hay nada inventado.
+
+Para las vistas y rutas, ver [Mapa de Arquitectura](/ingenieria/mapa-arquitectura).
+
+---
+
+## 1. Sistema de Diseño
+
+La interfaz de Camarai se rige por los principios de **Atomic Design**, garantizando que cada píxel sea reutilizable, accesible y consistente. El Dashboard utiliza **Radix UI** para la lógica de accesibilidad y **Tailwind CSS** para el estilado atómico. El POS usa **Vanilla CSS** con templates HTML.
+
+### 1.1 Leyenda de Estado
+
+| Badge | Significado |
+|:------|:------------|
+| 🟢 Production Ready | Testeado en producción, documentado y estable. |
+| 🟡 In Progress | Funcional pero requiere refactor de props o estilos. |
+| 🔴 Backlog | Definido funcionalmente pero no implementado en UI. |
+
+---
+
+<Tabs>
+  <Tab title="Dashboard (Gestión)">
+    ## 2. Dashboard: Inventario de Componentes
+
+    En el Dashboard (Next.js), los componentes se dividen por su responsabilidad técnica y su nivel de complejidad.
+
+    ### 2.1 UI Base (`src/components/ui/`) — 60 componentes
+    Son los **átomos** del sistema. Componentes puros de presentación (botones, inputs, badges) basados en Radix UI y Tailwind.
+
+    | # | Componente | # | Componente | # | Componente |
+    |:--|:-----------|:--|:-----------|:--|:-----------|
+    | 1 | `accordion` | 21 | `dashboard-list` | 41 | `radio-group` |
+    | 2 | `action-tile` | 22 | `date-range-picker` | 42 | `scroll-area` |
+    | 3 | `alert` | 23 | `dropdown-menu` | 43 | `search-input` |
+    | 4 | `ambiente-card` | 24 | `empty-state` | 44 | `select` |
+    | 5 | `avatar` | 25 | `establishment-tab` | 45 | `select-field` |
+    | 6 | `badge` | 26 | `floor-plan-canvas` | 46 | `separator` |
+    | 7 | `billing-tab` | 27 | `form` | 47 | `sheet` |
+    | 8 | `button` | 28 | `icon-picker` | 48 | `sidebar` |
+    | 9 | `calendar` | 29 | `image-uploader` | 49 | `skeleton` |
+    | 10 | `card` | 30 | `input` | 50 | `slider` |
+    | 11 | `carousel` | 31 | `integrations-tab` | 51 | `staff-tab` |
+    | 12 | `carta-card` | 32 | `inventory-tab` | 52 | `switch` |
+    | 13 | `cash-closing-tab` | 33 | `label` | 53 | `table` |
+    | 14 | `chart` | 34 | `menubar` | 54 | `tabs` |
+    | 15 | `checkbox` | 35 | `performance-tab` | 55 | `taxes-tab` |
+    | 16 | `collapsible` | 36 | `personal-card` | 56 | `textarea` |
+    | 17 | `color-picker` | 37 | `popover` | 57 | `toast` |
+    | 18 | `command` | 38 | `profile-tab` | 58 | `toaster` |
+    | 19 | `company-tab` | 39 | `progress` | 59 | `tooltip` |
+    | 20 | `config-item` | 40 | `providers-tab` | 60 | `typography` |
+
+    ### 2.2 Diálogos (`src/components/dialogs/`) — 31 diálogos
+    Representan las **interacciones complejas** y formularios. Cada diálogo está vinculado a una acción de negocio específica como configurar impuestos o editar el personal.
+
+    | # | Diálogo | Función |
+    |:--|:--------|:--------|
+    | 1 | `ambientes-qr-dialog` | Generación de QR por ambiente |
+    | 2 | `cartas-cartas-dialog` | Gestión de listado de cartas |
+    | 3 | `cartas-categoria-dialog` | Editor de categorías de carta |
+    | 4 | `cartas-producto-dialog` | Editor de productos/variantes en carta |
+    | 5 | `comandas-config-dialog` | Configuración del flujo de comandas |
+    | 6 | `comandas-edit-order-dialog` | Modificación de pedidos activos |
+    | 7 | `comandas-export-dialog` | Exportación de histórico de comandas |
+    | 8 | `comandas-order-details-dialog` | Vista detallada de ticket |
+    | 9 | `configuracion-dispositivos-dialog` | Configuración de hardware y terminales |
+    | 10 | `configuracion-tax-dialog` | Gestión de impuestos (IVA) |
+    | 11 | `dashboard-config-dialog` | Ajustes de widgets y vista principal |
+    | 12 | `device-dialog` | Gestión individual de dispositivo |
+    | 13 | `global-alert-dialog` | Confirmaciones y alertas críticas |
+    | 14 | `inventario-history-dialog` | Histórico de movimientos de stock |
+    | 15 | `inventario-ingredient-dialog` | Ficha técnica de ingrediente/materia prima |
+    | 16 | `inventario-stock-adjustment-dialog` | Ajuste manual de existencias |
+    | 17 | `kds-config-dialog` | Configuración del Kitchen Display System |
+    | 18 | `movements-details-dialog` | Detalle específico de un movimiento |
+    | 19 | `notificaciones-filter-dialog` | Filtros avanzados de alertas |
+    | 20 | `personal-config-dialog` | Configuración general de RRHH |
+    | 21 | `personal-edit-dialog` | Editor completo de ficha de empleado |
+    | 22 | `personal-fichaje-dialog` | Terminal virtual de entrada/salida |
+    | 23 | `personal-solicitudausencia-dialog` | Gestión de vacaciones y bajas |
+    | 24 | `planomesas-config-dialog` | Editor del plano de sala |
+    | 25 | `planomesas-qr-dialog` | Generar QR para mesa específica |
+    | 26 | `planomesas-templates-dialog` | Gestión de plantillas de plano |
+    | 27 | `pos-config-dialog` | Configuración de la terminal de venta |
+    | 28 | `promociones-edit-dialog` | Editor de campañas y cupones |
+    | 29 | `reportes-orderdetails-dialog` | Detalle de ticket desde analytics |
+    | 30 | `reservas-edit-dialog` | Crear/Modificar reserva manual |
+    | 31 | `reservas-notificaciones-dialog` | Configuración de avisos de reserva |
+
+    ### 2.3 Features, Charts y Widgets
+    Componentes de alto nivel que encapsulan lógica de negocio o visualización de datos.
+
+    | Grupo | Cantidad | Componentes Destacados |
+    |:------|:---------|:-----------------------|
+    | **Features** | 17 | `whatsapp-preview`, `kpi-cards`, `team-leaderboard`, `schedule-manager` |
+    | **Charts** | 7 | `sales-chart`, `revenue-chart`, `occupancy-charts` |
+    | **Widgets** | 3 | `metric-card`, `low-stock-alerts`, `create-action-card` |
+    | **Layout** | 6 | `sidebar-nav`, `page-container`, `mobile-header` |
+
+    ### 2.4 Resumen y Reutilización
+    Análisis de la eficiencia del código en el Dashboard. Descubrimos qué piezas son las más vitales y cuáles podrían sobrar.
+
+    **Componentes más utilizados**:
+    | # | Componente | Nº vistas que lo importan | Nivel |
+    |:--|:-----------|:--------------------------|:------|
+    | 1 | `button` | 17 | 🔥 Máximo |
+    | 2 | `card` | 15 | 🔥 |
+    | 3 | `badge` | 14 | 🔥 |
+    | 4 | `tabs` | 10 | Alto |
+    | 5 | `input` | 10 | Alto |
+
+    **Código Potencialmente Muerto**: 
+    Componentes en `features/` o `ui/` sin referencias externas detectadas.
+    | # | Componente | Posible motivo |
+    |:--|:-----------|:---------------|
+    | 1 | `dashboard-toolbar` | ¿Reemplazado por page-header? |
+    | 2 | `role-dashboard` | ¿Vista de roles no implementada? |
+    | 3 | `whatsapp-login` | ¿Flujo de login WA no conectado? |
+    | 4 | `accordion`, `carousel`, `menubar` | Sin uso actual en ninguna vista |
+  </Tab>
+
+  <Tab title="POS (Venta)">
+    ## 3. POS: Inventario Tecnológico
+
+    El POS utiliza una arquitectura de **Templates HTML** y **Módulos JS Vanilla** para maximizar el rendimiento en terminales táctiles.
+
+    ### 3.1 Templates HTML (`src/templates/`) — 13 plantillas
+    Definen la estructura visual de los componentes del punto de venta y sus ventanas modales. Son fragmentos HTML puros que el motor Vanilla JS inyecta dinámicamente.
+
+    | # | Archivo | Tipo | Función |
+    |:--|:--------|:-----|:---------|
+    | 1 | `pos/product-card.html` | Componente | Tarjeta visual de producto |
+    | 2 | `pos/category-btn.html` | Componente | Botón de filtro de categoría |
+    | 3 | `pos/cart-item.html` | Componente | Línea de pedido en el carrito (más reutilizado) |
+    | 4 | `modal-auth.html` | Modal | Login y autorización de personal |
+    | 5 | `modal-chat.html` | Modal | Historial de comunicación interna |
+    | 6 | `modal-configurar-cuenta.html` | Modal | Perfil de usuario y ajustes rápidos |
+    | 7 | `pos/modals/modal-pay.html` | Modal POS | Motor de cierre de cuenta y cobro |
+    | 8 | `pos/modals/modal-dividir-cuenta.html` | Modal POS | Lógica de división de tickets |
+    | 9 | `pos/modals/modal-descuento.html` | Modal POS | Aplicación de descuentos y razones |
+    | 10 | `pos/modals/modal-marchar.html` | Modal POS | Confirmación de envío a cocina |
+    | 11 | `pos/modals/modal-modificar-pedido.html` | Modal POS | Edición de items ya agregados |
+    | 12 | `pos/modals/modal-opciones-pedido.html` | Modal POS | Acciones secundarias sobre la orden |
+    | 13 | `pos/modals/modal-void-reason.html` | Modal POS | Justificación de anulación de ticket |
+
+    ### 3.2 Módulos JS (`src/`) — 36 archivos
+    El motor lógico que orquesta toda la interfaz. Sin estos archivos, el POS sería una cáscara vacía. Aquí reside la inteligencia del carrito y los pagos.
+
+    | Grupo | Archivos | Función |
+    |:------|:---------|:--------|
+    | `core/` | `cart.js`, `config.js`, `payment.js`, `split.js`, `store.js` | Lógica de negocio (5 archivos) |
+    | `data/` | `mock-config.js`, `mock-orders.js`, `mock-pos.js`, `mock-store.js`, `mock-ui.js` | Mock data (5 archivos) |
+    | `ui/render/` | `admin.js`, `helpers.js`, `index.js`, `layout.js`, `modals.js`, `pos.js` | Renderizado del DOM (6 archivos) |
+    | `ui/events/` | `index.js`, `keypad.js`, `modal-triggers.js`, `navigation.js`, `pos.js` | Manejadores de eventos (5 archivos) |
+    | `ui/events/modals/` | `modal-utils.js`, `config-account.js`, `chat/`, `discount/`, `march/`, `order-options/`, `pay/`, `split/` | Lógica profunda de modales (13 archivos) |
+    | `ui/icons/` | `index.js` | Generación de iconos Lucide (1 archivo) |
+    | `utils/` | `formatting.js` | Utilidades de moneda y fecha (1 archivo) |
+
+    ### 3.3 Reutilización en el POS
+    A diferencia de React, aquí la reutilización ocurre mediante la inyección repetida del mismo fragmento HTML.
+    *   `cart-item.html`: Se usa en **5 sitios** (renderizado de carrito, edición, eventos de borrado).
+    *   `category-btn.html`: Se usa en **4 sitios**.
+  </Tab>
+
+  <Tab title="Carta Digital">
+    ## 4. Carta: Componentes TSX
+
+    La Carta Digital es una web app optimizada para móviles de clientes. Utiliza **React** pero con un enfoque ultra-ligero.
+
+    ### 4.1 Inventario de Componentes (`src/components/`)
+    Cada componente TSX tiene su propio archivo CSS dedicado para evitar colisiones de estilos.
+
+    | # | Componente | Función |
+    |:--|:-----------|:--------|
+    | 1 | `Header` | Identidad visual y acceso al carrito |
+    | 2 | `CategoryTabs` | Navegación horizontal por el menú |
+    | 3 | `ProductCard` | Tarjeta interactiva con selectores (+/-) |
+    | 4 | `CheckoutBar` | Resumen flotante de cantidad y total |
+    | 5 | `CheckoutScreen` | Pantalla de confirmación y envío a cocina |
+    | 6 | `Notification` | Alertas visuales de confirmación |
+    | 7 | `Loader` | Pantalla de espera durante la carga inicial |
+
+    **Infraestructura**: Utiliza un `LanguageContext` para i18n y un archivo `config.json` para constantes de branding.
+  </Tab>
+
+  <Tab title="Arquitectura y Roadmap">
+    ## 5. Análisis Avanzado de la Interfaz
+
+    Aquí analizamos cómo se conectan los productos y qué pasos faltan para la unificación total.
+
+    ### 5.1 Equivalentes Dashboard ↔ POS
+    Misma función de negocio, distinta implementación técnica.
+
+    | Concepto | Dashboard (React) | POS (Vanilla) |
+    |:---------|:------------------|:--------------|
+    | Tarjeta de producto | `carta-card.tsx` | `product-card.html` |
+    | Editor plano mesas | `floor-plan-canvas.tsx` | No tiene ❌ |
+    | QR de mesa | `planomesas-qr-dialog.tsx` | No tiene ❌ |
+    | Pago / Descuento | No tiene ❌ | Modales dedicados ✅ |
+
+    ### 5.2 Estructura Atómica (Moléculas y Organismos)
+    *   **Moléculas**: Composiciones de átomos como el `DateRangePicker` o el `ActionTile`.
+    *   **Organismos**: Secciones completas como el `edit-order-dialog` o el sistema de `personal-fichaje`.
+
+    ### 5.3 Roadmap de Componentes Faltantes
+    Para alcanzar la madurez empresarial, se han identificado los siguientes "agujeros" funcionales que requieren desarrollo tanto en lógica como en UI:
+
+    1.  **Módulo de Cobro Dividido (Prorrateo)**
+        *   **Ubicación**: **POS** (Terminal de Venta).
+        *   **Ruta/Vista**: Dentro de la vista `caja`, específicamente en la lógica de `modal-pay.html`.
+        *   **Detalle**: Es necesario conectar el botón "Dividir Cuenta" con una lógica real en `core/split.js` que permita separar el total por número de comensales o por selección manual de items.
+
+    2.  **Integración CRM en Checkout (Fidelización)**
+        *   **Ubicación**: **POS** y **Dashboard**.
+        *   **Ruta/Vista**: En el **POS** (durante el proceso de pago) y en el **Dashboard** (Ruta `/clientes`).
+        *   **Detalle**: Implementar en el POS la búsqueda de clientes desde la base de datos central de Convex para aplicar puntos o emitir facturas nominativas al cerrar la venta.
+
+    3.  **Kanban KDS Interactivo (Drag & Drop)**
+        *   **Ubicación**: **KDS** (Kitchen Display System).
+        *   **Ruta/Vista**: En el **POS** (Vista `kds`) y en el **Dashboard** (Ruta `/kds`).
+        *   **Detalle**: Evolucionar la lista estática actual a un tablero de columnas (Pendiente, En Marcha, Listo) que permita al personal de cocina arrastrar los tickets para cambiar su estado en tiempo real.
+
+    ### 5.4 Conteo General de la UI
+    | Métrica | Dashboard | POS | Carta | Total |
+    |:--------|:----------|:----|:------|:------|
+    | Componentes / Templates | 124 | 13 | 9 | **146** |
+    | Diálogos / Modales | 31 | 10 | 0 | **41** |
+    | Archivos JS/TS lógica | 19 | 36 | 4 | **59** |
+    | Código muerto | 8 | 0 | 0 | **8** |
+  </Tab>
+</Tabs>
+
+---
+
+<Note>
+  **Importante para Devs**: Antes de crear un nuevo componente, verifica en `src/components/ui/` si ya existe un átomo que cubra la necesidad. Mantener la librería limpia es prioridad #1.
+</Note>

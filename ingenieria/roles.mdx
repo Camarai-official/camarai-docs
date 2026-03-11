@@ -1,0 +1,91 @@
+---
+title: "Roles y Permisos"
+description: "Jerarquía de accesos, seguridad por PIN y segregación de funciones en el ecosistema Camarai."
+---
+
+# Sistema de Gestión de Roles y Accesos
+
+En Camarai, la seguridad no es solo una capa de UI; está profundamente integrada en la **Arquitectura de Datos de Convex**. El sistema utiliza una estructura de tablas relacionales para definir qué puede hacer cada identidad dentro del ecosistema.
+
+---
+
+## Estructura de Datos en Convex
+
+La gestión de roles reside principalmente en la tabla `staff`, que actúa como el puente entre una identidad física y sus permisos en el software. Para ver la definición completa de todos los campos, consulta [Base de Datos > staff](/ingenieria/bbdd).
+
+### Tabla: `staff` — Campos Clave para Seguridad
+
+| Campo | Tipo | Función en Seguridad |
+| :--- | :--- | :--- |
+| `establishment_id` | `Id<"establishments">` | **Multi-tenancy**: Garantiza que un usuario solo acceda a datos de su local. |
+| `role` | `string` | **Nivel de Autoridad**: `owner` \| `admin` \| `manager` \| `waiter` \| `cook`. |
+| `pin` | `string` (Hash) | **Acceso Rápido**: Validación para acciones críticas en el POS. |
+| `auth_id` | `string` | **Identidad Externa**: Vinculación con [Camarauth](/ingenieria/autenticacion) para login por email/WhatsApp. |
+| `status` | `string` | **Control de Vida**: `active` \| `suspended` \| `deleted`. |
+| `dashboard_sections` | `array` | **Acceso Granular**: Lista de secciones del Dashboard a las que tiene acceso. |
+
+> [!IMPORTANT]
+> **Regla de Oro**: Ninguna mutación en Convex se ejecuta sin validar primero el `staff_id` y su `role` asociado en la petición.
+
+---
+
+## Escenarios de Acceso y Casos de Uso
+
+La gestión de roles no es estática; se activa según el escenario operativo. A continuación, se detalla quién y cómo accede a las funciones críticas.
+
+### Matriz de Operativa Real
+
+| Escenario | Actor Principal | Acción en la UI | Validación de Datos (Convex) |
+| :--- | :--- | :--- | :--- |
+| **Cambio de Turno** | Waiter | Logout / Login rápido con PIN | `updateStaffStatus(id, "active")` |
+| **Error en Cobro** | Manager | Pulsa "Anular" -> Modal PIN superior | `cancelPayment(id, supervisorToken)` |
+| **Subida de Precios** | Admin | Edita celda en tabla Productos | `updateProduct(id, { price })` |
+| **Cierre de Mes** | Owner | Descarga reporte PDF en Finanzas | `getFinancialSummary(establishmentId)` |
+| **Restricción de Vista** | Manager | Accede al Dashboard pero no ve Facturación | `dashboard_sections` no incluye `billing` |
+
+---
+
+## Gestión de la Jerarquía (Niveles de Privilegio)
+
+El sistema opera bajo el principio de **Privilegio Mínimo**: nadie tiene acceso a algo que no necesite para su función diaria.
+
+### Nivel 1: Staff — Operador de Campo
+- **Roles**: `waiter`, `cook`
+- **Vistas**: POS, KDS, Carta.
+- **Limitación**: No puede ver costes de ingredientes ni facturación total. Solo ve lo que debe servir o cobrar.
+- **`dashboard_sections`**: `[]` (sin acceso al Dashboard)
+
+### Nivel 2: Manager — Autorizador
+- **Roles**: `manager`
+- **Vistas**: Dashboard Operativo, POS.
+- **Poder Especial**: Puede sobreescribir acciones del Staff (ej: invitaciones o descuentos) mediante su **PIN Maestro**.
+- **`dashboard_sections`**: `["comandas", "plano_mesas", "personal", "inventario", "reportes"]`
+
+### Nivel 3: Admin — Configurador
+- **Roles**: `admin`
+- **Vistas**: Dashboard de Gestión.
+- **Responsabilidad**: Mantenimiento del catálogo, horarios de personal y estructura de mesas.
+- **`dashboard_sections`**: Todas excepto `billing` y `subscriptions`
+
+### Nivel 4: Owner — Titular
+- **Roles**: `owner`
+- **Vistas**: Control Total.
+- **Acción Única**: Gestión de suscripción, borrado de logs persistentes y creación de perfiles Admin.
+- **`dashboard_sections`**: `["*"]` (acceso completo)
+
+---
+
+## Auditoría y Tranquilidad del Dueño
+
+Cada vez que un **Manager** o **Admin** realiza una acción sensible, se genera una huella digital inalterable en la tabla `event_log`:
+
+1.  **Registro**: `timestamp` + `actor` (staff_id) + `action` + `entity_type` + `entity_id`.
+2.  **Detalle**: Se guarda el estado `before` y `after` del registro modificado.
+3.  **Notificación**: Si la acción es crítica (ej: "Borrado de Factura"), el **Agente Gerente** envía un WhatsApp al Owner instantáneamente.
+
+> [!NOTE]
+> Para la definición completa de `event_log`, consulta [Base de Datos > Dominio 5](/ingenieria/bbdd).
+
+<Info>
+  La validación técnica de estos roles se realiza mediante la identidad provista por el SDK de Camarauth. Consulta [Autenticación y Login](/ingenieria/autenticacion) para entender el flujo handshake.
+</Info>

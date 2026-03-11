@@ -1,0 +1,348 @@
+---
+title: "Mapa de Arquitectura"
+description: "4 apps frontend + 4 agentes IA del ecosistema Camarai. Vistas, rutas, decisiones y capa Convex compartida."
+---
+
+## 1. Ecosistema Camarai — 4 apps + 4 agentes
+
+El ecosistema Camarai se estructura en tres capas interconectadas, bajo una premisa fundamental:
+
+> [!IMPORTANT]
+> **Regla de Oro Nº1**: El **Dashboard** es el cerebro de gestión centralizada. Configura impresoras, nodos, empleados y reglas de negocio. El **POS y la Carta** son terminales ligeras que consumen esa configuración para ejecutar la operación.
+
+<Steps>
+  <Step title="1. Capa de Agentes IA (Inteligencia)" icon="robot">
+    Agentes autónomos que interactúan con humanos vía WhatsApp, voz o prompt. Sustentados por **n8n**, **Evolution API** y modelos de AI.
+
+    <CardGroup cols={2}>
+      <Card title="Agente Cliente" icon="comments">
+        **WhatsApp:** Recomienda platos, upselling, reservas y envía carta digital.
+      </Card>
+      <Card title="Agente Gerente" icon="bell">
+        **WhatsApp:** Alertas de stock, notificaciones y KPIs para el manager.
+      </Card>
+      <Card title="Agente Camarero" icon="microphone">
+        **Voz (V2-V3):** Toma pedidos dictados y los procesa directamente en el POS.
+      </Card>
+      <Card title="Agente TPV" icon="wand-magic-sparkles">
+        **Prompt (V3-V4):** Gestión completa del local mediante lenguaje natural.
+      </Card>
+    </CardGroup>
+  </Step>
+
+  <Step title="2. Capa de Apps Frontend (Interfaz Visual)" icon="window-maximize">
+    Las aplicaciones con interfaz gráfica (UI) utilizadas por los operadores humanos.
+
+    <CardGroup cols={2}>
+      <Card title="Dashboard (Gestión)" icon="chart-line">
+        **Next.js / React.** El panel de control total para dueños y administradores.
+      </Card>
+      <Card title="POS + KDS (Ventas y Cocina)" icon="cash-register">
+        **Vanilla JS / HTML.** Ligero, sin compilación, para terminales de venta.
+      </Card>
+      <Card title="PDA (Camareros en sala)" icon="mobile-screen">
+        **Vanilla JS / HTML.** (Futuro) Adaptación móvil del POS para toma ágil.
+      </Card>
+      <Card title="Carta Digital (Clientes)" icon="utensils">
+        **Next.js / React.** Web app de menú digital vinculada a sesiones.
+      </Card>
+    </CardGroup>
+  </Step>
+
+  <Step title="3. Capa de Datos (Backend Unificado)" icon="database">
+    **Convex** actúa como la única fuente de verdad para todo el ecosistema.
+    
+    Centraliza el `schema.ts`, las `queries`, las `mutations` y provee **reactividad en tiempo real** a todas las aplicaciones y agentes, asegurando sincronización instantánea y consistencia de datos (types compartidos).
+  </Step>
+</Steps>
+
+
+### 1.1 Inventario del Ecosistema
+
+<Tabs>
+  <Tab title="Apps Frontend (4)">
+    | App | Repo | Tech | Estado | Quién lo usa |
+    |:----|:-----|:-----|:-------|:-------------|
+    | **Dashboard** | `CamaraiDashboardFinal` (fran-reorganization) | Next.js 14 / React / TypeScript | ✅ En desarrollo | Managers, dueños, admins |
+    | **POS + KDS** | `pos-template-main` | Vanilla JS / HTML / CSS | ✅ En desarrollo (1 vista funcional) | Cajeros, camareros, cocina |
+    | **PDA** | Fork del sidebar POS (futuro) | Vanilla JS / HTML / CSS | 🔲 Planificado | Camareros en sala (móvil) |
+    | **Carta** | `carta.camarai.es-main` | Next.js / React / TypeScript | ✅ Funcional | Clientes (menú digital) |
+  </Tab>
+  <Tab title="Agentes IA (4)">
+    | Agente | Canal | Función | Versión | Estado |
+    |:-------|:------|:--------|:--------|:-------|
+    | **🤖 Agente Cliente** | WhatsApp | Recomienda platos, hace upselling, envía link de la Carta, gestiona reservas | V1 | ✅ Base funcional |
+    | **🤖 Agente Gerente** | WhatsApp | Envía notificaciones, KPIs, alertas — espejo del Dashboard en el móvil del dueño | V1 | 🔲 Planificado |
+    | **🤖 Agente Camarero** | Voz (micrófono) | Toma pedidos por voz, los transcribe y los envía al POS | V2-V3 | 🔲 Futuro |
+    | **🤖 Agente TPV** | Prompt (chat en Dashboard) | Gestión completa vía prompt: stock, proveedores, personal, reportes — cualquier acción del Dashboard | V3-V4 | 🔲 Futuro |
+
+    **Tech de agentes**: n8n (orquestación) + Evolution API (WhatsApp) + AI model (procesamiento de lenguaje natural)
+  </Tab>
+</Tabs>
+
+---
+
+## 2. Vistas — Dashboard
+
+**24 archivos `page.tsx`** en `src/app/`. Muchas vistas contienen sub-tabs internas que funcionan como sub-pantallas. Total real: **~52 pantallas**.
+
+<Tabs>
+  <Tab title="Rutas sin sub-tabs">
+    | # | Ruta | Descripción |
+    |:--|:-----|:------------|
+    | 1 | `/` | Dashboard home (KPIs: Ingresos, Ticket Medio, Upsell, NPS) |
+    | 2 | `/ambientes` | Gestión de zonas y aforo (Terraza, Salón, etc.) |
+    | 3 | `/chat` | Chat interno y bot logs |
+    | 4 | `/clientes` | Directorio CRM y fidelización |
+    | 5 | `/comandas` | Historial interactivo de pedidos y estados |
+    | 6 | `/kds` | Kitchen Display System (vista de solo lectura) |
+    | 7 | `/notificaciones` | Log centralizado de alertas del sistema |
+    | 8 | `/plano-mesas` | Editor visual de sala (Drag & Drop) |
+    | 9 | `/pos-kds` | Terminal de venta e interfaz de cocina integrada |
+    | 10 | `/reservas` | Libro de reservas y calendario de ocupación |
+
+    **Subtotal**: 10 rutas base
+  </Tab>
+  <Tab title="Rutas con sub-tabs">
+    | # | Ruta | Descripción | Sub-tabs (Tabs.Trigger value) | Nº tabs |
+    |:--|:-----|:------------|:-----------------|:--------|
+    | 0 | `/` (Home) | Dashboard Central (Widgets) | `metrics`, `salesChart`, `recentOrders`, `stockAlerts`, `teamRanking`, `topProducts` | 6* |
+    | 11 | `/cartas` | Gestor de cartas digitales | `[id]`, `[id]/edit` (sub-rutas físicas) | 2 |
+    | 12 | `/categorias` | Jerarquía del menú y apariencia | `general`, `apariencia`, `productos` | 3 |
+    | 13 | `/ingredientes` | Gestión de materia prima y stock | — (Diálogos de ajuste e historial) | 1 |
+    | 14 | `/inventario` | Control de stock y alertas | — (Diálogos de stock, historial y edición) | 1 |
+    | 15 | `/personal` | Gestión de equipo, RRHH y fichajes | `team`, `time-tracking`, `absences`, `incidencias`, `fichaje` | 5 |
+    | 16 | `/productos` | Catálogo de productos y precios | `general`, `precios`, `receta`, `variantes`, `disponibilidad` | 5 |
+    | 17 | `/promociones` | Configuración de ofertas y campañas | `campaigns`, `stats` | 2 |
+    | 18 | `/reportes` | Analytics, ventas y cierres de caja | `billing`, `performance`, `hours`, `absences`, `inventory`, `whatsapp`, `cash-closing` | 7 |
+    | 19 | `/settings` | Configuración central del sistema | `notifications`, `profile`, `taxes` (sub-rutas físicas) | 3 |
+    | 20 | `/settings/profile` | Configuración profunda de negocio | `profile`, `establishment`, `company`, `devices`, `providers`, `integrations`, `taxes` | 7 |
+
+    **Subtotal**: 11 rutas físicas principales + 41 sub-pantallas verificadas.
+  </Tab>
+  <Tab title="Resumen Métricas Verificadas">
+    | Métrica | Valor | Estado |
+    |:--------|:------|:-------|
+    | Rutas físicas en `src/app` | **12** | ✅ Verificado |
+    | Sub-rutas detectadas | **5** | ✅ Verificado |
+    | Sub-tabs (funcionales) | **41** | ✅ Verificado |
+    | **Pantallas reales totales** | **~58** | 🔍 Actualizado |
+  </Tab>
+</Tabs>
+
+---
+
+## 3. Vistas — POS (Terminal de Venta)
+
+**Repo**: `pos-template-main` — SPA (Single Page Application) basada en **Vanilla JS ES6**.
+Utiliza un sistema de **DOM Swapping** gestionado en `navigation.js` y fragmentos HTML dinámicos (`templates/`).
+
+| # | Vista | Key en router | Estado | Lógica de Renderizado |
+|:--|:------|:--------------|:-------|:----------------------|
+| 1 | **Caja** (Registro) | `caja` | ✅ Funcional | Inyectada en `index.html` + `render/pos.js` |
+| 2 | **Mesas** | `mesas` | ⚠️ Placeholder | `viewPlaceholders` (UI estática) |
+| 3 | **KDS** (Cocina/Barra) | `kds` | ⚠️ Placeholder | `viewPlaceholders` (Oculta PDA Sidebar) |
+| 4 | **Clientes** | `clientes` | ⚠️ Placeholder | `viewPlaceholders` (Inyectado vía JS) |
+| 5 | **Recibos** | `recibos` | ⚠️ Placeholder | `viewPlaceholders` |
+| 6 | **Configuración** | `config` | ⚠️ Placeholder | `viewPlaceholders` (Oculta PDA Sidebar) |
+
+**Total POS**: 6 vistas base vinculadas al Router.
+
+**Arquitectura Vanilla**:
+- **Router**: El `initRouter` en `navigation.js` captura los clicks del footer y alterna la visibilidad de la sección de productos vs placeholders.
+- **Componentes**: No utiliza Custom Elements nativos (`web-components`), sino **módulos funcionales** que inyectan plantillas HTML (`fillTemplate`) para mantener el rendimiento al máximo en terminales táctiles.
+- **PDA Mode**: El sistema detecta automáticamente la vista activa para ocultar o mostrar el panel lateral de pedidos (ej. en KDS se oculta para maximizar visibilidad de tickets).
+
+---
+
+## 4. Vistas — Carta (Menú Digital)
+
+**Repo**: `carta.camarai.es-main` — Next.js / React / TypeScript.
+**Estructura**: App de una sola página (`AllComponents.tsx`) que gestiona el estado dinámico del pedido.
+
+| # | Sección/Componente | Función | Lógica Técnica |
+|:--|:-------------------|:--------|:---------------|
+| 1 | `Header` | Identidad + Badge de pedido | Muestra nº items en `pedido` state |
+| 2 | `CategoryTabs` | Navegación por categorías | Filtra `menuData` en el cliente |
+| 3 | `MenuContainer` | Grid de productos y variantes | Renderiza `ProductCard` con +/- y selectores de variante |
+| 4 | `CheckoutBar` | Resumen flotante (Sticky) | Acción de cierre de pedido |
+| 5 | `CheckoutScreen` | Pantalla de confirmación final | Recoge datos y activa `generarComanda` |
+| 6 | `Notification` | Alertas de sistema (Toast) | Feedback de éxito/error en pedido |
+| 7 | `Loader` | Pantalla de carga (Splash) | Aparece mientras `obtenerCarta` está en curso |
+
+**Flujo Técnico Verificado**:
+1. **Acceso**: 🤖 Agente Cliente (WhatsApp) envía link `carta.camarai.es?session=ID`.
+2. **Carga**: La app llama a `/api/obtenerCarta` (Next API Route) -> Proxy a Webhook n8n en `bot1.camarai.es:5678/webhook/get-catalog`.
+3. **Selección**: El cliente añade productos al estado local `pedido`.
+4. **Envío**: La app llama a `/api/generarComanda` -> Proxy a Webhook n8n en `bot1.camarai.es:5678/webhook/generate-order`.
+5. **Cierre**: El pedido entra en el ecosistema Convex y se notifica al POS/Dashboard.
+
+---
+
+## 5. PDA — Adaptación móvil del POS (futuro)
+
+**Estado**: 🔲 Planificado — no tiene repo aún.
+
+**Concepto**: Extraer el **PDA Side Panel** (sidebar del carrito) del POS y convertirlo en una app móvil standalone para camareros.
+
+| Aspecto | Detalle |
+|:--------|:--------|
+| **Base** | `cart-item.html` + `cart.js` del POS actual |
+| **Tech** | Vanilla JS / HTML / CSS (misma filosofía POS) |
+| **Función** | Tomar pedidos en sala, enviar a cocina, ver estado mesas |
+| **Lee de Convex** | `products`, `categories`, `tables`, `establishments` |
+| **Escribe en Convex** | `orders` (crear), `tables` (cambiar estado) |
+| **Lo que NO hace** | Cobrar (eso es POS), gestionar personal (eso es Dashboard), editar carta (Dashboard) |
+
+---
+
+## 6. Agentes IA — Capa de Inteligencia
+
+Los agentes NO son apps frontend. Son **servicios de backend** que se comunican con usuarios vía WhatsApp o voz, y ejecutan acciones en Convex.
+
+<Tabs>
+  <Tab title="🤖 Cliente (V1)">
+    | Aspecto | Detalle |
+    |:--------|:--------|
+    | **Canal** | WhatsApp (Evolution API) |
+    | **Orquestación** | n8n |
+    | **Funciones** | Recomienda platos, hace upselling, envía link de la Carta (`carta.camarai.es?session=X`), gestiona reservas, responde preguntas sobre el menú |
+    | **Lee de Convex** | `products`, `categories`, `menu`, `establishments` (horarios, alérgenos) |
+    | **Escribe en Convex** | `reservations` (crear reserva), `customers` (registrar interacción) |
+    | **Relación con Carta** | Envía el link → el cliente hace el pedido en la Carta → la Carta hace el `generarComanda` |
+  </Tab>
+  <Tab title="🤖 Gerente (V1)">
+    | Aspecto | Detalle |
+    |:--------|:--------|
+    | **Canal** | WhatsApp (Evolution API) |
+    | **Funciones** | Envía notificaciones al dueño (stock bajo, pedidos anulados, fichajes, cierres de caja), resúmenes diarios de KPIs, alertas en tiempo real |
+    | **Lee de Convex** | Todo — es un espejo del Dashboard en formato chat |
+    | **Escribe en Convex** | ❌ Solo lee (V1) |
+  </Tab>
+  <Tab title="🤖 Camarero (V2-V3)">
+    | Aspecto | Detalle |
+    |:--------|:--------|
+    | **Canal** | Voz (micrófono del móvil o PDA) |
+    | **Funciones** | Toma pedidos por voz, transcribe, identifica productos y mesa, envía a cocina |
+    | **Lee de Convex** | `products`, `categories`, `tables` |
+    | **Escribe en Convex** | `orders` (crear pedido vía voz) |
+  </Tab>
+  <Tab title="🤖 TPV (V3-V4)">
+    | Aspecto | Detalle |
+    |:--------|:--------|
+    | **Canal** | Chat integrado dentro del Dashboard |
+    | **Funciones** | Gestión completa vía prompt: stock, precios, proveedores, reportes — cualquier acción |
+    | **Lee de Convex** | Todo |
+    | **Escribe en Convex** | Todo — con confirmación del usuario |
+  </Tab>
+  <Tab title="Stack Técnico">
+    | Capa | Tecnología |
+    |:-----|:-----------|
+    | Mensajería WhatsApp | Evolution API |
+    | Orquestación de flujos | n8n |
+    | Procesamiento de lenguaje | LLM (AI Models) |
+    | Voz → texto | Speech-to-text API (SST) |
+    | Almacenamiento | Convex (mismas tablas que las apps) |
+  </Tab>
+</Tabs>
+
+---
+
+## 7. Decisiones de Arquitectura
+
+<Tabs>
+  <Tab title="Filosofía y Stack">
+    ```
+    Dashboard = Next.js / React / TypeScript  →  componentes .tsx
+    POS + PDA = Vanilla JS / HTML / CSS       →  templates .html + .js
+    Carta     = Next.js / React / TypeScript  →  componentes .tsx
+    Agentes   = n8n + Evolution API + AI      →  flujos backend (no frontend)
+
+    Los componentes React del Dashboard NUNCA van al POS/PDA.
+    Los templates HTML del POS NUNCA van al Dashboard/Carta.
+    Los agentes NO tienen UI propia — usan WhatsApp, voz o el chat del Dashboard.
+    ```
+
+    | Motivo (Vanilla JS) | Explicación |
+    |:-------|:------------|
+    | **Sin compilación** | El POS se copia como carpeta estática a cualquier dispositivo y funciona. No necesita `npm build`. |
+    | **Cualquier dispositivo** | Tablets Android, iPads, Chromebox, terminales táctiles — un navegador basta. |
+    | **Rendimiento** | Un POS necesita respuesta instantánea. Vanilla JS no carga virtual DOM ni reconciliación. |
+    | **Mantenimiento** | El equipo de cocina/sala no mantiene repos React. Se edita un archivo y listo. |
+
+    ### 7.1 Filosofía de Autoridad (Regla Nº1)
+    *   **Dashboard**: Creador de datos (CMS, Configuración técnica, RRHH, Permisos).
+    *   **POS / PDA**: Consumidor de datos (Flujo de venta, KDS, Toma de pedidos). No configuran, ejecutan.
+    *   **Convex**: El canal que transporta la autoridad del Dashboard a los terminales en tiempo real.
+  </Tab>
+  <Tab title="Mapa de Roles">
+    | | **POS** | **Dashboard** | **Carta** | **PDA** | **Agentes** |
+    |:--|:---|:---|:---|:---|:---|
+    | **Función** | Vender, cobrar, comandar | Configurar, analizar, gestionar | Menú digital, recibir pedidos | Tomar pedidos en sala | Comunicar, recomendar, automatizar |
+    | **Quién lo usa** | Cajeros, cocina | Managers, dueños | Clientes | Camareros | Todos (vía WhatsApp/voz/chat) |
+    | **Tipo operación** | 🔥 Escritura intensiva | 📖 Lectura + CRUD | 📖 Lectura + 1 escritura | 🔥 Escritura pedidos | 🤖 Lee + escribe según agente |
+    | **Dónde corre** | Tablet/terminal | PC/portátil | Móvil cliente | Móvil camarero | Servidor (n8n) |
+  </Tab>
+  <Tab title="Conexión a Datos">
+    **La única capa compartida es el backend Convex.**
+
+    | Capa | ¿Compartida? | Formato |
+    |:-----|:-------------|:--------|
+    | Componentes UI | ❌ No | `.tsx` (React) vs `.html/.js` (Vanilla) |
+    | Lógica de negocio | ❌ No | Hooks vs `core/*.js` |
+    | **Types / Interfaces**| ✅ **SÍ** | TypeScript `.ts` (Paquete compartido) |
+    | **Schema Convex** | ✅ **SÍ** | `convex/schema.ts` (Único) |
+    | **Queries/Mutations** | ✅ **SÍ** | `convex/functions/*.ts` (Único) |
+
+    ---
+
+    | Producto | SDK / Conexión | Tipado |
+    |:---------|:---------------|:-------|
+    | **Dashboard** | `convex/react` | TypeScript nativo |
+    | **POS / PDA** | `convex/browser` | JS puro (Documentation-based) |
+    | **Carta** | `convex/react` / `fetch` | TypeScript nativo |
+    | **Agentes** | Convex HTTP API | Nulo (n8n JSON nodes) |
+  </Tab>
+  <Tab title="Solapamiento Convex">
+    | Tabla Convex | Dashboard | POS | PDA | Carta | Agentes |
+    |:-------------|:----------|:----|:----|:------|:--------|
+    | `orders` | 📖+✏️ | **🔥 Principal** | **🔥 Crea** | ✏️ `generarComanda` | 🤖 Camarero (voz→order) |
+    | `payments` | 📖 Reportes | **🔥 Principal** | ❌ | ❌ | ❌ |
+    | `tables` | 📖+✏️ Config | **🔥 Ciclo** | ✏️ Estado | ❌ | ❌ |
+    | `products` | ✏️ CRUD | 📖 Lee | 📖 Lee | 📖 Menú | 🤖 Cliente (recomendar), TPV (editar) |
+    | `categories` | ✏️ CRUD | 📖 Lee | 📖 Lee | 📖 Tabs | 🤖 Cliente (filtrar) |
+    | `customers` | ✏️ CRM | 📖 Lee | ❌ | ❌ | 🤖 Cliente (registrar) |
+    | `reservations` | ✏️ CRUD | ❌ | ❌ | ❌ | 🤖 Cliente (crear reserva) |
+    | `staff` | ✏️ CRUD | 📖 Lee | 📖 Auth | ❌ | 🤖 Gerente (alertas fichajes) |
+    | `environments` | ✏️ CRUD | ❌ | ❌ | ❌ | ❌ |
+    | `establishments` | ✏️ CRUD | 📖 Config | 📖 Config | 📖 Brand | 🤖 TPV (leer/modificar config) |
+    | `devices` | ✏️ CRUD | ❌ | ❌ | ❌ | ❌ |
+    | `menu` | ✏️ CRUD | 📖 Lee | ❌ | 📖 `obtenerCarta` | 🤖 Cliente (leer menú) |
+  </Tab>
+</Tabs>
+
+---
+
+## 8. Conteo General del Ecosistema
+
+<Tabs>
+  <Tab title="Apps Frontend">
+    | Métrica | Dashboard | POS | Carta | PDA | Total |
+    |:--------|:----------|:----|:------|:----|:------|
+    | Vistas / rutas | 24 | 6 | 1 | 1 (futuro) | **32** |
+    | Pantallas reales | ~52 | 6 | 1 | 1 | **~60** |
+    | Componentes / Templates | 115 | 13 | 9 | — | **137** |
+    | Diálogos / Modales | 21 | 10 | 0 | — | **31** |
+    | Types / Interfaces | ~30 | 0 | 3 | — | **~33** |
+  </Tab>
+  <Tab title="Agentes IA">
+    | Agente | Canal | Tablas Convex | Versión | Estado |
+    |:-------|:------|:-------------|:--------|:-------|
+    | 🤖 Cliente | WhatsApp | products, categories, menu, reservations, customers | V1 | ✅ Base |
+    | 🤖 Gerente | WhatsApp | Todas (solo lectura) | V1 | 🔲 Planificado |
+    | 🤖 Camarero | Voz | products, categories, tables, orders | V2-V3 | 🔲 Futuro |
+    | 🤖 TPV | Chat Dashboard | Todas (lectura + escritura) | V3-V4 | 🔲 Futuro |
+  </Tab>
+</Tabs>
+
+Para el detalle de cada componente, ver [Componentes UI](/ingenieria/componentes).

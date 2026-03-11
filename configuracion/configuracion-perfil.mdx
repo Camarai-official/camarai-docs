@@ -1,0 +1,80 @@
+---
+title: "Configuración / Perfil y Empresa"
+description: "Datos del establecimiento, logo, métodos de pago y gestión de dispositivos periféricos."
+---
+
+![Vista Perfil y Empresa](/images/settings-profile-view.png)
+
+## ¿Qué es esta página?
+
+Esta sub-página de Configuración recoge **todos los datos del establecimiento**: nombre del negocio, dirección, contacto, logo, configuración fiscal y los dispositivos periféricos (impresoras, TPV) vinculados.
+
+Es la fuente de verdad para los datos que aparecen en los tickets, reservas y notificaciones del sistema.
+
+---
+
+## ¿De qué tablas se alimenta?
+
+## Base de Datos: Establecimiento
+
+Los datos centrales del negocio residen en la tabla `establishments`. Consulta el detalle técnico en [BBDD](/ingenieria/bbdd).
+
+---
+
+## Tab "Perfil" — Datos del negocio
+
+![Vista Profile Completa (scroll)](/images/settings-profile-scroll.png)
+
+Formulario con:
+- **Nombre del negocio**, CIF/NIF, dirección completa
+- **Email y teléfono** de contacto (usados en notificaciones automáticas)
+- **Logo**: upload de imagen → se sube a Convex File Storage → `logo_url` guarda la URL pública
+- **Web y WhatsApp Business**: enlace y número del canal
+- **Zona horaria y moneda**: afectan todos los timestamps del sistema
+- **Footer del ticket**: texto libre que aparece al final de cada ticket impreso
+- **Métodos de pago habilitados**: toggles para Efectivo / Tarjeta / Bizum / Mixto
+
+**Mutation necesaria:**
+```ts
+updateEstablishment(id: Id<"establishments">, data: Partial<Establishment>): Promise<void>
+```
+
+---
+
+## Tab "Dispositivos" — Periféricos vinculados
+
+![Tab Dispositivos](/images/settings-profile-devices.png)
+
+Lista de impresoras y terminales registrados. Desde aquí se pueden añadir nuevos dispositivos.
+
+**Configuración Técnica (Impresoras):** Consultar tabla `pos_printers` en [BBDD](/ingenieria/bbdd).
+
+**Configuración Técnica (Terminales):** Consultar tabla `pos_terminals` en [BBDD](/ingenieria/bbdd).
+
+---
+
+### 🪟 Modal: Añadir / Configurar Dispositivo
+
+![Modal Añadir Dispositivo](/images/settings-profile-add-device.png)
+
+Formulario con:
+- Nombre del dispositivo
+- Tipo: Impresora Térmica / Impresora Láser / Terminal / Caja Registradora
+- Conexión: Red (IP) / USB / Bluetooth
+- IP (si es conexión de red)
+- Toggle: imprimir comandas de cocina / imprimir tickets
+- Ancho de papel: 58mm o 80mm
+
+---
+
+## 🚀 Plan de Mejoras (Roadmap Técnico)
+
+### 🎨 Frontend (UI/UX & Sincronización)
+- **Flujo de Upload de Logo**: Integrar el componente de subida de archivos con `Convex Storage` para que el logo se previsualice y persista realmente.
+- **Validación de Formularios**: Implementar validaciones estrictas de formato para CIF/NIF, Teléfono (E.164) e IBAN antes de permitir el guardado.
+- **Monitor de Hardware**: Añadir un estado de "Ping" visual en la lista de dispositivos para saber si la impresora/tablet está respondiendo en la red local.
+
+### ⚙️ Backend (BBDD & Lógica Convex)
+- **Estructura Multi-Entidad**: Asegurar que la configuración de métodos de pago sea estricta por `establishment_id` para evitar conflictos en cuentas con múltiples locales.
+- **Healthcheck Automático**: Implementar una función que limpie periódicamente dispositivos marcados como `online` pero que no han enviado un heartbeat en >5 minutos.
+- **Gestión de Medios en BBDD**: Almacenar los metadatos de las imágenes subidas (`size`, `format`) para optimizar la carga del logo en los tickets.

@@ -1,0 +1,47 @@
+---
+title: "Clientes (CRM)"
+description: "Gestión de la base de datos de clientes y fidelización."
+---
+
+<Tabs>
+  <Tab title="Fidelización (CRM)">
+    ## Gestión de la Base de Clientes
+    La vista de Clientes es el núcleo del sistema de marketing de Camarai. Permite gestionar el historial de cada comensal y su vinculación con WhatsApp.
+
+    ![Placeholder: Vista Tabla de Clientes](/images/TODO-clientes-view-main.png)
+
+    ### Atributos del Cliente
+    - **LTV (Gasto Total)**: Valor acumulado de todas las comandas pagadas.
+    - **Última Visita**: Sincronizado automáticamente con el TPV.
+    - **Etiquetas**: Segmentación manual o automática (VIP, Recurrente).
+  </Tab>
+
+  <Tab title="Ficha de Cliente">
+    ## Detalle Individual
+    ![Placeholder: Vista Ficha Detallada Cliente](/images/TODO-clientes-modal-ficha.png)
+
+    - **Historial de Pedidos**: Acceso directo a todos los tickets pasados.
+    - **Notas de Preferencia**: Alérgenos, mesa favorita o gustos específicos.
+    - **Acción Rápida**: Botón directo para iniciar chat de WhatsApp.
+  </Tab>
+
+  <Tab title="Especificación Técnica">
+    <Note icon="database" color="#FF0000">
+      **🚨 HAY QUE SOLUCIONAR**: Actualmente los clientes se crean en `reservas`, pero no siempre se sincronizan con las `orders` del POS si el nombre varía ligeramente.
+      **Acción**: Implementar unificación por `phone` (formato E.164).
+    </Note>
+
+    ### Esquema Convex: `customers`
+    - `name: string`
+    - `phone: string` (Identificador único)
+    - `total_spent: number`
+    - `tags: string[]`
+  </Tab>
+
+  <Tab title="Roadmap">
+    ## 🚀 Futuras Mejoras
+    - **Sincronización por QR**: Identificación automática del cliente al escanear la mesa.
+    - **NPS Automático**: Envío de encuesta de satisfacción tras el pago vía WhatsApp.
+    - **Sugerencias IA**: El sistema sugiere qué clientes "dormidos" contactar para reactivarlos.
+  </Tab>
+</Tabs>

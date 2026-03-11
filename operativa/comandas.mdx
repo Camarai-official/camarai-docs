@@ -1,0 +1,78 @@
+---
+title: "Comandas — El Historial de Todo lo que se ha Vendido"
+description: "Gestión y consulta del historial completo de pedidos del restaurante."
+---
+
+<Tabs>
+  <Tab title="Historial de Pedidos">
+    ## ¿Qué es esta vista?
+    Las Comandas son **el registro de cada pedido** creado en el sistema. Es el libro mayor de auditoría: permite buscar, filtrar y exportar cualquier venta.
+
+    La tabla muestra páginas de **10 pedidos** con las siguientes columnas principales:
+
+    | Columna | Editable | Datos DB |
+    |---|---|---|
+    | **Nº Orden** | No | `order_number` |
+    | **Mesa** | Sí | `table_id` |
+    | **Nombre** | Sí | `client_name` |
+    | **Total** | No directo | Calculado de `order_items` |
+    | **Estado** | Sí | `status` |
+  </Tab>
+
+  <Tab title="Acciones y Tickets">
+    ## 🪟 Menú de Acciones (···)
+    ![Menú de Acciones](/images/modal-comandas-acciones.png)
+
+    | Opción | Acción Técnica |
+    |---|---|
+    | 👁️ **Ver detalles** | Renderiza el ticket visual desde `order_items`. |
+    | ✏️ **Editar comanda** | Abre el editor de dos columnas. |
+    | 📄 **Exportar** | Genera PDF/CSV basado en el filtrado actual. |
+    | 🚫 **Anular** | Mutation `voidOrder` en Convex. |
+
+    ### 🪟 Modal: Ticket Visual
+    ![Modal Ver Detalles - Ticket](/images/modal-comandas-detalle.png)
+    Muestra el desglose completo (IVA 21%, Subtotal, Total) alimentado de la tabla `establishments`.
+  </Tab>
+
+  <Tab title="Edición">
+    ## 🪟 Modal: Editar Comanda
+    ![Modal Editar Comanda](/images/modal-comandas-editar.png)
+
+    Dividido en dos columnas para máxima velocidad:
+    - **Izquierda**: Gestión de productos (buscador + cantidades +/-).
+    - **Derecha**: Detalles del servicio (Mesa, Cliente, Notas de cocina, Descuento %).
+
+    <Note icon="floppy-disk">
+      Al guardar, se actualiza el documento en la colección `orders` y se recalculan los `order_items` relacionados.
+    </Note>
+  </Tab>
+
+  <Tab title="Especificación Técnica">
+    <Note icon="shield-check" color="#6366f1">
+      **Control de Acceso**: La visualización de facturación y anulación de tickets está restringida por la [Matriz de Roles](/ingenieria/roles).
+    </Note>
+    <Note icon="triangle-exclamation" color="#FF0000">
+      **🚨 HAY QUE SOLUCIONAR**: El campo `total` se está recibiendo como `string` (`"€70.50"`).
+      **Acción**: Debe cambiarse a `number` puro para evitar errores en reportes financieros.
+    </Note>
+
+    <Note icon="language" color="#FF0000">
+      **🚨 HAY QUE SOLUCIONAR**: Los estados en la BBDD están en español (`'En Progreso'`).
+      **Acción**: Migrar a English Enums (`'open'`, `'paid'`, `'void'`) según la [Nomenclatura](/ingenieria/nomenclatura).
+    </Note>
+
+    | Campo | Dashboard (ES ⚠️) | Estándar Convex (EN ✅) |
+    | :--- | :--- | :--- |
+    | Estado | `'En Progreso'│'Completado'` | `'open'│'paid'│'void'` |
+    | Cliente | `client_name` | `customer_id` / `name` |
+    | Total | `total: string` | `total: number` |
+  </Tab>
+
+  <Tab title="Roadmap">
+    ## 🚀 Futuras Mejoras
+    - **Auditoría de Cambios**: Registro de "quién editó qué" en cada pedido.
+    - **Integración Pasarela**: Vinculación real con Stripe para marcar "Pagada" automáticamente.
+    - **Shortcuts de Tiempo**: Filtros rápidos "Hoy/Semana/Mes" en el DatePicker.
+  </Tab>
+</Tabs>

@@ -1,0 +1,177 @@
+---
+title: "Documentación Camarai"
+sidebarTitle: "Bienvenida"
+description: "Sistema de gestión integral para restauración moderna con ADN WhatsApp-first."
+---
+
+<img
+  className="block dark:hidden"
+  src="/logo.png"
+  alt="Camarai Logo"
+  width="80"
+/>
+<img
+  className="hidden dark:block"
+  src="/logo.png"
+  alt="Camarai Logo"
+  width="80"
+/>
+
+Camarai no es solo un software de gestión; es una **arquitectura de comunicación** diseñada para revolucionar la interacción entre restaurante, personal y cliente. Basado en un modelo **WhatsApp-first**, el sistema utiliza la potencia de **Evolution API** y **n8n** para convertir el canal de mensajería más usado del mundo en el núcleo operativo del negocio.
+
+> [!IMPORTANT]
+> **Regla de Oro #1 (Filosofía de Autoridad)**: El Dashboard es el **único cerebro** de gestión. El POS, la PDA y la Carta son terminales de ejecución. Ninguna configuración (precios, stock, personal) se crea fuera del Dashboard.
+
+## Los 4 productos
+
+<CardGroup cols={2}>
+  <Card
+    title="🖥️ Dashboard"
+    icon="chart-line"
+    href="/operativa/dashboard"
+  >
+    Cerebro de gestión. CRUD de productos, personal y configuración global. Next.js / React. **~58 pantallas, 124 componentes.**
+  </Card>
+  <Card
+    title="💳 POS + KDS"
+    icon="cash-register"
+    href="/operativa/pos"
+  >
+    Motor transaccional. Crear pedidos y cobros rápidos. Vanilla JS. **6 vistas, 13 templates.**
+  </Card>
+  <Card
+    title="📱 PDA (futuro)"
+    icon="mobile-screen"
+    href="/operativa/pos"
+  >
+    Comandera móvil para camareros. Adaptación del POS. Vanilla JS. **Planificado.**
+  </Card>
+  <Card
+    title="📖 Carta Digital"
+    icon="utensils"
+    href="/gestion/cartas"
+  >
+    Menú digital web para clientes. Next.js / React. **1 vista, 9 componentes.**
+  </Card>
+</CardGroup>
+
+## Los 4 agentes IA
+
+<CardGroup cols={2}>
+  <Card
+    title="🤖 Agente Cliente"
+    icon="comments"
+    href="/agentes/agente-cliente"
+  >
+    WhatsApp. Recomienda platos, hace upselling, envía la Carta, gestiona reservas. **V1 — base funcional.**
+  </Card>
+  <Card
+    title="🤖 Agente Gerente"
+    icon="bell"
+    href="/agentes/agente-gerente"
+  >
+    WhatsApp. Envía KPIs, alertas y notificaciones al dueño — espejo del Dashboard en el móvil. **V1 — planificado.**
+  </Card>
+  <Card
+    title="🤖 Agente Camarero"
+    icon="microphone"
+    href="/agentes/agente-camarero"
+  >
+    Voz. Toma pedidos hablando, transcribe y los envía al POS. **V2-V3 — futuro.**
+  </Card>
+  <Card
+    title="🤖 Agente TPV"
+    icon="wand-magic-sparkles"
+    href="/agentes/agente-tpv"
+  >
+    Chat en Dashboard. Gestión completa vía prompt: stock, proveedores, reportes, lo que sea. **V3-V4 — futuro.**
+  </Card>
+</CardGroup>
+
+---
+
+## Un vistazo por áreas
+
+Explora las dimensiones del proyecto según tu necesidad de contribución o consulta:
+
+<CardGroup cols={2}>
+  <Card
+    title="Ingeniería y Datos"
+    icon="code"
+    href="/ingenieria/mapa-arquitectura"
+  >
+    Mapa de arquitectura, catálogo de componentes, nomenclatura, alineación de datos y base de datos Convex.
+  </Card>
+  <Card
+    title="Operativa de Negocio"
+    icon="utensils"
+    href="/operativa/dashboard"
+  >
+    Flujos de trabajo en Dashboard, Comandas, POS y gestión interactiva de planos de mesas.
+  </Card>
+  <Card
+    title="Gestión de Recursos"
+    icon="boxes-stacked"
+    href="/gestion/inventario"
+  >
+    Control crítico de stock, trazabilidad de mermas, gestión de personal y analítica de reportes.
+  </Card>
+  <Card
+    title="Marketing y CRM"
+    icon="megaphone"
+    href="/marketing/clientes"
+  >
+    Fidelización de clientes y motores de promociones automatizadas vía WhatsApp.
+  </Card>
+</CardGroup>
+
+---
+
+## ADN Tecnológico
+
+| Capa | Tecnologías | Productos que la usan |
+|:-----|:------------|:----------------------|
+| **Frontend React** | Next.js 14, React 18, TypeScript | Dashboard, Carta |
+| **Frontend Vanilla** | HTML, CSS, Vanilla JS | POS, PDA |
+| **Backend** | Convex (BaaS) — schema, queries, mutations | Los 4 productos |
+| **Comunicación** | WhatsApp, Evolution API, n8n | Carta, Dashboard (notificaciones) |
+| **Diseño** | shadcn/ui, Tailwind CSS (Dashboard) / CSS puro (POS) | Según producto |
+
+---
+
+## Arquitectura de Solución por Perfil
+
+Camarai está diseñado para servir a cada actor del ecosistema con herramientas específicas:
+
+### 👨‍🍳 Perfiles de Usuario (El Restaurante)
+Enfocado en la eficiencia operativa diaria y la rentabilidad del negocio.
+
+<Steps>
+  <Step title="Operativa de Sala (Camareros)">
+    PDA móvil para toma de comandas ágil + POS para gestión de mesas y cobros.
+  </Step>
+  <Step title="Producción (Cocina / Barra)">
+    KDS integrado en el POS para visualización y control del flujo de preparación.
+  </Step>
+  <Step title="Administración (Gerencia / Dueño)">
+    Dashboard 360° para control de inventarios, costes, personal y analítica.
+  </Step>
+  <Step title="Clientes">
+    Carta digital vía WhatsApp para hacer pedidos desde su propio móvil.
+  </Step>
+</Steps>
+
+### 🛠️ Equipo de Tecnología (Ingeniería / Producto)
+Enfocado en la evolución y escalabilidad de la plataforma técnica.
+
+<CardGroup cols={1}>
+  <Card title="Desarrollo y Soporte" icon="gears">
+    Utilizan esta documentación para mantener la base de componentes, asegurar los contratos de datos en Convex y evolucionar las integraciones con Evolution API y n8n.
+  </Card>
+</CardGroup>
+
+---
+
+<Note>
+  **Estado Crítico**: Estamos en fase de **Auditoría de Datos**. Consulta la [Alineación de Datos](/ingenieria/alineacion) para conocer la deuda técnica y el estado de limpieza del "veneno" de mocks antes de la integración con Convex.
+</Note>

@@ -1,0 +1,51 @@
+---
+title: "Notificaciones — El Log de Todo lo que Pasa"
+description: "Registro en tiempo real de actividad operativa: personal, stock, cobros, reservas y ambientes."
+---
+
+<Tabs>
+  <Tab title="Log Operativo">
+    ## El Historial de Todo
+    Las Notificaciones son el **libro de eventos del establecimiento**. Cada vez que algo relevante ocurre (fichajes, stock bajo, cobros, reservas), queda registrado aquí.
+
+    ![Vista Notificaciones](/images/notificaciones-view.png)
+
+    | Tipo | Origen | Cuándo se crea |
+    | :--- | :--- | :--- |
+    | **Personal** | Fichajes | Entradas, salidas y descansos. |
+    | **Inventario** | Stock | Cuando `stock ≤ alert_min`. |
+    | **Cobros** | TPV | Al cerrar una comanda. |
+    | **Reservas** | Libro | Al crear o confirmar reserva. |
+  </Tab>
+
+  <Tab title="Filtros y Control">
+    ## 🪟 Modal: Búsqueda Avanzada
+    ![Modal Filtros](/images/modal-notificaciones-filter.png)
+
+    Permite segmentar el log por:
+    - **Criticidad**: Solo advertencias o errores graves.
+    - **Categoría**: Filtrar para ver solo RRHH o solo Ventas.
+    - **Actor**: Quién generó el evento.
+  </Tab>
+
+  <Tab title="Especificación Técnica">
+    <Note icon="code" color="#FF0000">
+      **🚨 HAY QUE SOLUCIONAR**: Algunos eventos de stock no muestran el ID del ingrediente, solo el nombre.
+      **Acción**: Usar `reference_id` para permitir navegar desde el log a la ficha del objeto.
+    </Note>
+
+    ### Tabla Convex: `event_log`
+    - `timestamp: number`
+    - `type: enum` (staff, inventory, payment, booking, system)
+    - `status: enum` (info, warning, critical)
+    - `actor: string`
+    - `description: string`
+  </Tab>
+
+  <Tab title="Roadmap">
+    ## 🚀 Futuras Mejoras
+    - **Notificaciones Push**: Alertas reales al móvil en eventos `critical`.
+    - **Scroll Infinito**: Optimización de carga para miles de registros.
+    - **Exportación**: Generar reporte PDF de auditoría de eventos.
+  </Tab>
+</Tabs>

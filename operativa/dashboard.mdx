@@ -1,0 +1,82 @@
+---
+title: "Dashboard — El Punto de Partida"
+description: "Todo lo que necesitas saber sobre el panel de control principal de Camarai."
+---
+
+<Tabs>
+  <Tab title="Vista General">
+    ![Vista Dashboard](/images/dashboard-view.png)
+
+    ## ¿Qué es esto?
+
+    El Dashboard es la primera pantalla que ve cualquier admin al entrar. Está diseñado para que, **de un solo vistazo**, puedas saber si el día va bien o mal sin tener que entrar en ninguna sección. Piénsalo como el cuadro de mandos de un avión: no necesitas saber cómo funciona cada motor, solo necesitas ver las métricas clave en verde.
+
+    La pantalla se divide en **widgets configurables** — cada uno muestra un aspecto diferente del negocio. Si un widget no te interesa, puedes ocultarlo.
+
+    | Funcionalidad | Descripción | Beneficio Operativo |
+    | :--- | :--- | :--- |
+    | **Resumen Diario** | Visualización de ventas y ticket medio en tiempo real. | Sabes si estás cumpliendo objetivos de facturación. |
+    | **Ranking de Platos** | Lista de lo más vendido. | Ayuda a decidir qué platos promocionar o retirar. |
+    | **Alertas de Stock** | Aviso de ingredientes críticos. | Evita roturas de stock en mitad del servicio. |
+    | **Ocupación** | Estado de la sala y aforo. | Permite gestionar mejor la rotación de mesas. |
+    | **Seguridad y Roles** | Control de acceso por PIN y logs. | [Tranquilidad del dueño](/ingenieria/roles) mediante trazabilidad total. |
+  </Tab>
+
+  <Tab title="Datos y Tablas">
+    ## ¿De qué tablas se alimenta?
+
+    Para renderizar correctamente todos los widgets, el Dashboard consulta varias tablas de Convex:
+
+    | Tabla de Convex | ¿Para qué se usa? | Impacto |
+    |---|---|---|
+    | `orders` | Calcular ingresos totales, ticket medio, y alimentar el widget de Comandas Recientes | **Financiero** |
+    | `order_items` | Calcular el ranking de productos más vendidos (Top Productos) | **Operativo** |
+    | `ingredients` | Detectar los ingredientes por debajo del stock mínimo (Alertas de Stock) | **Logístico** |
+    | `tables` + `environments` | Calcular la ocupación de mesas y distribución de aforo | **Operativo** |
+    | `staff` | Generar el Ranking de Equipo con ventas por empleado | **RRHH** |
+    | `establishments` | Nombre del restaurante, horario y datos de configuración | **Identidad** |
+
+    <Note icon="code">
+      **Nota para el backend:** Todas estas consultas deben centralizarse en el endpoint `getDashboardSummary` que filtra por rango de fechas (`from/to`).
+    </Note>
+  </Tab>
+
+  <Tab title="Configuración">
+    ## 🪟 Modal: Configurar Dashboard
+
+    Para personalizar tu panel, pulsa el botón ⚙️ en la esquina superior derecha. Se abre el modal de configuración donde activas o desactivas cada widget con un simple toggle.
+
+    ### Sección 1 — Análisis de Ventas
+    ![Modal Configurar Dashboard (parte superior)](/images/modal-dashboard-config-top.png)
+
+    | Widget | ¿Qué muestra? | Tabla Relacionada |
+    |---|---|---|
+    | **Métricas Principales** | Ingresos totales, ticket medio, variación vs. semana anterior | `orders` |
+    | **Ventas por Hora** | Curva de demanda hora a hora | `orders` |
+    | **Gráfico de Ingresos** | Comparativa de facturación día a día | `orders` |
+
+    ### Sección 2 y 3 — Operaciones y Rendimiento
+    ![Modal Configurar Dashboard (parte inferior)](/images/modal-dashboard-config-bottom.png)
+
+    | Widget | ¿Qué muestra? | Tabla Relacionada |
+    |---|---|---|
+    | **Comandas Recientes** | Los últimos 5-10 pedidos activos | `orders` |
+    | **Alertas de Stock** | Lista de ingredientes críticos | `ingredients` |
+    | **Leaderboard Staff** | Eficiencia de venta por empleado | `staff` |
+    | **Ocupación de Sala** | % de mesas activas vs. totales | `tables` |
+  </Tab>
+
+  <Tab title="Roadmap">
+    ## 🚀 Plan de Mejoras Técnicas
+
+    ### 🎨 Frontend
+    - **Persistencia Local**: Implementar `localStorage` para recordar los toggles de widgets.
+    - **Nuevos Widgets**: Vincular el widget **"Conversión Upsell"** al modal de configuración.
+    - **Atajos de Fecha**: Botones rápidos "Hoy", "Semana", "Mes" en el DatePicker.
+
+    ### ⚙️ Backend (Convex)
+    - **Colección Preferences**: Guardar `user_dashboard_preferences` por cada admin.
+    - **Optimización de Índices**: Índices compuestos por `establishment_id` y `created_at`.
+    - **Analítica Profunda**: Implementar el widget de rentabilidad basado en la tabla `expenses`.
+  </Tab>
+</Tabs>
