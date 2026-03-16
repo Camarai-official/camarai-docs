@@ -307,17 +307,18 @@ Los agentes NO son apps frontend. Son **servicios de backend** que se comunican 
     | Tabla Convex | Dashboard | POS | PDA | Carta | Agentes |
     |:-------------|:----------|:----|:----|:------|:--------|
     | `orders` | 📖+✏️ | **🔥 Principal** | **🔥 Crea** | ✏️ `generarComanda` | 🤖 Camarero (voz→order) |
-    | `payments` | 📖 Reportes | **🔥 Principal** | ❌ | ❌ | ❌ |
-    | `tables` | 📖+✏️ Config | **🔥 Ciclo** | ✏️ Estado | ❌ | ❌ |
-    | `products` | ✏️ CRUD | 📖 Lee | 📖 Lee | 📖 Menú | 🤖 Cliente (recomendar), TPV (editar) |
+    | `payments` y `invoices` | 📖 Reportes | **🔥 Principal** | ❌ | ❌ | ❌ |
+    | `tables` / `environments` | 📖+✏️ Config | **🔥 Ciclo** | ✏️ Estado | ❌ | ❌ |
+    | `products` y `menu` | ✏️ CRUD | 📖 Lee | 📖 Lee | 📖 Menú | 🤖 Cliente (recomendar), TPV (editar) |
     | `categories` | ✏️ CRUD | 📖 Lee | 📖 Lee | 📖 Tabs | 🤖 Cliente (filtrar) |
     | `customers` | ✏️ CRM | 📖 Lee | ❌ | ❌ | 🤖 Cliente (registrar) |
     | `reservations` | ✏️ CRUD | ❌ | ❌ | ❌ | 🤖 Cliente (crear reserva) |
-    | `staff` | ✏️ CRUD | 📖 Lee | 📖 Auth | ❌ | 🤖 Gerente (alertas fichajes) |
-    | `environments` | ✏️ CRUD | ❌ | ❌ | ❌ | ❌ |
+    | `staff` | ✏️ CRUD | 📖 Lee | 📖 Auth | ❌ | 🤖 Gerente (alertas) |
     | `establishments` | ✏️ CRUD | 📖 Config | 📖 Config | 📖 Brand | 🤖 TPV (leer/modificar config) |
-    | `devices` | ✏️ CRUD | ❌ | ❌ | ❌ | ❌ |
-    | `menu` | ✏️ CRUD | 📖 Lee | ❌ | 📖 `obtenerCarta` | 🤖 Cliente (leer menú) |
+    | `conversations` / `campaigns` | ✏️ CRUD | ❌ | ❌ | ❌ | 🤖 Cliente (gestiona mkt) |
+    | `table_sessions` | 📖 Lee | ❌ | ❌ | ❌ | 🤖 Cliente (crea sesión mesa) |
+    | `purchases` / `suppliers` | ✏️ CRUD | ❌ | ❌ | ❌ | 🤖 Gerente (analiza compras) |
+    | `shifts` / `time_logs` | ✏️ CRUD | ❌ | ❌ | ❌ | 🤖 Gerente (incidencias) |
   </Tab>
 </Tabs>
 
@@ -336,12 +337,12 @@ Los agentes NO son apps frontend. Son **servicios de backend** que se comunican 
     | Types / Interfaces | ~30 | 0 | 3 | — | **~33** |
   </Tab>
   <Tab title="Agentes IA">
-    | Agente | Canal | Tablas Convex | Versión | Estado |
+    | Agente | Canal | Tablas Convex (Destacadas) | Versión | Estado |
     |:-------|:------|:-------------|:--------|:-------|
-    | 🤖 Cliente | WhatsApp | products, categories, menu, reservations, customers | V1 | ✅ Base |
-    | 🤖 Gerente | WhatsApp | Todas (solo lectura) | V1 | 🔲 Planificado |
+    | 🤖 Cliente | WhatsApp | products, menu, reservations, customers, campaigns, table_sessions | V1 | ✅ Base |
+    | 🤖 Gerente | WhatsApp | Todas. Específicas: profit_analysis, stock_movements, event_log | V1 | 🔲 Planificado |
     | 🤖 Camarero | Voz | products, categories, tables, orders | V2-V3 | 🔲 Futuro |
-    | 🤖 TPV | Chat Dashboard | Todas (lectura + escritura) | V3-V4 | 🔲 Futuro |
+    | 🤖 TPV | Chat Dashboard | Todas (lectura + escritura total) | V3-V4 | 🔲 Futuro |
   </Tab>
 </Tabs>
 

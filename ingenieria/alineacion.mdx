@@ -70,18 +70,18 @@ Organización de tipos, modelos y mocks actuales en cada repositorio.
     ### 1.3 Vistas del Dashboard SIN types (Agujeros)
     Este inventario identifica las páginas que ya existen físicamente o están planificadas, pero que carecen de un archivo de tipos dedicado. Son áreas donde el contrato de datos aún es volátil o está pendiente de definición.
 
-    | # | Vista | Estado en `src/app` | Archivo que falta | Qué debería definir |
-    |:--|:------|:-------------------|:------------------|:--------------------|
-    | 1 | `/clientes` | 🔲 No implementado | `customers.ts` | `Customer`, `CustomerTag`, historial |
-    | 2 | `/chat` | 🔲 No implementado | `chat.ts` | `Conversation`, `Message`, `Channel` |
-    | 3 | `/notificaciones` | ✅ Implementado | `notifications.ts` | `Notification`, `AlertType`, `NotificationStatus` |
-    | 4 | `/promociones` | ✅ Implementado | `promotions.ts` | `Promotion`, `Coupon`, `DiscountRule`, `CampaignStats` |
-    | 5 | `/inventario` | ✅ Implementado | `inventory.ts` | `StockMovement`, `Merma`, `Purchase` |
-    | 6 | `/reservas` | ✅ Implementado | `reservations.ts` | `Reservation` con fecha, hora, personas, estado |
-    | 7 | `/` (dashboard) | ✅ Implementado | `dashboard.ts` | `DashboardWidget`, `KPI`, `MetricConfig` |
+    | 1 | `/clientes` | 🔲 No implementado | `customers.ts` | `Customer`, `CustomerTag`, `TableSession`, `VerificationCode` |
+    | 2 | `/chat` | 🔲 No implementado | `chat.ts` | `Conversation`, `Message` |
+    | 3 | `/notificaciones` | ✅ Implementado | `notifications.ts` | `Notification`, `EventLog` |
+    | 4 | `/promociones` | ✅ Implementado | `marketing.ts` | `Campaign`, `Coupon`, `CampaignStats` |
+    | 5 | `/inventario` | ✅ Implementado | `inventory.ts` | `StockMovement`, `Merma`, `Ingredient` |
+    | 6 | `/reservas` | ✅ Implementado | `reservations.ts` | `Reservation` con fecha, hora, personas |
+    | 7 | `/` (dashboard) | ✅ Implementado | `dashboard.ts` | `DashboardWidget`, `SystemConfig` |
+    | 8 | `/proveedores` | 🔲 No implementado | `suppliers.ts` | `Supplier`, `Purchase`, `PurchaseItem` |
+    | 9 | `/finanzas` | 🔲 No implementado | `finance.ts` | `Invoice`, `CashRegister`, `ProfitAnalysis` |
 
     <Note icon="octagon-exclamation" color="#FF0000">
-      **🚨 HAY QUE SOLUCIONAR**: Es obligatorio crear los 7 archivos de tipos faltantes (`customers.ts`, `chat.ts`, etc.) para que el Dashboard deje de tener "puntos ciegos" en su contrato de datos. Sin estos archivos, no podemos mapear la base de datos Convex con seguridad.
+      **🚨 HAY QUE SOLUCIONAR**: Es obligatorio crear los archivos de tipos faltantes (`customers.ts`, `finance.ts`, etc.) para que el Dashboard deje de tener "puntos ciegos" en su contrato de datos. Sin estos archivos, no podemos mapear la base de datos Convex con seguridad.
     </Note>
   </Tab>
 
